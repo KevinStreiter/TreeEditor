@@ -1,0 +1,35 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+header {
+    background-color: #7b9eb4;
+    padding: 30px;
+    text-align: center;
+    font-size: 35px;
+    color: white;
+}
+
+.divContent {
+    display: -webkit-flex;
+    display: flex;
+    height: 1000px;
+}
+
+#divGraph {
+    -webkit-flex: 3;
+    -ms-flex: 3;
+    flex: 3;
+    background-color: #f1f1f1;
+    padding: 10px;
+}
+
+#graph {
+    display: block;
+    width: 100%;
+    height: 100%;
+}

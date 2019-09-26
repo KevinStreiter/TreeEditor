@@ -1,0 +1,23 @@
+{
+    "require": {
+        "ext-pdo": "*",
+        "cakephp/collection": "^3.8",
+        "cakephp/database": "^3.8",
+        "cakephp/event": "^3.8",
+        "slim/php-view": "^2.2",
+        "slim/slim": "^3.12"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Test\\": "tests"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
