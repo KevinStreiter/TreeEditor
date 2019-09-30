@@ -1,34 +1,1 @@
-import { Bubble } from "./bubble"
-import * as d3 from "./modules/d3.js"
-
-window.onload = () => {
-
-    var line;
-
-    var vis = d3.select("#graph")
-        .on("mousedown", mousedown)
-        .on("mouseup", mouseup);
-
-    console.log(vis);
-
-    function mousedown() {
-        var m = d3.mouse(this);
-        line = vis.append("line")
-            .attr("x1", m[0])
-            .attr("y1", m[1])
-            .attr("x2", m[0])
-            .attr("y2", m[1]);
-
-        vis.on("mousemove", mousemove);
-    }
-
-    function mousemove() {
-        var m = d3.mouse(this);
-        line.attr("x2", m[0])
-            .attr("y2", m[1]);
-    }
-
-    function mouseup() {
-        vis.on("mousemove", null);
-    }
-};
+import { Bubble } from "./bubble"import * as d3 from "./modules/d3.js"window.onload = () => {    let rect;    let deltaX;    let deltaY;    let svg = d3.select("#graph")        .on("mousedown", mousedown)        .on("mouseup", mouseup);    let drag = d3.drag()        .on("start", dragstart)        .on("drag", dragmove);        function mousedown() {        let event = d3.mouse(this);        rect = svg.append("rect")            .attr("x", event[0])            .attr("y", event[1])            .attr("rx", 20)            .attr("ry", 20)            .attr('height', 0)            .attr('width', 0)            .attr("stroke", "#7b9eb4")            .attr("stroke-width", 4)            .attr("fill",  "#aaa9ad")            .call(drag);        svg.on("mousemove", mousemove);    }    function mousemove() {        let event = d3.mouse(this);        rect.attr("width", Math.max(0,event[0] - +rect.attr("x")))            .attr("height",  Math.max(0,event[1] - +rect.attr("y")));    }    function dragstart() {        let current = d3.select(this);        deltaX = current.attr("x") - d3.event.x;        deltaY = current.attr("y") - d3.event.y;    }    function dragmove() {        if (d3.event.sourceEvent.altKey) {            d3.select(this)                .attr("x", d3.event.x + deltaX)                .attr("y", d3.event.y + deltaY)        }    }    function mouseup() {        svg.on("mousemove", null);    }};
