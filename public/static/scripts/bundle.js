@@ -18435,7 +18435,10 @@ var d3 = require("./modules/d3.js");
 window.onload = function () {
     var g;
     var rect;
-    var circle;
+    var circleTop;
+    var circleBottom;
+    var circleLeft;
+    var circleRight;
     var deltaX;
     var deltaY;
     var svg = d3.select("#graph")
@@ -18467,10 +18470,29 @@ window.onload = function () {
             d3.select(this)
                 .style("cursor", "default");
         });
-        circle = g.append("circle")
+        circleTop = g.append("circle")
             .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
             .attr("cy", +rect.attr("y"))
             .attr("r", 5)
+            .attr("class", "circleTop")
+            .attr("fill", "grey");
+        circleBottom = g.append("circle")
+            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
+            .attr("cy", (+rect.attr("y") + +rect.attr("height")))
+            .attr("r", 5)
+            .attr("class", "circleBottom")
+            .attr("fill", "grey");
+        circleLeft = g.append("circle")
+            .attr("cx", +rect.attr("x"))
+            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
+            .attr("r", 5)
+            .attr("class", "circleLeft")
+            .attr("fill", "grey");
+        circleRight = g.append("circle")
+            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
+            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
+            .attr("r", 5)
+            .attr("class", "circleRight")
             .attr("fill", "grey");
         svg.on("mousemove", mousemove);
     }
@@ -18478,9 +18500,18 @@ window.onload = function () {
         var event = d3.mouse(this);
         rect.attr("width", Math.max(0, event[0] - +rect.attr("x")))
             .attr("height", Math.max(0, event[1] - +rect.attr("y")));
-        circle
+        circleTop
             .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
             .attr("cy", +rect.attr("y"));
+        circleBottom
+            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
+            .attr("cy", (+rect.attr("y") + +rect.attr("height")));
+        circleLeft
+            .attr("cx", +rect.attr("x"))
+            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)));
+        circleRight
+            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
+            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)));
     }
     function dragstart() {
         var current = d3.select(this);
@@ -18491,10 +18522,19 @@ window.onload = function () {
         d3.select(this)
             .attr("x", d3.event.x + deltaX)
             .attr("y", d3.event.y + deltaY);
-        var circle = d3.select(this.parentNode).select("circle");
-        circle
+        var parent = d3.select(this.parentNode);
+        parent.select("circle.circleTop")
             .attr("cx", (d3.event.x + deltaX) + (+d3.select(this).attr("width") / 2))
             .attr("cy", (d3.event.y + deltaY));
+        parent.select("circle.circleBottom")
+            .attr("cx", (d3.event.x + deltaX) + (+d3.select(this).attr("width") / 2))
+            .attr("cy", (d3.event.y + deltaY) + +d3.select(this).attr("height"));
+        parent.select("circle.circleLeft")
+            .attr("cx", (d3.event.x + deltaX))
+            .attr("cy", (d3.event.y + deltaY) + (+d3.select(this).attr("height") / 2));
+        parent.select("circle.circleRight")
+            .attr("cx", (d3.event.x + deltaX) + +d3.select(this).attr("width"))
+            .attr("cy", (d3.event.y + deltaY) + (+d3.select(this).attr("height") / 2));
     }
     function mouseup() {
         svg.on("mousemove", null);
