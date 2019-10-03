@@ -65,11 +65,12 @@ window.onload = function () {
             .attr("class", "circleRight")
             .attr("fill", "grey");
         d3.selectAll("circle")
+            .raise()
             .on('mouseover', function () {
             d3.select(this)
                 .attr("r", 10);
         })
-            .on("mouseout", function () {
+            .on('mouseout', function () {
             d3.select(this)
                 .attr("r", 5);
         })
@@ -128,23 +129,16 @@ window.onload = function () {
         svg.on("mousemove", null);
     }
     function drawLine() {
-        var event = d3.mouse(this);
+        var current = d3.select(this);
+        var cx = current.attr("cx");
+        var cy = current.attr("cy");
         line = svg.append("line");
-        line.attr("x1", event[0])
-            .attr("y1", event[1])
-            .attr("x2", event[0])
-            .attr("y2", event[1])
+        line.attr("x1", cx)
+            .attr("y1", cy)
+            .attr("x2", cx)
+            .attr("y2", cy)
             .attr("stroke", "grey");
         svg.on("mousemove", moveLine);
-        d3.selectAll("circle")
-            .on('mouseover', function () {
-            d3.select(this)
-                .attr("r", 10);
-        })
-            .on("mouseout", function () {
-            d3.select(this)
-                .attr("r", 5);
-        });
     }
     function removeLine() {
         line.remove();
@@ -161,5 +155,8 @@ window.onload = function () {
             .on("mousedown", null)
             .on("mouseup", null)
             .on("dblclick", removeLine);
+    }
+    function combineRect() {
+        console.log("Combine it");
     }
 };
