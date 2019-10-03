@@ -18568,27 +18568,41 @@ window.onload = function () {
             .attr("y1", cy)
             .attr("x2", cx)
             .attr("y2", cy)
-            .attr("stroke", "grey");
+            .attr("stroke", "grey")
+            .attr("stroke-width", 3);
         svg.on("mousemove", moveLine);
     }
     function removeLine() {
         line.remove();
+        resetListeners();
+    }
+    function resetListeners() {
         svg
             .on("mousemove", null)
             .on("mousedown", mousedown)
             .on("mouseup", mouseup);
+        d3.selectAll("circle")
+            .raise()
+            .on("click", drawLine);
     }
     function moveLine() {
         var event = d3.mouse(this);
-        line.attr("x2", event[0])
-            .attr("y2", event[1]);
+        line.attr("x2", event[0] - 5)
+            .attr("y2", event[1] - 5);
         svg
             .on("mousedown", null)
             .on("mouseup", null)
             .on("dblclick", removeLine);
+        d3.selectAll("circle")
+            .raise()
+            .on("click", combineRect);
     }
     function combineRect() {
-        console.log("Combine it");
+        var current = d3.select(this);
+        line
+            .attr("x2", current.attr("cx"))
+            .attr("y2", current.attr("cy"));
+        resetListeners();
     }
 };
 
