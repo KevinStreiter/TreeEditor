@@ -4,6 +4,7 @@ var d3 = require("./modules/d3.js");
 window.onload = function () {
     var g;
     var rect;
+    var rectBorder;
     var circleTop;
     var circleBottom;
     var circleLeft;
@@ -14,25 +15,43 @@ window.onload = function () {
     var rectCounter = 0;
     var svg = d3.select("#graph")
         .on("mousedown", mousedown)
-        .on("mouseup", mouseup);
-    var drag = d3.drag()
-        .on("start", dragstart)
-        .on("drag", dragmove);
+        .on("mouseup", mouseUp);
+    var dragRect = d3.drag()
+        .on("start", dragStart)
+        .on("drag", dragMove);
+    var dragBorder = d3.drag()
+        .on("start", dragStartBorder)
+        .on("drag", dragMoveBorder);
     function mousedown() {
         var event = d3.mouse(this);
         g = svg.append("g")
             .attr("id", rectCounter)
-            .call(drag);
-        rect = g.append("rect")
+            .call(dragRect);
+        rectBorder = g.append("rect")
             .attr("x", event[0])
             .attr("y", event[1])
-            .attr("rx", 20)
-            .attr("ry", 20)
+            .attr("rx", 5)
+            .attr("ry", 5)
             .attr('height', 0)
             .attr('width', 0)
-            .attr("stroke", "#7b9eb4")
-            .attr("stroke-width", 4)
+            .attr("fill", "#7b9eb4")
+            .attr("class", "border")
+            .on("mouseover", function () {
+            d3.select(this)
+                .style("cursor", "move");
+        })
+            .on("mouseout", function () {
+            d3.select(this)
+                .style("cursor", "default");
+        })
+            .call(dragBorder);
+        rect = g.append("rect")
+            .attr("x", event[0] + 5)
+            .attr("y", event[1] + 5)
+            .attr('height', 0)
+            .attr('width', 0)
             .attr("fill", "#aaa9ad")
+            .attr("class", "rect")
             .on("mouseover", function () {
             d3.select(this)
                 .style("cursor", "pointer");
@@ -41,28 +60,28 @@ window.onload = function () {
             d3.select(this)
                 .style("cursor", "default");
         })
-            .call(drag);
+            .call(dragRect);
         circleTop = g.append("circle")
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", +rect.attr("y"))
+            .attr("cx", (+rectBorder.attr("x") + (+rectBorder.attr("width") / 2)))
+            .attr("cy", +rectBorder.attr("y"))
             .attr("r", 5)
             .attr("id", "circleTop" + rectCounter)
             .attr("fill", "grey");
         circleBottom = g.append("circle")
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", (+rect.attr("y") + +rect.attr("height")))
+            .attr("cx", (+rectBorder.attr("x") + (+rectBorder.attr("width") / 2)))
+            .attr("cy", (+rectBorder.attr("y") + +rectBorder.attr("height")))
             .attr("r", 5)
             .attr("id", "circleBottom" + rectCounter)
             .attr("fill", "grey");
         circleLeft = g.append("circle")
-            .attr("cx", +rect.attr("x"))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
+            .attr("cx", +rectBorder.attr("x"))
+            .attr("cy", (+rectBorder.attr("y") + (+rectBorder.attr("height") / 2)))
             .attr("r", 5)
             .attr("id", "circleLeft" + rectCounter)
             .attr("fill", "grey");
         circleRight = g.append("circle")
-            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
+            .attr("cx", (+rectBorder.attr("x") + +rectBorder.attr("width")))
+            .attr("cy", (+rectBorder.attr("y") + (+rectBorder.attr("height") / 2)))
             .attr("r", 5)
             .attr("id", "circleRight" + rectCounter)
             .attr("fill", "grey");
@@ -76,29 +95,30 @@ window.onload = function () {
                 .attr("r", 5);
         })
             .on("click", drawLine)
-            .call(drag);
-        svg.on("mousemove", mousemove);
+            .call(dragRect);
+        svg.on("mousemove", mouseMove);
         rectCounter++;
     }
-    function mousemove() {
-        var parent = d3.select(this.parentNode);
+    function mouseMove() {
         var event = d3.mouse(this);
-        rect.attr("width", Math.max(0, event[0] - +rect.attr("x")))
-            .attr("height", Math.max(0, event[1] - +rect.attr("y")));
+        rectBorder.attr("width", Math.max(0, event[0] - +rectBorder.attr("x")))
+            .attr("height", Math.max(0, event[1] - +rectBorder.attr("y")));
+        rect.attr("width", Math.max(0, event[0] - +rect.attr("x") - 5))
+            .attr("height", Math.max(0, event[1] - +rect.attr("y") - 5));
         circleTop
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", +rect.attr("y"));
+            .attr("cx", (+rectBorder.attr("x") + (+rectBorder.attr("width") / 2)))
+            .attr("cy", +rectBorder.attr("y"));
         circleBottom
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", (+rect.attr("y") + +rect.attr("height")));
+            .attr("cx", (+rectBorder.attr("x") + (+rectBorder.attr("width") / 2)))
+            .attr("cy", (+rectBorder.attr("y") + +rectBorder.attr("height")));
         circleLeft
-            .attr("cx", +rect.attr("x"))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)));
+            .attr("cx", +rectBorder.attr("x"))
+            .attr("cy", (+rectBorder.attr("y") + (+rectBorder.attr("height") / 2)));
         circleRight
-            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)));
+            .attr("cx", (+rectBorder.attr("x") + +rectBorder.attr("width")))
+            .attr("cy", (+rectBorder.attr("y") + (+rectBorder.attr("height") / 2)));
     }
-    function dragstart() {
+    function dragStart() {
         var current = d3.select(this);
         var tagName = current.node().tagName;
         if (tagName === "rect") {
@@ -106,55 +126,69 @@ window.onload = function () {
             deltaY = current.attr("y") - d3.event.y;
         }
     }
-    function dragmove() {
+    function dragMove() {
         var current = d3.select(this);
+        var parent = d3.select(this.parentNode);
+        var counter = parent.attr("id");
         var tagName = current.node().tagName;
         if (tagName === "rect") {
-            current
+            parent.select("rect.rect")
+                .attr("x", d3.event.x + deltaX + 5)
+                .attr("y", d3.event.y + deltaY + 5);
+            current = parent.select("rect.border")
                 .attr("x", d3.event.x + deltaX)
                 .attr("y", d3.event.y + deltaY);
-            var parent_1 = d3.select(this.parentNode);
-            var counter = parent_1.attr("id");
             d3.select("#circleTop" + counter)
-                .attr("cx", (d3.event.x + deltaX) + (+d3.select(this).attr("width") / 2))
+                .attr("cx", (d3.event.x + deltaX) + (+current.attr("width") / 2))
                 .attr("cy", (d3.event.y + deltaY));
             d3.select("#circleBottom" + counter)
-                .attr("cx", (d3.event.x + deltaX) + (+d3.select(this).attr("width") / 2))
-                .attr("cy", (d3.event.y + deltaY) + +d3.select(this).attr("height"));
+                .attr("cx", (d3.event.x + deltaX) + (+current.attr("width") / 2))
+                .attr("cy", (d3.event.y + deltaY) + +current.attr("height"));
             d3.select("#circleLeft" + counter)
                 .attr("cx", (d3.event.x + deltaX))
-                .attr("cy", (d3.event.y + deltaY) + (+d3.select(this).attr("height") / 2));
+                .attr("cy", (d3.event.y + deltaY) + (+current.attr("height") / 2));
             d3.select("#circleRight" + counter)
-                .attr("cx", (d3.event.x + deltaX) + +d3.select(this).attr("width"))
-                .attr("cy", (d3.event.y + deltaY) + (+d3.select(this).attr("height") / 2));
+                .attr("cx", (d3.event.x + deltaX) + +current.attr("width"))
+                .attr("cy", (d3.event.y + deltaY) + (+current.attr("height") / 2));
             d3.selectAll("line.circleTop" + counter)
-                .attr("x1", (d3.event.x + deltaX) + (+d3.select(this).attr("width") / 2))
+                .attr("x1", (d3.event.x + deltaX) + (+current.attr("width") / 2))
                 .attr("y1", d3.event.y + deltaY);
             d3.selectAll("line.circleBottom" + counter)
-                .attr("x1", (d3.event.x + deltaX) + (+d3.select(this).attr("width") / 2))
-                .attr("y1", (d3.event.y + deltaY) + +d3.select(this).attr("height"));
+                .attr("x1", (d3.event.x + deltaX) + (+current.attr("width") / 2))
+                .attr("y1", (d3.event.y + deltaY) + +current.attr("height"));
             d3.selectAll("line.circleLeft" + counter)
                 .attr("x1", (d3.event.x + deltaX))
-                .attr("y1", (d3.event.y + deltaY) + (+d3.select(this).attr("height") / 2));
+                .attr("y1", (d3.event.y + deltaY) + (+current.attr("height") / 2));
             d3.selectAll("line.circleRight" + counter)
-                .attr("x1", (d3.event.x + deltaX) + +d3.select(this).attr("width"))
-                .attr("y1", (d3.event.y + deltaY) + (+d3.select(this).attr("height") / 2));
+                .attr("x1", (d3.event.x + deltaX) + +current.attr("width"))
+                .attr("y1", (d3.event.y + deltaY) + (+current.attr("height") / 2));
             d3.selectAll("line.circleTop" + counter + "Connector")
-                .attr("x2", (d3.event.x + deltaX) + (+d3.select(this).attr("width") / 2))
+                .attr("x2", (d3.event.x + deltaX) + (+current.attr("width") / 2))
                 .attr("y2", d3.event.y + deltaY);
             d3.selectAll("line.circleBottom" + counter + "Connector")
-                .attr("x2", (d3.event.x + deltaX) + (+d3.select(this).attr("width") / 2))
-                .attr("y2", (d3.event.y + deltaY) + +d3.select(this).attr("height"));
+                .attr("x2", (d3.event.x + deltaX) + (+current.attr("width") / 2))
+                .attr("y2", (d3.event.y + deltaY) + +current.attr("height"));
             d3.selectAll("line.circleLeft" + counter + "Connector")
                 .attr("x2", (d3.event.x + deltaX))
-                .attr("y2", (d3.event.y + deltaY) + (+d3.select(this).attr("height") / 2));
+                .attr("y2", (d3.event.y + deltaY) + (+current.attr("height") / 2));
             d3.selectAll("line.circleRight" + counter + "Connector")
-                .attr("x2", (d3.event.x + deltaX) + +d3.select(this).attr("width"))
-                .attr("y2", (d3.event.y + deltaY) + (+d3.select(this).attr("height") / 2));
+                .attr("x2", (d3.event.x + deltaX) + +current.attr("width"))
+                .attr("y2", (d3.event.y + deltaY) + (+current.attr("height") / 2));
         }
     }
-    function mouseup() {
+    function dragMoveBorder() {
+    }
+    function dragStartBorder() {
+    }
+    function mouseUp() {
         svg.on("mousemove", null);
+        var parent = rect.select(function () { return this.parentNode; });
+        var width = +rect.attr("width");
+        var height = +rect.attr("height");
+        var surface = width * height;
+        if (surface < 2000) {
+            parent.remove();
+        }
     }
     function drawLine() {
         var current = d3.select(this);
@@ -179,7 +213,7 @@ window.onload = function () {
         svg
             .on("mousemove", null)
             .on("mousedown", mousedown)
-            .on("mouseup", mouseup);
+            .on("mouseup", mouseUp);
         d3.selectAll("circle")
             .raise()
             .on("click", drawLine);
