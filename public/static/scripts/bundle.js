@@ -18442,6 +18442,7 @@ window.onload = function () {
     var line;
     var deltaX;
     var deltaY;
+    var rectCounter = 0;
     var svg = d3.select("#graph")
         .on("mousedown", mousedown)
         .on("mouseup", mouseup);
@@ -18451,6 +18452,7 @@ window.onload = function () {
     function mousedown() {
         var event = d3.mouse(this);
         g = svg.append("g")
+            .attr("id", rectCounter)
             .call(drag);
         rect = g.append("rect")
             .attr("x", event[0])
@@ -18475,25 +18477,25 @@ window.onload = function () {
             .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
             .attr("cy", +rect.attr("y"))
             .attr("r", 5)
-            .attr("class", "circleTop")
+            .attr("id", "circleTop" + rectCounter)
             .attr("fill", "grey");
         circleBottom = g.append("circle")
             .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
             .attr("cy", (+rect.attr("y") + +rect.attr("height")))
             .attr("r", 5)
-            .attr("class", "circleBottom")
+            .attr("id", "circleBottom" + rectCounter)
             .attr("fill", "grey");
         circleLeft = g.append("circle")
             .attr("cx", +rect.attr("x"))
             .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
             .attr("r", 5)
-            .attr("class", "circleLeft")
+            .attr("id", "circleLeft" + rectCounter)
             .attr("fill", "grey");
         circleRight = g.append("circle")
             .attr("cx", (+rect.attr("x") + +rect.attr("width")))
             .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
             .attr("r", 5)
-            .attr("class", "circleRight")
+            .attr("id", "circleRight" + rectCounter)
             .attr("fill", "grey");
         d3.selectAll("circle")
             .on('mouseover', function () {
@@ -18507,6 +18509,7 @@ window.onload = function () {
             .on("click", drawLine)
             .call(drag);
         svg.on("mousemove", mousemove);
+        rectCounter++;
     }
     function mousemove() {
         var parent = d3.select(this.parentNode);
@@ -18542,30 +18545,43 @@ window.onload = function () {
                 .attr("x", d3.event.x + deltaX)
                 .attr("y", d3.event.y + deltaY);
             var parent_1 = d3.select(this.parentNode);
-            var top_1 = parent_1.select("circle.circleTop")
+            var counter = parent_1.attr("id");
+            d3.select("#circleTop" + counter)
                 .attr("cx", (d3.event.x + deltaX) + (+d3.select(this).attr("width") / 2))
                 .attr("cy", (d3.event.y + deltaY));
-            var bottom = parent_1.select("circle.circleBottom")
+            d3.select("#circleBottom" + counter)
                 .attr("cx", (d3.event.x + deltaX) + (+d3.select(this).attr("width") / 2))
                 .attr("cy", (d3.event.y + deltaY) + +d3.select(this).attr("height"));
-            var left = parent_1.select("circle.circleLeft")
+            d3.select("#circleLeft" + counter)
                 .attr("cx", (d3.event.x + deltaX))
                 .attr("cy", (d3.event.y + deltaY) + (+d3.select(this).attr("height") / 2));
-            var right = parent_1.select("circle.circleRight")
+            d3.select("#circleRight" + counter)
                 .attr("cx", (d3.event.x + deltaX) + +d3.select(this).attr("width"))
                 .attr("cy", (d3.event.y + deltaY) + (+d3.select(this).attr("height") / 2));
-            parent_1.selectAll("line.circleTop")
+            d3.selectAll("line.circleTop" + counter)
                 .attr("x1", (d3.event.x + deltaX) + (+d3.select(this).attr("width") / 2))
                 .attr("y1", d3.event.y + deltaY);
-            parent_1.selectAll("line.circleBottom")
+            d3.selectAll("line.circleBottom" + counter)
                 .attr("x1", (d3.event.x + deltaX) + (+d3.select(this).attr("width") / 2))
                 .attr("y1", (d3.event.y + deltaY) + +d3.select(this).attr("height"));
-            parent_1.selectAll("line.circleLeft")
+            d3.selectAll("line.circleLeft" + counter)
                 .attr("x1", (d3.event.x + deltaX))
                 .attr("y1", (d3.event.y + deltaY) + (+d3.select(this).attr("height") / 2));
-            parent_1.selectAll("line.circleRight")
+            d3.selectAll("line.circleRight" + counter)
                 .attr("x1", (d3.event.x + deltaX) + +d3.select(this).attr("width"))
                 .attr("y1", (d3.event.y + deltaY) + (+d3.select(this).attr("height") / 2));
+            d3.selectAll("line.circleTop" + counter + "Connector")
+                .attr("x2", (d3.event.x + deltaX) + (+d3.select(this).attr("width") / 2))
+                .attr("y2", d3.event.y + deltaY);
+            d3.selectAll("line.circleBottom" + counter + "Connector")
+                .attr("x2", (d3.event.x + deltaX) + (+d3.select(this).attr("width") / 2))
+                .attr("y2", (d3.event.y + deltaY) + +d3.select(this).attr("height"));
+            d3.selectAll("line.circleLeft" + counter + "Connector")
+                .attr("x2", (d3.event.x + deltaX))
+                .attr("y2", (d3.event.y + deltaY) + (+d3.select(this).attr("height") / 2));
+            d3.selectAll("line.circleRight" + counter + "Connector")
+                .attr("x2", (d3.event.x + deltaX) + +d3.select(this).attr("width"))
+                .attr("y2", (d3.event.y + deltaY) + (+d3.select(this).attr("height") / 2));
         }
     }
     function mouseup() {
@@ -18583,7 +18599,7 @@ window.onload = function () {
             .attr("y2", cy)
             .attr("stroke", "grey")
             .attr("stroke-width", 3)
-            .attr("class", current.attr("class"));
+            .attr("class", current.attr("id"));
         svg.on("mousemove", moveLine);
     }
     function removeLine() {
@@ -18627,7 +18643,8 @@ window.onload = function () {
         if (!sameRect) {
             line
                 .attr("x2", current.attr("cx"))
-                .attr("y2", current.attr("cy"));
+                .attr("y2", current.attr("cy"))
+                .attr("class", line.attr("class") + " " + current.attr("id") + "Connector");
             resetListeners();
         }
     }
