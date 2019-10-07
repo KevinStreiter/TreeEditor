@@ -106,7 +106,6 @@ window.onload = () => {
         rectCounter++;
     }
     function mouseMove() {
-        console.log("mouseMove");
         let event = d3.mouse(this);
         rect.attr("width", Math.max(0, event[0] - +rect.attr("x")))
             .attr("height", Math.max(0, event[1] - +rect.attr("y")));
@@ -222,8 +221,8 @@ window.onload = () => {
                 .attr("cx", (+current.attr("x") + +current.attr("width")))
                 .attr("cy", (+current.attr("y") + (+current.attr("height") / 2)));
             d3.selectAll("line.circleTop" + counter)
-                .attr("cx", (+current.attr("x") + (+current.attr("width") / 2)))
-                .attr("cy", +current.attr("y"));
+                .attr("x1", (+current.attr("x") + (+current.attr("width") / 2)))
+                .attr("y1", +current.attr("y"));
             d3.selectAll("line.circleBottom" + counter)
                 .attr("x1", (+current.attr("x") + (+current.attr("width") / 2)))
                 .attr("y1", (+current.attr("y") + +current.attr("height")));
