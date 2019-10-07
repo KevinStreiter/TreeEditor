@@ -8,15 +8,24 @@
     <link rel="stylesheet" href="../static/css/style.css" />
 </head>
 <body>
-<header>
+<div id="main">
     <h2>Tree-Editor</h2>
-</header>
-
-<div class="divContent">
-    <div id="divGraph">
-        <svg id="graph"></svg>
+    <div id="mySidebar" class="sidebar">
+        <div id="absoluteCenteredDiv">
+            <form action="/login" method="post">
+                <div class="box">
+                    <h1>Properties</h1>
+                    <input class="username" name="username" type="text" placeholder="Title">
+                    <input class="username" name="password" type="password" placeholder="Content">
+                    <button type="submit" id="SignUp" class="button" name="submit" value="SignUp">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+    <svg id="graph">
+    </svg>
 </div>
-
 </body>
 </html>

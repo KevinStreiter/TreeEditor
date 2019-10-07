@@ -1,33 +1,33 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const d3 = require("./modules/d3.js");
-window.onload = () => {
-    let g;
-    let rect;
-    let circleTop;
-    let circleBottom;
-    let circleBottomRight;
-    let circleLeft;
-    let circleRight;
-    let line;
-    let deltaX;
-    let deltaY;
-    let deltaXBorder;
-    let deltaYBorder;
-    let width;
-    let height;
-    let rectCounter = 0;
-    let svg = d3.select("#graph")
+var d3 = require("./modules/d3.js");
+window.onload = function () {
+    var g;
+    var rect;
+    var circleTop;
+    var circleBottom;
+    var circleBottomRight;
+    var circleLeft;
+    var circleRight;
+    var line;
+    var deltaX;
+    var deltaY;
+    var deltaXBorder;
+    var deltaYBorder;
+    var width;
+    var height;
+    var rectCounter = 0;
+    var svg = d3.select("#graph")
         .on("mousedown", mousedown)
         .on("mouseup", mouseUp);
-    let dragRect = d3.drag()
+    var dragRect = d3.drag()
         .on("start", dragStart)
         .on("drag", dragMove);
-    let dragBorder = d3.drag()
+    var dragBorder = d3.drag()
         .on("start", dragStartBorder)
         .on("drag", dragMoveBorder);
     function mousedown() {
-        let event = d3.mouse(this);
+        var event = d3.mouse(this);
         g = svg.append("g")
             .attr("id", rectCounter)
             .call(dragRect);
@@ -50,6 +50,7 @@ window.onload = () => {
             d3.select(this)
                 .style("cursor", "default");
         })
+            .on("dblclick", openNav)
             .call(dragRect);
         circleTop = g.append("circle")
             .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
@@ -90,7 +91,7 @@ window.onload = () => {
                 .style("cursor", "default");
         })
             .call(dragBorder);
-        d3.selectAll(`#circleRight${rectCounter}, #circleLeft${rectCounter}, #circleTop${rectCounter}, #circleBottom${rectCounter}`)
+        d3.selectAll("#circleRight" + rectCounter + ", #circleLeft" + rectCounter + ", #circleTop" + rectCounter + ", #circleBottom" + rectCounter)
             .on('mouseover', function () {
             d3.select(this)
                 .attr("r", 10)
@@ -106,7 +107,7 @@ window.onload = () => {
         rectCounter++;
     }
     function mouseMove() {
-        let event = d3.mouse(this);
+        var event = d3.mouse(this);
         rect.attr("width", Math.max(0, event[0] - +rect.attr("x")))
             .attr("height", Math.max(0, event[1] - +rect.attr("y")));
         circleTop
@@ -126,18 +127,18 @@ window.onload = () => {
             .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)));
     }
     function dragStart() {
-        let current = d3.select(this);
-        let tagName = current.node().tagName;
+        var current = d3.select(this);
+        var tagName = current.node().tagName;
         if (tagName === "rect") {
             deltaX = current.attr("x") - d3.event.x;
             deltaY = current.attr("y") - d3.event.y;
         }
     }
     function dragMove() {
-        let current = d3.select(this);
-        let parent = d3.select(this.parentNode);
-        let counter = parent.attr("id");
-        let tagName = current.node().tagName;
+        var current = d3.select(this);
+        var parent = d3.select(this.parentNode);
+        var counter = parent.attr("id");
+        var tagName = current.node().tagName;
         if (tagName === "rect") {
             current
                 .attr("x", d3.event.x + deltaX)
@@ -184,9 +185,9 @@ window.onload = () => {
         }
     }
     function dragStartBorder() {
-        let parent = d3.select(this.parentNode);
-        let current = parent.select("rect");
-        let tagName = current.node().tagName;
+        var parent = d3.select(this.parentNode);
+        var current = parent.select("rect");
+        var tagName = current.node().tagName;
         if (tagName === "rect") {
             deltaXBorder = d3.event.x;
             deltaYBorder = d3.event.y;
@@ -197,10 +198,10 @@ window.onload = () => {
         }
     }
     function dragMoveBorder() {
-        let parent = d3.select(this.parentNode);
-        let counter = parent.attr("id");
-        let current = parent.select("rect");
-        let tagName = current.node().tagName;
+        var parent = d3.select(this.parentNode);
+        var counter = parent.attr("id");
+        var current = parent.select("rect");
+        var tagName = current.node().tagName;
         if (tagName === "rect") {
             current
                 .attr("width", width + (d3.event.x - deltaXBorder))
@@ -248,19 +249,19 @@ window.onload = () => {
     }
     function mouseUp() {
         svg.on("mousemove", null);
-        let parent = rect.select(function () { return this.parentNode; });
-        let width = +rect.attr("width");
-        let height = +rect.attr("height");
-        let surface = width * height;
+        var parent = rect.select(function () { return this.parentNode; });
+        var width = +rect.attr("width");
+        var height = +rect.attr("height");
+        var surface = width * height;
         if (surface < 2000) {
             parent.remove();
         }
     }
     function drawLine() {
-        let current = d3.select(this);
-        let parent = d3.select(this.parentNode);
-        let cx = current.attr("cx");
-        let cy = current.attr("cy");
+        var current = d3.select(this);
+        var parent = d3.select(this.parentNode);
+        var cx = current.attr("cx");
+        var cy = current.attr("cy");
         line = parent.append("line");
         line.attr("x1", cx)
             .attr("y1", cy)
@@ -283,13 +284,13 @@ window.onload = () => {
         d3.selectAll("circle")
             .raise()
             .on("click", drawLine);
-        for (let i = 0; i < rectCounter; i++) {
-            d3.select(`#circleBottomRight${i}`)
+        for (var i = 0; i < rectCounter; i++) {
+            d3.select("#circleBottomRight" + i)
                 .on("click", null);
         }
     }
     function moveLine() {
-        let event = d3.mouse(this);
+        var event = d3.mouse(this);
         line.attr("x2", event[0] - 5)
             .attr("y2", event[1] - 5);
         svg
@@ -301,14 +302,14 @@ window.onload = () => {
             .on("click", combineRect);
     }
     function combineRect() {
-        let current = d3.select(this);
-        let parent = d3.select(this.parentNode);
-        let x1 = line.attr("x1");
-        let y1 = line.attr("y1");
-        let sameRect = false;
+        var current = d3.select(this);
+        var parent = d3.select(this.parentNode);
+        var x1 = line.attr("x1");
+        var y1 = line.attr("y1");
+        var sameRect = false;
         parent.selectAll("circle").each(function () {
-            let cx = d3.select(this).attr("cx");
-            let cy = d3.select(this).attr("cy");
+            var cx = d3.select(this).attr("cx");
+            var cy = d3.select(this).attr("cy");
             if (x1 == cx && y1 == cy) {
                 sameRect = true;
             }
@@ -320,5 +321,17 @@ window.onload = () => {
                 .attr("class", line.attr("class") + " " + current.attr("id") + "Connector");
             resetListeners();
         }
+    }
+    function openNav() {
+        document.getElementById("mySidebar").style.width = "250px";
+        document.getElementById("main").style.marginLeft = "250px";
+        var current = d3.select(this);
+        current.on("dblclick", closeNav);
+    }
+    function closeNav() {
+        document.getElementById("mySidebar").style.width = "0";
+        document.getElementById("main").style.marginLeft = "0";
+        var current = d3.select(this);
+        current.on("dblclick", openNav);
     }
 };
