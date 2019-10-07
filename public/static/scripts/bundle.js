@@ -18641,41 +18641,41 @@ window.onload = () => {
                 .attr("cx", (+current.attr("x") + (+current.attr("width") / 2)))
                 .attr("cy", +current.attr("y"));
             d3.select("#circleBottom" + counter)
-                .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-                .attr("cy", (+rect.attr("y") + +rect.attr("height")));
+                .attr("cx", (+current.attr("x") + (+current.attr("width") / 2)))
+                .attr("cy", (+current.attr("y") + +current.attr("height")));
             d3.select("#circleBottomRight" + counter)
-                .attr("cx", (+rect.attr("x") + (+rect.attr("width")) - 2))
-                .attr("cy", (+rect.attr("y") + +rect.attr("height") - 2));
+                .attr("cx", (+current.attr("x") + (+current.attr("width")) - 2))
+                .attr("cy", (+current.attr("y") + +current.attr("height") - 2));
             d3.select("#circleLeft" + counter)
-                .attr("cx", +rect.attr("x"))
-                .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)));
+                .attr("cx", +current.attr("x"))
+                .attr("cy", (+current.attr("y") + (+current.attr("height") / 2)));
             d3.select("#circleRight" + counter)
-                .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-                .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)));
+                .attr("cx", (+current.attr("x") + +current.attr("width")))
+                .attr("cy", (+current.attr("y") + (+current.attr("height") / 2)));
             d3.selectAll("line.circleTop" + counter)
                 .attr("cx", (+current.attr("x") + (+current.attr("width") / 2)))
                 .attr("cy", +current.attr("y"));
             d3.selectAll("line.circleBottom" + counter)
-                .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-                .attr("cy", (+rect.attr("y") + +rect.attr("height")));
+                .attr("x1", (+current.attr("x") + (+current.attr("width") / 2)))
+                .attr("y1", (+current.attr("y") + +current.attr("height")));
             d3.selectAll("line.circleLeft" + counter)
-                .attr("cx", +rect.attr("x"))
-                .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)));
+                .attr("x1", +current.attr("x"))
+                .attr("y1", (+current.attr("y") + (+current.attr("height") / 2)));
             d3.selectAll("line.circleRight" + counter)
-                .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-                .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)));
+                .attr("x1", (+current.attr("x") + +current.attr("width")))
+                .attr("y1", (+current.attr("y") + (+current.attr("height") / 2)));
             d3.selectAll("line.circleTop" + counter + "Connector")
-                .attr("cx", (+current.attr("x") + (+current.attr("width") / 2)))
-                .attr("cy", +current.attr("y"));
+                .attr("x2", (+current.attr("x") + (+current.attr("width") / 2)))
+                .attr("y2", +current.attr("y"));
             d3.selectAll("line.circleBottom" + counter + "Connector")
-                .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-                .attr("cy", (+rect.attr("y") + +rect.attr("height")));
+                .attr("x2", (+current.attr("x") + (+current.attr("width") / 2)))
+                .attr("y2", (+current.attr("y") + +current.attr("height")));
             d3.selectAll("line.circleLeft" + counter + "Connector")
-                .attr("cx", +rect.attr("x"))
-                .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)));
+                .attr("x2", +current.attr("x"))
+                .attr("y2", (+current.attr("y") + (+current.attr("height") / 2)));
             d3.selectAll("line.circleRight" + counter + "Connector")
-                .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-                .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)));
+                .attr("x2", (+current.attr("x") + +current.attr("width")))
+                .attr("y2", (+current.attr("y") + (+current.attr("height") / 2)));
         }
     }
     function mouseUp() {
@@ -18715,6 +18715,10 @@ window.onload = () => {
         d3.selectAll("circle")
             .raise()
             .on("click", drawLine);
+        for (let i = 0; i < rectCounter; i++) {
+            d3.select(`#circleBottomRight${i}`)
+                .on("click", null);
+        }
     }
     function moveLine() {
         let event = d3.mouse(this);
