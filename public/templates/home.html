@@ -8,21 +8,23 @@
     <link rel="stylesheet" href="../static/css/style.css" />
 </head>
 <body>
+<div class="header" id="myHeader">
+    <h1 id="title">Tree-Editor</h1>
+</div>
 <div id="main">
-    <h2>Tree-Editor</h2>
     <div id="mySidebar" class="sidebar">
-        <div id="absoluteCenteredDiv">
-            <form action="/login" method="post">
+            <form action="" method="post">
                 <div class="box">
-                    <h1>Properties</h1>
-                    <input class="username" name="username" type="text" placeholder="Title">
-                    <input class="username" name="password" type="password" placeholder="Content">
-                    <button type="submit" id="SignUp" class="button" name="submit" value="SignUp">
+                    <h2>Properties</h2>
+                    <h4>Color</h4>
+                    <input type="color" name="favcolor" value="#ff0000"><br><br>
+                    <h4>Color Border</h4>
+                    <input type="color" name="favcolor" value="#ff0000"><br><br>
+                    <button type="submit" id="save" class="button" name="save" value="Save">
                         Save
                     </button>
                 </div>
             </form>
-        </div>
     </div>
     <svg id="graph">
     </svg>

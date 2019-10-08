@@ -1,12 +1,40 @@
 html {
     height: 100%;
     width: 100%;
+    margin:0;
+    padding:0
 }
 
 body {
     font-family: "Lato", sans-serif;
     height: 100%;
     width: 100%;
+    margin:0;
+    padding:0
+}
+
+.header {
+    padding: 10px 16px;
+    background: #aaa9ad;
+    color: #f1f1f1;
+}
+
+.content {
+    padding: 16px;
+}
+
+.sticky {
+    position: fixed;
+    top: 0;
+    width: 100%
+}
+
+.sticky + .content {
+    padding-top: 102px;
+}
+
+#title {
+    padding: 5px 250px;
 }
 
 .sidebar {
@@ -26,35 +54,22 @@ body {
     padding: 8px 8px 8px 32px;
     text-decoration: none;
     font-size: 25px;
-    color: #818181;
+    color: #aaa9ad;
     display: block;
     transition: 0.3s;
 }
 
-.sidebar a:hover {
-    color: #f1f1f1;
+.box {
+    padding: 50px 10px 10px 10px;
 }
 
-.sidebar .closebtn {
-    position: absolute;
-    top: 0;
-    right: 25px;
-    font-size: 36px;
-    margin-left: 50px;
+input[type="text"], textarea {
+
+    background-color : #aaa9ad;
+    width: 100%;
 }
 
-.openbtn {
-    font-size: 20px;
-    cursor: pointer;
-    background-color: #111;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-}
 
-.openbtn:hover {
-    background-color: #444;
-}
 
 #main {
     transition: margin-left .5s;
@@ -63,9 +78,15 @@ body {
     width: 100%;
 }
 
+
 @media screen and (max-height: 450px) {
     .sidebar {padding-top: 15px;}
     .sidebar a {font-size: 18px;}
+}
+
+h4 {
+    margin-block-start: 0.5em;
+    margin-block-end: 0.1em;
 }
 
 #graph {
