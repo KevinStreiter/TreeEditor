@@ -93,3 +93,15 @@ h4 {
     height: 100%;
     width: 100%;
 }
+
+.box {
+    padding: 10px;
+}
+
+.content {
+    height: 300px;
+}
+
+#mySidebar {
+    height: 100%;
+}
