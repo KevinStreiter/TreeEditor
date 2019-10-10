@@ -9,7 +9,8 @@ window.onload = () => {
     let sticky = header.offsetTop;
     let g;
     let rect;
-    let text;
+    let title;
+    let content;
     let circleTop;
     let circleBottom;
     let circleBottomRight;
@@ -266,10 +267,30 @@ window.onload = () => {
         if (surface < 2000) {
             parent.remove();
         }
-        text = g.append("text")
+        title = g.append("text")
             .attr("x", +rect.attr("x") + 10)
             .attr("y", +rect.attr("y") + 20)
-            .text("Content");
+            .attr("class", "title")
+            .text();
+        content = g.append("text")
+            .attr("x", +rect.attr("x") + 10)
+            .attr("y", +rect.attr("y") + 20)
+            .attr("class", "content")
+            .text();
+        /*
+
+                svg.append("foreignObject")
+                    .raise()
+                    .attr("x",+rect.attr("x") + 10)
+                    .attr("y",+rect.attr("y") + 20)
+                    .attr("width", +rect.attr("width") - 20)
+                    .attr("height", +rect.attr("height") - 40)
+                    .append('xhtml:div')
+                    .attr("contentEditable", true)
+                    .append("text")
+                    .attr("maxlength", 300)
+                    .html("Content");
+         */
     }
     function drawLine() {
         let current = d3.select(this);
@@ -296,6 +317,8 @@ window.onload = () => {
             .on("mousedown", mousedown)
             .on("mouseup", mouseUp)
             .on("dblclick", null);
+        svg.selectAll("rect")
+            .on("dblclick", openNav);
         d3.selectAll("circle")
             .raise()
             .on("click", drawLine);
@@ -338,16 +361,22 @@ window.onload = () => {
         }
     }
     function openNav() {
+        resetListeners();
         document.getElementById("mySidebar").style.width = "250px";
         document.getElementById("main").style.marginLeft = "250px";
-        let current = d3.select(this);
-        current.on("dblclick", closeNav);
+        svg.selectAll("rect")
+            .style("stroke", "#7b9eb4");
+        d3.select(this)
+            .style("stroke", "red")
+            .on("dblclick", closeNav);
     }
     function closeNav() {
         document.getElementById("mySidebar").style.width = "0";
         document.getElementById("main").style.marginLeft = "0";
-        let current = d3.select(this);
-        current.on("dblclick", openNav);
+        svg.selectAll("rect")
+            .style("stroke", "#7b9eb4");
+        d3.select(this)
+            .on("dblclick", openNav);
     }
     function stickyHeader() {
         if (window.pageYOffset > sticky) {
