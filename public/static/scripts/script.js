@@ -33,6 +33,9 @@ window.onload = () => {
     d3.select("#colorPicker").on("input", function () {
         updateRectColor(this);
     });
+    d3.select("#fileChooser").on("input", function () {
+        updateFileList();
+    });
     let svg = d3.select("#graph")
         .on("mousedown", mousedown)
         .on("mouseup", mouseUp);
@@ -432,5 +435,22 @@ window.onload = () => {
                 element.select("rect").attr("fill", object.value);
             }
         });
+    }
+    function updateFileList() {
+        let file = document.getElementById("fileChooser");
+        let ul = document.getElementById("fileList");
+        let li = document.createElement("li");
+        let span = document.createElement("span");
+        li.appendChild(document.createTextNode(file.files[0].name));
+        span.setAttribute("class", "close");
+        span.appendChild(document.createTextNode("x"));
+        li.appendChild(span);
+        ul.appendChild(li);
+        let btnList = document.getElementsByClassName("close");
+        for (let i = 0; i < btnList.length; i++) {
+            btnList[i].addEventListener("click", function () {
+                this.parentElement.remove();
+            });
+        }
     }
 };
