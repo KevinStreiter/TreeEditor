@@ -18431,47 +18431,50 @@ Object.defineProperty(exports, '__esModule', { value: true });
 },{}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var d3 = require("./modules/d3.js");
-window.onload = function () {
+const d3 = require("./modules/d3.js");
+window.onload = () => {
     window.onscroll = function () {
         stickyHeader();
     };
-    var header = document.getElementById("myHeader");
-    var sticky = header.offsetTop;
-    var g;
-    var rect;
-    var title;
-    var content;
-    var circleTop;
-    var circleBottom;
-    var circleBottomRight;
-    var circleLeft;
-    var circleRight;
-    var line;
-    var deltaX;
-    var deltaY;
-    var deltaXBorder;
-    var deltaYBorder;
-    var width;
-    var height;
-    var rectCounter = 0;
+    let header = document.getElementById("myHeader");
+    let sticky = header.offsetTop;
+    let g;
+    let rect;
+    let title;
+    let content;
+    let circleTop;
+    let circleBottom;
+    let circleBottomRight;
+    let circleLeft;
+    let circleRight;
+    let line;
+    let deltaX;
+    let deltaY;
+    let deltaXBorder;
+    let deltaYBorder;
+    let width;
+    let height;
+    let rectCounter = 0;
     d3.select("#titleText").on("input", function () {
         updateRectText(this);
     });
     d3.select("#contentText").on("input", function () {
         updateRectText(this);
     });
-    var svg = d3.select("#graph")
+    d3.select("#colorPicker").on("input", function () {
+        updateRectColor(this);
+    });
+    let svg = d3.select("#graph")
         .on("mousedown", mousedown)
         .on("mouseup", mouseUp);
-    var dragRect = d3.drag()
+    let dragRect = d3.drag()
         .on("start", dragStart)
         .on("drag", dragMove);
-    var dragBorder = d3.drag()
+    let dragBorder = d3.drag()
         .on("start", dragStartBorder)
         .on("drag", dragMoveBorder);
     function mousedown() {
-        var event = d3.mouse(this);
+        let event = d3.mouse(this);
         g = svg.append("g")
             .attr("id", rectCounter)
             .call(dragRect);
@@ -18535,7 +18538,7 @@ window.onload = function () {
                 .style("cursor", "default");
         })
             .call(dragBorder);
-        d3.selectAll("#circleRight" + rectCounter + ", #circleLeft" + rectCounter + ", #circleTop" + rectCounter + ", #circleBottom" + rectCounter)
+        d3.selectAll(`#circleRight${rectCounter}, #circleLeft${rectCounter}, #circleTop${rectCounter}, #circleBottom${rectCounter}`)
             .on('mouseover', function () {
             d3.select(this)
                 .attr("r", 10)
@@ -18551,7 +18554,7 @@ window.onload = function () {
         rectCounter++;
     }
     function mouseMove() {
-        var event = d3.mouse(this);
+        let event = d3.mouse(this);
         rect.attr("width", Math.max(0, event[0] - +rect.attr("x")))
             .attr("height", Math.max(0, event[1] - +rect.attr("y")));
         circleTop
@@ -18571,18 +18574,18 @@ window.onload = function () {
             .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)));
     }
     function dragStart() {
-        var current = d3.select(this);
-        var tagName = current.node().tagName;
+        let current = d3.select(this);
+        let tagName = current.node().tagName;
         if (tagName === "rect") {
             deltaX = current.attr("x") - d3.event.x;
             deltaY = current.attr("y") - d3.event.y;
         }
     }
     function dragMove() {
-        var current = d3.select(this);
-        var parent = d3.select(this.parentNode);
-        var counter = parent.attr("id");
-        var tagName = current.node().tagName;
+        let current = d3.select(this);
+        let parent = d3.select(this.parentNode);
+        let counter = parent.attr("id");
+        let tagName = current.node().tagName;
         if (tagName === "rect") {
             current
                 .attr("x", d3.event.x + deltaX)
@@ -18635,9 +18638,9 @@ window.onload = function () {
         }
     }
     function dragStartBorder() {
-        var parent = d3.select(this.parentNode);
-        var current = parent.select("rect");
-        var tagName = current.node().tagName;
+        let parent = d3.select(this.parentNode);
+        let current = parent.select("rect");
+        let tagName = current.node().tagName;
         if (tagName === "rect") {
             deltaXBorder = d3.event.x;
             deltaYBorder = d3.event.y;
@@ -18648,10 +18651,10 @@ window.onload = function () {
         }
     }
     function dragMoveBorder() {
-        var parent = d3.select(this.parentNode);
-        var counter = parent.attr("id");
-        var current = parent.select("rect");
-        var tagName = current.node().tagName;
+        let parent = d3.select(this.parentNode);
+        let counter = parent.attr("id");
+        let current = parent.select("rect");
+        let tagName = current.node().tagName;
         if (tagName === "rect") {
             current
                 .attr("width", width + (d3.event.x - deltaXBorder))
@@ -18699,11 +18702,11 @@ window.onload = function () {
     }
     function mouseUp() {
         svg.on("mousemove", null);
-        var parent = rect.select(function () { return this.parentNode; });
-        var id = parent.attr("id");
-        var width = +rect.attr("width");
-        var height = +rect.attr("height");
-        var surface = width * height;
+        let parent = rect.select(function () { return this.parentNode; });
+        let id = parent.attr("id");
+        let width = +rect.attr("width");
+        let height = +rect.attr("height");
+        let surface = width * height;
         if (surface < 2000) {
             parent.remove();
         }
@@ -18735,10 +18738,10 @@ window.onload = function () {
          */
     }
     function drawLine() {
-        var current = d3.select(this);
-        var parent = d3.select(this.parentNode);
-        var cx = current.attr("cx");
-        var cy = current.attr("cy");
+        let current = d3.select(this);
+        let parent = d3.select(this.parentNode);
+        let cx = current.attr("cx");
+        let cy = current.attr("cy");
         line = parent.append("line");
         line.attr("x1", cx)
             .attr("y1", cy)
@@ -18764,13 +18767,13 @@ window.onload = function () {
         d3.selectAll("circle")
             .raise()
             .on("click", drawLine);
-        for (var i = 0; i < rectCounter; i++) {
-            d3.select("#circleBottomRight" + i)
+        for (let i = 0; i < rectCounter; i++) {
+            d3.select(`#circleBottomRight${i}`)
                 .on("click", null);
         }
     }
     function moveLine() {
-        var event = d3.mouse(this);
+        let event = d3.mouse(this);
         line.attr("x2", event[0] - 5)
             .attr("y2", event[1] - 5);
         svg
@@ -18782,14 +18785,14 @@ window.onload = function () {
             .on("click", combineRect);
     }
     function combineRect() {
-        var current = d3.select(this);
-        var parent = d3.select(this.parentNode);
-        var x1 = line.attr("x1");
-        var y1 = line.attr("y1");
-        var sameRect = false;
+        let current = d3.select(this);
+        let parent = d3.select(this.parentNode);
+        let x1 = line.attr("x1");
+        let y1 = line.attr("y1");
+        let sameRect = false;
         parent.selectAll("circle").each(function () {
-            var cx = d3.select(this).attr("cx");
-            var cy = d3.select(this).attr("cy");
+            let cx = d3.select(this).attr("cx");
+            let cy = d3.select(this).attr("cy");
             if (x1 == cx && y1 == cy) {
                 sameRect = true;
             }
@@ -18803,19 +18806,19 @@ window.onload = function () {
         }
     }
     function openNav() {
-        var current = d3.select(this);
-        var parent = d3.select(this.parentNode);
-        var id = parent.attr("id");
+        let current = d3.select(this);
+        let parent = d3.select(this.parentNode);
+        let id = parent.attr("id");
         resetListeners();
         document.getElementById("mySidebar").style.width = "250px";
         document.getElementById("main").style.marginLeft = "250px";
         document.getElementById('rectInfo').innerHTML = id;
-        var titleText = document.getElementById("titleText");
-        var contentText = document.getElementById("contentText");
-        var newTitleText = parent.select("text.titleText").text();
-        var newContentText = parent.select("text.contentText").text();
-        titleText.value = newTitleText;
-        contentText.value = newContentText;
+        let titleText = document.getElementById("titleText");
+        let contentText = document.getElementById("contentText");
+        let colorPicker = document.getElementById("colorPicker");
+        titleText.value = parent.select("text.titleText").text();
+        contentText.value = parent.select("text.contentText").text();
+        colorPicker.value = current.attr("fill");
         svg.selectAll("rect")
             .style("stroke", "#7b9eb4");
         d3.select(this)
@@ -18826,8 +18829,8 @@ window.onload = function () {
         document.getElementById("mySidebar").style.width = "0";
         document.getElementById("main").style.marginLeft = "0";
         document.getElementById('rectInfo').innerHTML = "";
-        var titleText = document.getElementById("titleText");
-        var contentText = document.getElementById("contentText");
+        let titleText = document.getElementById("titleText");
+        let contentText = document.getElementById("contentText");
         titleText.value = "";
         contentText.value = "";
         svg.selectAll("rect")
@@ -18844,16 +18847,22 @@ window.onload = function () {
         }
     }
     function updateRectText(object) {
-        var id = document.getElementById('rectInfo').innerHTML;
+        let id = document.getElementById('rectInfo').innerHTML;
         svg.selectAll("g").each(function () {
-            var element = d3.select(this);
+            let element = d3.select(this);
             if (element.attr("id") == id) {
                 element.select("text." + object.id).html(object.value);
             }
         });
     }
-    function updateRectColor() {
-        var id = document.getElementById('rectInfo').innerHTML;
+    function updateRectColor(object) {
+        let id = document.getElementById('rectInfo').innerHTML;
+        svg.selectAll("g").each(function () {
+            let element = d3.select(this);
+            if (element.attr("id") == id) {
+                element.select("rect").attr("fill", object.value);
+            }
+        });
     }
 };
 
