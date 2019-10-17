@@ -18464,6 +18464,9 @@ window.onload = () => {
     d3.select("#colorPicker").on("input", function () {
         updateRectColor(this);
     });
+    d3.select("#fileChooserBtn").on("click", function () {
+        document.getElementById("fileChooser").click();
+    });
     d3.select("#fileChooser").on("input", function () {
         updateFileList();
     });
@@ -18870,18 +18873,28 @@ window.onload = () => {
     function updateFileList() {
         let file = document.getElementById("fileChooser");
         let ul = document.getElementById("fileList");
-        let li = document.createElement("li");
-        let span = document.createElement("span");
-        li.appendChild(document.createTextNode(file.files[0].name));
-        span.setAttribute("class", "close");
-        span.appendChild(document.createTextNode("x"));
-        li.appendChild(span);
-        ul.appendChild(li);
-        let btnList = document.getElementsByClassName("close");
-        for (let i = 0; i < btnList.length; i++) {
-            btnList[i].addEventListener("click", function () {
-                this.parentElement.remove();
-            });
+        let entries = d3.select("#fileList").selectAll("li");
+        let isDublicate = false;
+        entries.each(function () {
+            let str = this.textContent.slice(0, -1);
+            if (str == file.files[0].name) {
+                isDublicate = true;
+            }
+        });
+        if (!isDublicate) {
+            let li = document.createElement("li");
+            let span = document.createElement("span");
+            li.appendChild(document.createTextNode(file.files[0].name));
+            span.setAttribute("class", "close");
+            span.appendChild(document.createTextNode("x"));
+            li.appendChild(span);
+            ul.appendChild(li);
+            let btnList = document.getElementsByClassName("close");
+            for (let i = 0; i < btnList.length; i++) {
+                btnList[i].addEventListener("click", function () {
+                    this.parentElement.remove();
+                });
+            }
         }
     }
 };
