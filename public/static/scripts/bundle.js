@@ -18468,6 +18468,9 @@ window.onload = () => {
         document.getElementById("fileChooser").click();
     });
     d3.select("#fileChooser").on("input", function () {
+        const files = document.querySelector('[type=file]');
+        let file_list = files.files;
+        console.log(file_list);
         updateFileList();
     });
     let svg = d3.select("#graph")

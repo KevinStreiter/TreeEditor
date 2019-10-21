@@ -23,7 +23,8 @@
                     <h4>Color</h4>
                     <input id="colorPicker" type="color" name="favcolor" value="#ff0000"  ><br><br>
                     <h4>Files</h4>
-                    <form method="post" enctype="multipart/form-data">
+                    <iframe id="upload_target" name="upload_target" style="display:none;"> </iframe>
+                    <form target="upload_target" method="post" enctype="multipart/form-data">
                         <input id="fileChooserBtn" type="button" value="Import"><br><br>
                         <ul id="fileList">
                         </ul>
