@@ -24,4 +24,4 @@ $container[PDO::class] = function (Container $container) {
 
 $container[PhpRenderer::class] = new PhpRenderer("./templates");
 
-$container['user'] = new \App\Factories\UserFactory();
+//$container['user'] = new \App\Factories\UserFactory();

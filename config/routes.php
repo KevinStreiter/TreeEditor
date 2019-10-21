@@ -7,6 +7,12 @@ use Cake\Database\Connection;
 use Slim\Container;
 
 
+$app->get('/treeEditor', function ($request, $response, $args) {
+    return $this->get(PhpRenderer::class)->render($response, "/home.html", $args);
+});
+
+/*
+
 $app->get('/bubbles', function ($request, $response, $args) {
     return $this->get(PhpRenderer::class)->render($response, "/login.html", $args);
 });
@@ -16,7 +22,7 @@ $app->post('/bubbles', \App\Controllers\UserController::class);
 
 $app->get('/databases', function (Request $request, Response $response) {
     /** @var Container $this */
-
+/*
     $query = $this->get(Connection::class)->newQuery();
 
     // fetch all rows as array
@@ -27,3 +33,4 @@ $app->get('/databases', function (Request $request, Response $response) {
     // return a json response
     return $response->withJson($rows);
 });
+*/

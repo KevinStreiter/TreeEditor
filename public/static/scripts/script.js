@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 window.onload = () => {
     window.onscroll = function () {
-        stickyHeader();
+        //stickyHeader()
     };
     let header = document.getElementById("myHeader");
     let sticky = header.offsetTop;
