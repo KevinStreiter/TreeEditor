@@ -9,6 +9,10 @@
   "author": "K.Streiter",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^12.11.2",
     "typescript": "^3.6.2"
+  },
+  "dependencies": {
+    "brfs": "^2.0.2"
   }
 }
