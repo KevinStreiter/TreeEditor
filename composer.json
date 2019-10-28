@@ -5,7 +5,8 @@
         "cakephp/database": "^3.8",
         "cakephp/event": "^3.8",
         "slim/php-view": "^2.2",
-        "slim/slim": "^3.12"
+        "slim/slim": "^3.12",
+      "ext-fileinfo": "*"
     },
     "autoload": {
         "psr-4": {

@@ -16,22 +16,31 @@ $app->get('/treeEditor', function ($request, $response, $args) {
 $app->post('/treeEditor', function($request, $response) {
     $directory = $this->get('upload_directory');
     $uploadedFiles = $request->getUploadedFiles();
+    echo $uploadedFiles;
     $encryptedFileName = "";
-    $rectInfo = $request->getParam('rectInfo');
     $uploadedFile = $uploadedFiles['file'];
     if ($uploadedFile->getError() === UPLOAD_ERR_OK) {
-        $encryptedFileName = moveUploadedFile($directory, $uploadedFile, $rectInfo);
+        $encryptedFileName = moveUploadedFile($directory, $uploadedFile);
     }
-    $data = array('name' => $uploadedFile->getClientFilename(), 'encrypted' => $encryptedFileName);
-    return $response->withJson($data);
+    return $response->withHeader('Content-Type', 'text/plain')->write($encryptedFileName);
+
 });
 
-function moveUploadedFile($directory, UploadedFile $uploadedFile, $rectInfo)
-{
+function moveUploadedFile($directory, UploadedFile $uploadedFile) {
     $extension = pathinfo($uploadedFile->getClientFilename(), PATHINFO_EXTENSION);
     $basename = bin2hex(random_bytes(8));
     $filename = sprintf('%s.%0.8s', $basename, $extension);
-    $filename = $rectInfo . "_" . $filename;
     $uploadedFile->moveTo($directory . DIRECTORY_SEPARATOR . $filename);
     return $filename;
 }
+
+$app->get('/treeEditor/files', function (Request $request, Response $response, array $args) {
+    // a 100mb file
+    $path = '../public/uploads/0_0cbb154dbc2f3ebf.pdf';
+    $fh = fopen($path, 'rb');
+    $file_stream = new Stream($fh);
+    return $response->withBody($file_stream)
+        ->withHeader('Content-Disposition', 'attachment; filename=document.pdf;')
+        ->withHeader('Content-Type', mime_content_type($path))
+        ->withHeader('Content-Length', filesize($path));
+})->setOutputBuffering(false);

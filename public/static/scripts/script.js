@@ -36,9 +36,8 @@ window.onload = function () {
     d3.select("#fileChooserBtn").on("click", function () {
         document.getElementById("fileChooser").click();
     });
-    d3.select("#fileChooser").on("submit", function () {
-        //const files =  <HTMLInputElement> document.querySelector('[type=file]');
-        //let file_list = files.files;
+    d3.select("#fileChooser").on("input", function () {
+        uploadFile();
         updateFileList();
     });
     var svg = d3.select("#graph")
@@ -443,6 +442,20 @@ window.onload = function () {
             }
         });
     }
+    function uploadFile() {
+        var file_input = document.querySelector('[type=file]');
+        var files = file_input.files;
+        var formData = new FormData();
+        formData.append('file', files[0]);
+        var text = "";
+        var url = '/treeEditor';
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+        }).then(function (response) {
+            console.log(response.text());
+        });
+    }
     function updateFileList() {
         var file = document.getElementById("fileChooser");
         var ul = document.getElementById("fileList");
@@ -468,6 +481,10 @@ window.onload = function () {
                     this.parentElement.remove();
                 });
             }
+            li.addEventListener("click", function () {
+                var _html = document.getElementsByTagName('pre')[0];
+                console.log(_html);
+            });
         }
     }
 };
