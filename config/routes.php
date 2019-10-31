@@ -16,14 +16,12 @@ $app->get('/treeEditor', function ($request, $response, $args) {
 $app->post('/treeEditor', function($request, $response) {
     $directory = $this->get('upload_directory');
     $uploadedFiles = $request->getUploadedFiles();
-    echo $uploadedFiles;
-    $encryptedFileName = "";
     $uploadedFile = $uploadedFiles['file'];
+    $filename = "";
     if ($uploadedFile->getError() === UPLOAD_ERR_OK) {
-        $encryptedFileName = moveUploadedFile($directory, $uploadedFile);
+        $filename = moveUploadedFile($directory, $uploadedFile);
     }
-    return $response->withHeader('Content-Type', 'text/plain')->write($encryptedFileName);
-
+    return $response->write($filename);
 });
 
 function moveUploadedFile($directory, UploadedFile $uploadedFile) {
@@ -35,12 +33,22 @@ function moveUploadedFile($directory, UploadedFile $uploadedFile) {
 }
 
 $app->get('/treeEditor/files', function (Request $request, Response $response, array $args) {
-    // a 100mb file
-    $path = '../public/uploads/0_0cbb154dbc2f3ebf.pdf';
+    $filename = $request->getParam('filename');
+    $directory = $this->get('upload_directory');
+    $path = $directory . DIRECTORY_SEPARATOR . $filename;
     $fh = fopen($path, 'rb');
     $file_stream = new Stream($fh);
     return $response->withBody($file_stream)
-        ->withHeader('Content-Disposition', 'attachment; filename=document.pdf;')
+        ->withHeader('Content-Disposition', "attachment; filename=$filename;")
         ->withHeader('Content-Type', mime_content_type($path))
         ->withHeader('Content-Length', filesize($path));
 })->setOutputBuffering(false);
+
+
+$app->post('/treeEditor/files/delete', function (Request $request) {
+    $filename = $request->getParam('filename');
+    $directory = $this->get('upload_directory');
+    unlink($directory . DIRECTORY_SEPARATOR . $filename);
+});
+
+

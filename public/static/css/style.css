@@ -130,6 +130,7 @@ ul li {
 
 ul li:hover {
     background-color: #eee;
+    cursor: pointer;
 }
 
 .close {
