@@ -13,21 +13,23 @@ $app->get('/treeEditor', function ($request, $response, $args) {
     return $this->get(PhpRenderer::class)->render($response, "/home.html", $args);
 });
 
-$app->post('/treeEditor', function($request, $response) {
+$app->post('/treeEditor/files/upload', function($request, $response) {
     $directory = $this->get('upload_directory');
     $uploadedFiles = $request->getUploadedFiles();
     $uploadedFile = $uploadedFiles['file'];
     $filename = "";
+    $rectIndex = $request->getParam('rectInfo');
     if ($uploadedFile->getError() === UPLOAD_ERR_OK) {
-        $filename = moveUploadedFile($directory, $uploadedFile);
+        $filename = moveUploadedFile($directory, $uploadedFile, $rectIndex);
     }
     return $response->write($filename);
 });
 
-function moveUploadedFile($directory, UploadedFile $uploadedFile) {
+function moveUploadedFile($directory, UploadedFile $uploadedFile, $rectIndex) {
     $extension = pathinfo($uploadedFile->getClientFilename(), PATHINFO_EXTENSION);
     $basename = bin2hex(random_bytes(8));
     $filename = sprintf('%s.%0.8s', $basename, $extension);
+    $filename = $rectIndex . "_" . $filename;
     $uploadedFile->moveTo($directory . DIRECTORY_SEPARATOR . $filename);
     return $filename;
 }

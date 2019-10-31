@@ -1,29 +1,29 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const d3 = require("./modules/d3.js");
-window.onload = () => {
+var d3 = require("./modules/d3.js");
+window.onload = function () {
     window.onscroll = function () {
         //stickyHeader()
     };
-    let header = document.getElementById("myHeader");
-    let sticky = header.offsetTop;
-    let g;
-    let rect;
-    let title;
-    let content;
-    let circleTop;
-    let circleBottom;
-    let circleBottomRight;
-    let circleLeft;
-    let circleRight;
-    let line;
-    let deltaX;
-    let deltaY;
-    let deltaXBorder;
-    let deltaYBorder;
-    let width;
-    let height;
-    let rectCounter = 0;
+    var header = document.getElementById("myHeader");
+    var sticky = header.offsetTop;
+    var g;
+    var rect;
+    var title;
+    var content;
+    var circleTop;
+    var circleBottom;
+    var circleBottomRight;
+    var circleLeft;
+    var circleRight;
+    var line;
+    var deltaX;
+    var deltaY;
+    var deltaXBorder;
+    var deltaYBorder;
+    var width;
+    var height;
+    var rectCounter = 0;
     d3.select("#titleText").on("input", function () {
         updateRectText(this);
     });
@@ -39,17 +39,17 @@ window.onload = () => {
     d3.select("#fileChooser").on("input", function () {
         uploadFile();
     });
-    let svg = d3.select("#graph")
+    var svg = d3.select("#graph")
         .on("mousedown", mousedown)
         .on("mouseup", mouseUp);
-    let dragRect = d3.drag()
+    var dragRect = d3.drag()
         .on("start", dragStart)
         .on("drag", dragMove);
-    let dragBorder = d3.drag()
+    var dragBorder = d3.drag()
         .on("start", dragStartBorder)
         .on("drag", dragMoveBorder);
     function mousedown() {
-        let event = d3.mouse(this);
+        var event = d3.mouse(this);
         g = svg.append("g")
             .attr("id", rectCounter)
             .call(dragRect);
@@ -113,7 +113,7 @@ window.onload = () => {
                 .style("cursor", "default");
         })
             .call(dragBorder);
-        d3.selectAll(`#circleRight${rectCounter}, #circleLeft${rectCounter}, #circleTop${rectCounter}, #circleBottom${rectCounter}`)
+        d3.selectAll("#circleRight" + rectCounter + ", #circleLeft" + rectCounter + ", #circleTop" + rectCounter + ", #circleBottom" + rectCounter)
             .on('mouseover', function () {
             d3.select(this)
                 .attr("r", 10)
@@ -129,7 +129,7 @@ window.onload = () => {
         rectCounter++;
     }
     function mouseMove() {
-        let event = d3.mouse(this);
+        var event = d3.mouse(this);
         rect.attr("width", Math.max(0, event[0] - +rect.attr("x")))
             .attr("height", Math.max(0, event[1] - +rect.attr("y")));
         circleTop
@@ -149,18 +149,18 @@ window.onload = () => {
             .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)));
     }
     function dragStart() {
-        let current = d3.select(this);
-        let tagName = current.node().tagName;
+        var current = d3.select(this);
+        var tagName = current.node().tagName;
         if (tagName === "rect") {
             deltaX = current.attr("x") - d3.event.x;
             deltaY = current.attr("y") - d3.event.y;
         }
     }
     function dragMove() {
-        let current = d3.select(this);
-        let parent = d3.select(this.parentNode);
-        let counter = parent.attr("id");
-        let tagName = current.node().tagName;
+        var current = d3.select(this);
+        var parent = d3.select(this.parentNode);
+        var counter = parent.attr("id");
+        var tagName = current.node().tagName;
         if (tagName === "rect") {
             current
                 .attr("x", d3.event.x + deltaX)
@@ -213,9 +213,9 @@ window.onload = () => {
         }
     }
     function dragStartBorder() {
-        let parent = d3.select(this.parentNode);
-        let current = parent.select("rect");
-        let tagName = current.node().tagName;
+        var parent = d3.select(this.parentNode);
+        var current = parent.select("rect");
+        var tagName = current.node().tagName;
         if (tagName === "rect") {
             deltaXBorder = d3.event.x;
             deltaYBorder = d3.event.y;
@@ -226,10 +226,10 @@ window.onload = () => {
         }
     }
     function dragMoveBorder() {
-        let parent = d3.select(this.parentNode);
-        let counter = parent.attr("id");
-        let current = parent.select("rect");
-        let tagName = current.node().tagName;
+        var parent = d3.select(this.parentNode);
+        var counter = parent.attr("id");
+        var current = parent.select("rect");
+        var tagName = current.node().tagName;
         if (tagName === "rect") {
             current
                 .attr("width", width + (d3.event.x - deltaXBorder))
@@ -277,11 +277,11 @@ window.onload = () => {
     }
     function mouseUp() {
         svg.on("mousemove", null);
-        let parent = rect.select(function () { return this.parentNode; });
-        let id = parent.attr("id");
-        let width = +rect.attr("width");
-        let height = +rect.attr("height");
-        let surface = width * height;
+        var parent = rect.select(function () { return this.parentNode; });
+        var id = parent.attr("id");
+        var width = +rect.attr("width");
+        var height = +rect.attr("height");
+        var surface = width * height;
         if (surface < 2000) {
             parent.remove();
         }
@@ -313,10 +313,10 @@ window.onload = () => {
          */
     }
     function drawLine() {
-        let current = d3.select(this);
-        let parent = d3.select(this.parentNode);
-        let cx = current.attr("cx");
-        let cy = current.attr("cy");
+        var current = d3.select(this);
+        var parent = d3.select(this.parentNode);
+        var cx = current.attr("cx");
+        var cy = current.attr("cy");
         line = parent.append("line");
         line.attr("x1", cx)
             .attr("y1", cy)
@@ -342,13 +342,13 @@ window.onload = () => {
         d3.selectAll("circle")
             .raise()
             .on("click", drawLine);
-        for (let i = 0; i < rectCounter; i++) {
-            d3.select(`#circleBottomRight${i}`)
+        for (var i = 0; i < rectCounter; i++) {
+            d3.select("#circleBottomRight" + i)
                 .on("click", null);
         }
     }
     function moveLine() {
-        let event = d3.mouse(this);
+        var event = d3.mouse(this);
         line.attr("x2", event[0] - 5)
             .attr("y2", event[1] - 5);
         svg
@@ -360,14 +360,14 @@ window.onload = () => {
             .on("click", combineRect);
     }
     function combineRect() {
-        let current = d3.select(this);
-        let parent = d3.select(this.parentNode);
-        let x1 = line.attr("x1");
-        let y1 = line.attr("y1");
-        let sameRect = false;
+        var current = d3.select(this);
+        var parent = d3.select(this.parentNode);
+        var x1 = line.attr("x1");
+        var y1 = line.attr("y1");
+        var sameRect = false;
         parent.selectAll("circle").each(function () {
-            let cx = d3.select(this).attr("cx");
-            let cy = d3.select(this).attr("cy");
+            var cx = d3.select(this).attr("cx");
+            var cy = d3.select(this).attr("cy");
             if (x1 == cx && y1 == cy) {
                 sameRect = true;
             }
@@ -381,17 +381,16 @@ window.onload = () => {
         }
     }
     function openNav() {
-        let current = d3.select(this);
-        let parent = d3.select(this.parentNode);
-        let id = parent.attr("id");
+        var current = d3.select(this);
+        var parent = d3.select(this.parentNode);
+        var id = parent.attr("id");
         resetListeners();
         document.getElementById("mySidebar").style.width = "250px";
         document.getElementById("main").style.marginLeft = "250px";
-        let rectInfo = document.getElementById("rectInfo");
-        let titleText = document.getElementById("titleText");
-        let contentText = document.getElementById("contentText");
-        let colorPicker = document.getElementById("colorPicker");
-        rectInfo.value = id;
+        document.getElementById('rectInfo').innerHTML = id;
+        var titleText = document.getElementById("titleText");
+        var contentText = document.getElementById("contentText");
+        var colorPicker = document.getElementById("colorPicker");
         titleText.value = parent.select("text.titleText").text();
         contentText.value = parent.select("text.contentText").text();
         colorPicker.value = current.attr("fill");
@@ -404,10 +403,9 @@ window.onload = () => {
     function closeNav() {
         document.getElementById("mySidebar").style.width = "0";
         document.getElementById("main").style.marginLeft = "0";
-        let rectInfo = document.getElementById("rectInfo");
-        let titleText = document.getElementById("titleText");
-        let contentText = document.getElementById("contentText");
-        rectInfo.value = "";
+        document.getElementById('rectInfo').innerHTML = "";
+        var titleText = document.getElementById("titleText");
+        var contentText = document.getElementById("contentText");
         titleText.value = "";
         contentText.value = "";
         svg.selectAll("rect")
@@ -424,60 +422,61 @@ window.onload = () => {
         }
     }
     function updateRectText(object) {
-        let id = document.getElementById('rectInfo').innerHTML;
+        var id = document.getElementById('rectInfo').innerHTML;
         svg.selectAll("g").each(function () {
-            let element = d3.select(this);
+            var element = d3.select(this);
             if (element.attr("id") == id) {
                 element.select("text." + object.id).html(object.value);
             }
         });
     }
     function updateRectColor(object) {
-        let id = document.getElementById('rectInfo').innerHTML;
+        var id = document.getElementById('rectInfo').innerHTML;
         svg.selectAll("g").each(function () {
-            let element = d3.select(this);
+            var element = d3.select(this);
             if (element.attr("id") == id) {
                 element.select("rect").attr("fill", object.value);
             }
         });
     }
     function uploadFile() {
-        let file_input = document.querySelector('[type=file]');
-        let files = file_input.files;
-        let formData = new FormData();
+        var file_input = document.querySelector('[type=file]');
+        var files = file_input.files;
+        var formData = new FormData();
         formData.append('file', files[0]);
-        let url = '/treeEditor';
+        var rectInfo = document.getElementById('rectInfo').innerHTML;
+        var url = '/treeEditor/files/upload?rectInfo=' + rectInfo;
         fetch(url, {
             method: 'POST',
             body: formData,
         })
-            .then(response => response.text())
-            .then(data => updateFileList(data));
+            .then(function (response) { return response.text(); })
+            .then(function (data) { return updateFileList(data); });
     }
     function updateFileList(filename) {
-        let file = document.getElementById("fileChooser");
-        let ul = document.getElementById("fileList");
-        let entries = d3.select("#fileList").selectAll("li");
-        let isDuplicate = false;
+        var file = document.getElementById("fileChooser");
+        var ul = document.getElementById("fileList");
+        var entries = d3.select("#fileList").selectAll("li");
+        var isDuplicate = false;
         entries.each(function () {
-            let str = this.textContent.slice(0, -1);
+            var str = this.textContent.slice(0, -1);
             if (str == file.files[0].name) {
                 isDuplicate = true;
             }
         });
         if (!isDuplicate) {
-            let li = document.createElement("li");
-            let span = document.createElement("span");
+            var li = document.createElement("li");
+            var span = document.createElement("span");
             li.appendChild(document.createTextNode(file.files[0].name));
             li.setAttribute("id", filename);
             span.setAttribute("class", "close");
             span.appendChild(document.createTextNode("x"));
             li.appendChild(span);
             ul.appendChild(li);
-            let btnList = document.getElementsByClassName("close");
-            for (let i = 0; i < btnList.length; i++) {
+            var btnList = document.getElementsByClassName("close");
+            for (var i = 0; i < btnList.length; i++) {
                 btnList[i].addEventListener("click", function (e) {
-                    let filename = this.parentElement.getAttribute("id");
+                    var filename = this.parentElement.getAttribute("id");
                     deleteFile(filename);
                     this.parentElement.remove();
                     e.stopPropagation();
@@ -489,19 +488,19 @@ window.onload = () => {
         }
     }
     function getUploadedFile(filename) {
-        let url = '/treeEditor/files' + '?filename=' + filename;
+        var url = '/treeEditor/files?filename=' + filename;
         fetch(url, {
             method: 'GET',
             credentials: 'include'
         })
-            .then(response => response.blob())
+            .then(function (response) { return response.blob(); })
             .then(function (blob) {
             url = URL.createObjectURL(blob);
             window.open(url);
         });
     }
     function deleteFile(filename) {
-        let url = '/treeEditor/files/delete' + '?filename=' + filename;
+        var url = '/treeEditor/files/delete?filename=' + filename;
         fetch(url, {
             method: 'POST'
         });
