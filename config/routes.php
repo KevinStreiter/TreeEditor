@@ -13,6 +13,10 @@ $app->get('/treeEditor', function ($request, $response, $args) {
     return $this->get(PhpRenderer::class)->render($response, "/home.html", $args);
 });
 
+$app->get('/treeEditor/project', function ($request, $response, $args) {
+    return $this->get(PhpRenderer::class)->render($response, "/project.html", $args);
+});
+
 $app->post('/treeEditor/files/upload', function($request, $response) {
     $directory = $this->get('upload_directory');
     $uploadedFiles = $request->getUploadedFiles();
