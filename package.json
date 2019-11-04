@@ -10,6 +10,8 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^12.11.2",
+    "babelify": "^10.0.0",
+    "esmify": "^2.1.1",
     "typescript": "^3.6.2"
   },
   "dependencies": {
