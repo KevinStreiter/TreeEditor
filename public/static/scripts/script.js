@@ -513,11 +513,15 @@ window.onload = () => {
         });
     }
     function saveProject() {
-        let formData = new FormData();
-        let node = document.getElementById("graph");
-        let json = toJSON(node);
-        console.log(json);
-        let dom = toDOM(json);
-        console.log(dom);
+        let projectName = document.getElementById("projectTitle").innerHTML;
+        let url = '/treeEditor/save?projectName=' + projectName;
+        let nodes = document.getElementById("graph");
+        let nodes_json = JSON.stringify(toJSON(nodes));
+        console.log(nodes_json);
+        fetch(url, {
+            method: 'POST',
+            body: nodes_json
+        })
+            .then(response => console.log(response.text()));
     }
 };

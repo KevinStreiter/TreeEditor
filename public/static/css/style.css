@@ -33,7 +33,7 @@ body {
     padding-top: 102px;
 }
 
-#title {
+#title, #projectTitle {
     padding: 5px 250px;
 }
 

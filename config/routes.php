@@ -57,4 +57,5 @@ $app->post('/treeEditor/files/delete', function (Request $request) {
     unlink($directory . DIRECTORY_SEPARATOR . $filename);
 });
 
+$app->post('/treeEditor/save', \App\Controllers\DBController::class);
 

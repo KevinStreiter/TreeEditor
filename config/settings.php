@@ -6,6 +6,7 @@ $settings = [];
 
 // Slim settings
 $settings['displayErrorDetails'] = true;
+$settings['debug'] = true;
 
 // Path settings
 $settings['root'] = dirname(__DIR__);
