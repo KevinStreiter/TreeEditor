@@ -8,17 +8,28 @@ CREATE TABLE Projects (
 ) ENGINE=INNODB;
 
 CREATE TABLE Nodes (
-    node_id INT NOT NULL,
+    id INT,
+    node_id VARCHAR(128) NOT NULL,
     project_id INT NOT NULL,
-    rect JSON NOT NULL,
-    FOREIGN KEY (node_id)
+    element JSON NOT NULL,
+    PRIMARY KEY (node_id),
+    FOREIGN KEY (id)
         REFERENCES Projects(project_id)
         ON DELETE CASCADE
 )ENGINE=INNODB;
 
+CREATE TABLE Rects (
+    rect_id VARCHAR(128),
+    node_id VARCHAR(128) NOT NULL,
+    element JSON NOT NULL,
+    FOREIGN KEY (rect_id)
+       REFERENCES Nodes(node_id)
+       ON DELETE CASCADE
+)ENGINE=INNODB;
+
 CREATE TABLE Texts (
-     text_id INT NOT NULL AUTO_INCREMENT,
-     node_id INT NOT NULL,
+     text_id VARCHAR(128),
+     node_id VARCHAR(128) NOT NULL,
      element JSON NOT NULL,
      FOREIGN KEY (text_id)
          REFERENCES Nodes(node_id)
@@ -27,8 +38,8 @@ CREATE TABLE Texts (
 
 
 CREATE TABLE Circles (
-    circle_id INT NOT NULL AUTO_INCREMENT,
-    node_id INT NOT NULL,
+    circle_id VARCHAR(128),
+    node_id VARCHAR(128) NOT NULL,
     element JSON NOT NULL,
     FOREIGN KEY (circle_id)
         REFERENCES Nodes(node_id)
@@ -36,8 +47,8 @@ CREATE TABLE Circles (
 )ENGINE=INNODB;
 
 CREATE TABLE Connectors (
-    connector_id INT NOT NULL AUTO_INCREMENT,
-    node_id INT NOT NULL,
+    connector_id VARCHAR(128),
+    node_id VARCHAR(128) NOT NULL,
     element JSON NOT NULL,
     FOREIGN KEY (connector_id)
         REFERENCES Nodes(node_id)

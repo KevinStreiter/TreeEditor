@@ -21,48 +21,45 @@ class DBController
         $nodes = $svg["childNodes"];
         $projectName = $request->getParam('projectName');
         $this->saveData($nodes, $connection, $projectName);
+        #return $response->withJson($id);
     }
 
     function saveData($data, $connection, $projectName) {
         $project = ['name' => $projectName];
         $connection->insert('Projects', $project);
         $project = $this->getRecentProjectID($connection);
-        $node_data = [];
-        $circle_data = [];
-        $connector_data = [];
-        $text_data = [];
+        $element_data = [];
         foreach($data as $node) {
-            if ($node['nodeType'] == 1) {
+            if ((int)$node['nodeType'] == 1) {
                 $attributes = $node['attributes'];
-                $node_data = ['node_id' => $attributes, 'project_id' => $project['project_id']];
-                $circle_data = ['node_id' => $attributes];
-                $connector_data = $circle_data;
-                $text_data = $circle_data;
+                $node_data = ['node_id' => $project['MAX(project_id)'] . '_' . $attributes[0][1], 'project_id' => (int)$project['MAX(project_id)'],
+                    'element' => json_encode($node)];
+                $connection->insert('Nodes', $node_data);
+                $element_data = ['node_id' =>  $project['MAX(project_id)'] . '_' . $attributes[0][1]];
 
-                foreach($node as $child) {
-
-                    if($child['tagName'] == 'rect') {
-                        $node_data['rect'] = json_encode($child);
+                foreach($node['childNodes'] as $child) {
+                    if ($child['tagName'] == "rect") {
+                        $element_data['element'] = json_encode($child);
+                        $connection->insert('Rects', $element_data);
                     }
 
                     elseif ($child['tagName'] == 'text') {
-                        $text_data['element'] = json_encode($child);
+                        $element_data['element'] = json_encode($child);
+                        $connection->insert('Texts', $element_data);
                     }
 
                     elseif ($child['tagName'] == 'circle') {
-                        $circle_data['element'] = json_encode($child);
+                        $element_data['element'] = json_encode($child);
+                        $connection->insert('Circles', $element_data);
                     }
 
                     elseif ($child['tagName'] == 'line') {
-                        $connector_data['element'] = json_encode($child);
+                        $element_data['element'] = json_encode($child);
+                        $connection->insert('Connectors', $element_data);
                     }
                 }
-                $connection->insert('Nodes', $node_data);
             }
-
         }
-
-
     }
 
 

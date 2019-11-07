@@ -18532,7 +18532,7 @@ window.onload = () => {
     let deltaYBorder;
     let width;
     let height;
-    let rectCounter = 0;
+    let rectCounter = 1;
     d3.select("#titleText").on("input", function () {
         updateRectText(this);
     });
