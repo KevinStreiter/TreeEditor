@@ -19020,16 +19020,23 @@ window.onload = () => {
         });
     }
     function saveProject() {
-        let projectName = document.getElementById("projectTitle").innerHTML;
-        let url = '/treeEditor/save?projectName=' + projectName;
+        let project = document.getElementById("projectTitle");
+        let projectName = project.innerHTML;
+        let projectID = project.className;
+        let url = '/treeEditor/save?projectName=' + projectName + '&projectID=' + projectID;
         let nodes = document.getElementById("graph");
         let nodes_json = JSON.stringify(toJSON(nodes));
-        console.log(nodes_json);
         fetch(url, {
             method: 'POST',
             body: nodes_json
         })
-            .then(response => console.log(response.text()));
+            .then(response => response.json())
+            .then(data => saveProjectID(data));
+    }
+    function saveProjectID(projectID) {
+        console.log(projectID);
+        let projectTitle = document.getElementById("projectTitle");
+        projectTitle.setAttribute("class", projectID);
     }
 };
 

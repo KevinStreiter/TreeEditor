@@ -58,4 +58,3 @@ $app->post('/treeEditor/files/delete', function (Request $request) {
 });
 
 $app->post('/treeEditor/save', \App\Controllers\DBController::class);
-

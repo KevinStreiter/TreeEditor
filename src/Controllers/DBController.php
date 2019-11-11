@@ -3,7 +3,6 @@
 namespace App\Controllers;
 
 use Cake\Database\Connection;
-use Slim\Views\PhpRenderer as PhpRenderer;
 
 class DBController
 {
@@ -14,28 +13,51 @@ class DBController
     }
 
     function __invoke($request, $response, $args) {
-        $renderer = $this->container->get(PhpRenderer::class);
         $connection = $this->container->get(Connection::class);
+
         $nodes = $request->getBody();
         $svg = json_decode($nodes, true);
         $nodes = $svg["childNodes"];
         $projectName = $request->getParam('projectName');
-        $this->saveData($nodes, $connection, $projectName);
-        #return $response->withJson($id);
+        $projectID = $request->getParam('projectID');
+        if (is_numeric($projectID)) {
+            $this->updateProject($connection, $projectName, $projectID);
+            $this->updateNodes($nodes, $connection, $projectID);
+            return $response->withJson($projectID);
+        }
+        else {
+            $this->saveProject($connection, $projectName);
+            $projectID = $this->getRecentProjectID($connection);
+            $this->saveNodes($nodes, $projectID, $connection);
+            return $response->withJson($projectID);
+        }
     }
 
-    function saveData($data, $connection, $projectName) {
+    function saveProject($connection, $projectName) {
         $project = ['name' => $projectName];
         $connection->insert('Projects', $project);
-        $project = $this->getRecentProjectID($connection);
+    }
+
+    function updateProject($connection, $projectName, $projectID) {
+        $connection->query("UPDATE Projects SET name = '{$projectName}' WHERE project_id = $projectID");
+    }
+
+    function getRecentProjectID($connection) {
+        $query = $connection->newQuery();
+        $query = $query->select('MAX(project_id)')->from('Projects');
+        $row = $query->execute()->fetch('assoc') ?: [];
+        return $row['MAX(project_id)'];
+    }
+
+    function saveNodes($data, $projectID, $connection) {
         $element_data = [];
         foreach($data as $node) {
             if ((int)$node['nodeType'] == 1) {
                 $attributes = $node['attributes'];
-                $node_data = ['node_id' => $project['MAX(project_id)'] . '_' . $attributes[0][1], 'project_id' => (int)$project['MAX(project_id)'],
+                $node_data = ['node_id' => $projectID . '_' . $attributes[0][1], 'project_id' => $projectID,
                     'element' => json_encode($node)];
                 $connection->insert('Nodes', $node_data);
-                $element_data = ['node_id' =>  $project['MAX(project_id)'] . '_' . $attributes[0][1]];
+                $element_data = ['node_id' =>  $projectID . '_' . $attributes[0][1]];
 
                 foreach($node['childNodes'] as $child) {
                     if ($child['tagName'] == "rect") {
@@ -62,27 +84,8 @@ class DBController
         }
     }
 
-
-    function getRecentProjectID($connection) {
-        $query = $connection->newQuery();
-        $query = $query->select('MAX(project_id)')->from('Projects');
-        $row = $query->execute()->fetch('assoc') ?: [];
-        return $row;
+    function updateNodes($data, $connection, $projectID) {
+        $connection->query("DELETE FROM Nodes WHERE project_id=$projectID");
+        $this->saveNodes($data, $projectID, $connection);
     }
-
-    function insertUser($user,$connection) {
-        $data = ['Username' => $user->getUsername(), 'Password' => $user->getPassword()];
-        if (!empty($this->getUser($user->getUsername(), $connection))) {
-            $message = $user->getUsername() . " already exists";
-        }
-        elseif ($data['Username'] !== '' and $data['Password'] !== '') {
-            $connection->insert('Users', $data);
-            $message = $user->getUsername() . " has been registered";
-        }
-        else {
-            $message = "Please fill in the mandatory blanks";
-        }
-        echo "<script type='text/javascript'>alert('$message');</script>";
-    }
-
 }
