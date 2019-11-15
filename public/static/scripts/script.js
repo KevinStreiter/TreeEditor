@@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
+document.addEventListener('DOMContentLoaded', function () {
+    loadProject();
+}, false);
 window.onload = () => {
     window.onscroll = function () {
         //stickyHeader()
@@ -520,7 +523,6 @@ window.onload = () => {
         let entries = d3.select("#fileList").selectAll("li");
         entries.each(function () {
             let li = d3.select(this);
-            console.log(li.attr("id").slice(0, 1));
             if (li.attr("id").slice(0, 1) == id) {
                 li.style("display", 'inherit');
             }
@@ -547,8 +549,34 @@ window.onload = () => {
             .then(data => saveProjectID(data));
     }
     function saveProjectID(projectID) {
-        console.log(projectID);
         let projectTitle = document.getElementById("projectTitle");
         projectTitle.setAttribute("class", projectID);
     }
 };
+function updateProjectNodes(data) {
+    let svg = document.getElementById("graph");
+    for (let element of data) {
+        svg.appendChild(toDOM(element["element"]));
+    }
+}
+function getProjectNodes(id) {
+    let url = '/treeEditor/nodes?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectNodes(data));
+}
+function loadProject() {
+    let urlParams = new URLSearchParams(window.location.search);
+    let id = urlParams.get('id');
+    let name = urlParams.get('name');
+    if (id != null && name != null) {
+        updateProjectName(name);
+        getProjectNodes(id);
+    }
+}
+function updateProjectName(name) {
+    let projectTitle = document.getElementById("projectTitle");
+    projectTitle.innerText = name;
+}

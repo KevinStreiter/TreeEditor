@@ -191,4 +191,10 @@ ul li:hover {
     top:1px;
 }
 
+.table {
+    position:absolute;
+    height:90%;
+    width:95%;
+    padding: 5% 5%;
+}
 

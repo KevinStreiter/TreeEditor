@@ -3,10 +3,10 @@
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Http\Stream;
-use Slim\Views\PhpRenderer as PhpRenderer;
+use Slim\Views\PhpRenderer;
 use Slim\Http\UploadedFile;
 use Cake\Database\Connection;
-use Slim\Container;
+
 
 
 $app->get('/treeEditor', function ($request, $response, $args) {
@@ -15,6 +15,21 @@ $app->get('/treeEditor', function ($request, $response, $args) {
 
 $app->get('/treeEditor/project', function ($request, $response, $args) {
     return $this->get(PhpRenderer::class)->render($response, "/project.html", $args);
+});
+
+$app->get('/treeEditor/projects', function ($request, $response, $args) {
+    $query = $this->get(Connection::class)->newQuery();
+    $query = $query->select('*')->from('Projects');
+    $rows = $query->execute()->fetchAll('assoc') ?: [];
+    return $response->withJson($rows);
+});
+
+$app->get('/treeEditor/nodes', function ($request, $response, $args) {
+    $id = $request->getParam('id');
+    $query = $this->get(Connection::class)->newQuery();
+    $query = $query->select('*')->from('Nodes')->andWhere(['project_id' => $id]);;
+    $rows = $query->execute()->fetchAll('assoc') ?: [];
+    return $response->withJson($rows);
 });
 
 $app->post('/treeEditor/files/upload', function($request, $response) {
@@ -57,4 +72,6 @@ $app->post('/treeEditor/files/delete', function (Request $request) {
     unlink($directory . DIRECTORY_SEPARATOR . $filename);
 });
 
-$app->post('/treeEditor/save', \App\Controllers\DBController::class);
+$app->post('/treeEditor/save', \App\Controllers\SaveController::class);
+
+
