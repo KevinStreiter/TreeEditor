@@ -49,3 +49,11 @@ CREATE TABLE Connectors (
         REFERENCES Nodes(node_id)
         ON DELETE CASCADE
 )ENGINE=INNODB;
+
+CREATE TABLE Files (
+    node_id VARCHAR(128) NOT NULL,
+    element JSON NOT NULL,
+    FOREIGN KEY (node_id)
+        REFERENCES Nodes(node_id)
+        ON DELETE CASCADE
+)ENGINE=INNODB;

@@ -18908,6 +18908,7 @@ window.onload = () => {
         titleText.value = parent.select("text.titleText").text();
         contentText.value = parent.select("text.contentText").text();
         colorPicker.value = current.attr("fill");
+        listFiles(id);
         svg.selectAll("rect")
             .style("stroke", "#7b9eb4");
         d3.select(this)
@@ -18965,7 +18966,10 @@ window.onload = () => {
             body: formData,
         })
             .then(response => response.text())
-            .then(data => updateFileList(data));
+            .then(function (data) {
+            updateFileList(data);
+            saveProject();
+        });
     }
     function updateFileList(filename) {
         let file = document.getElementById("fileChooser");
@@ -19019,16 +19023,32 @@ window.onload = () => {
             method: 'POST'
         });
     }
+    function listFiles(id) {
+        let entries = d3.select("#fileList").selectAll("li");
+        entries.each(function () {
+            let li = d3.select(this);
+            console.log(li.attr("id").slice(0, 1));
+            if (li.attr("id").slice(0, 1) == id) {
+                li.style("display", 'inherit');
+            }
+            else {
+                li.style("display", 'none');
+            }
+        });
+    }
     function saveProject() {
         let project = document.getElementById("projectTitle");
         let projectName = project.innerHTML;
         let projectID = project.className;
         let url = '/treeEditor/save?projectName=' + projectName + '&projectID=' + projectID;
         let nodes = document.getElementById("graph");
-        let nodes_json = JSON.stringify(toJSON(nodes));
+        let nodes_json = toJSON(nodes);
+        let files = document.getElementById("fileList");
+        let files_json = toJSON(files);
+        let data = JSON.stringify({ nodes: nodes_json, files: files_json });
         fetch(url, {
             method: 'POST',
-            body: nodes_json
+            body: data
         })
             .then(response => response.json())
             .then(data => saveProjectID(data));

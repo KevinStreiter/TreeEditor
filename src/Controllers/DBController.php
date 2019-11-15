@@ -14,21 +14,23 @@ class DBController
 
     function __invoke($request, $response, $args) {
         $connection = $this->container->get(Connection::class);
-
         $nodes = $request->getBody();
-        $svg = json_decode($nodes, true);
-        $nodes = $svg["childNodes"];
+        $data = json_decode($nodes, true);
+        $nodes = $data["nodes"]["childNodes"];
+        $files = $data["files"]["childNodes"];
         $projectName = $request->getParam('projectName');
         $projectID = $request->getParam('projectID');
         if (is_numeric($projectID)) {
             $this->updateProject($connection, $projectName, $projectID);
             $this->updateNodes($nodes, $connection, $projectID);
+            $this->saveFiles($files, $connection, $projectID);
             return $response->withJson($projectID);
         }
         else {
             $this->saveProject($connection, $projectName);
             $projectID = $this->getRecentProjectID($connection);
             $this->saveNodes($nodes, $projectID, $connection);
+            $this->saveFiles($nodes, $projectID, $connection);
             return $response->withJson($projectID);
         }
     }
@@ -87,5 +89,18 @@ class DBController
     function updateNodes($data, $connection, $projectID) {
         $connection->query("DELETE FROM Nodes WHERE project_id=$projectID");
         $this->saveNodes($data, $projectID, $connection);
+    }
+
+    function saveFiles($data, $connection, $projectID) {
+
+        foreach($data as $file) {
+            if ($file['tagName'] == "li") {
+                $id = $file["attributes"][0][1];
+                $id = substr($id, 0, 1);
+                $element_data = ['node_id' =>  $projectID . '_' . $id];
+                $element_data['element'] = json_encode($file);
+                $connection->insert('Files', $element_data);
+            }
+        }
     }
 }
