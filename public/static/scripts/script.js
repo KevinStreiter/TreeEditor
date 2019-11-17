@@ -3,32 +3,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
+let g;
+let rect;
+let title;
+let content;
+let circleTop;
+let circleBottom;
+let circleBottomRight;
+let circleLeft;
+let circleRight;
+let line;
+let deltaX;
+let deltaY;
+let deltaXBorder;
+let deltaYBorder;
+let width;
+let height;
+let rectCounter = 1;
 document.addEventListener('DOMContentLoaded', function () {
     loadProject();
 }, false);
 window.onload = () => {
-    window.onscroll = function () {
-        //stickyHeader()
-    };
-    let header = document.getElementById("myHeader");
-    let sticky = header.offsetTop;
-    let g;
-    let rect;
-    let title;
-    let content;
-    let circleTop;
-    let circleBottom;
-    let circleBottomRight;
-    let circleLeft;
-    let circleRight;
-    let line;
-    let deltaX;
-    let deltaY;
-    let deltaXBorder;
-    let deltaYBorder;
-    let width;
-    let height;
-    let rectCounter = 1;
     d3.select("#titleText").on("input", function () {
         updateRectText(this);
     });
@@ -424,14 +419,6 @@ window.onload = () => {
         d3.select(this)
             .on("dblclick", openNav);
     }
-    function stickyHeader() {
-        if (window.pageYOffset > sticky) {
-            header.classList.add("sticky");
-        }
-        else {
-            header.classList.remove("sticky");
-        }
-    }
     function updateRectText(object) {
         let id = document.getElementById('rectInfo').innerHTML;
         svg.selectAll("g").each(function () {
@@ -556,10 +543,12 @@ window.onload = () => {
 function updateProjectNodes(data) {
     let svg = document.getElementById("graph");
     for (let element of data) {
+        rectCounter = Number(element["node_id"].slice(-1));
         let node = toDOM(element["element"]);
         svg.appendChild(document.importNode(new DOMParser()
             .parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + node.outerHTML + '</svg>', 'application/xml').documentElement.firstChild, true));
     }
+    rectCounter += 1;
 }
 function getProjectNodes(id) {
     let url = '/treeEditor/nodes?id=' + id;
