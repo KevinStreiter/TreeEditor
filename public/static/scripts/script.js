@@ -556,7 +556,9 @@ window.onload = () => {
 function updateProjectNodes(data) {
     let svg = document.getElementById("graph");
     for (let element of data) {
-        svg.appendChild(toDOM(element["element"]));
+        let node = toDOM(element["element"]);
+        svg.appendChild(document.importNode(new DOMParser()
+            .parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + node.outerHTML + '</svg>', 'application/xml').documentElement.firstChild, true));
     }
 }
 function getProjectNodes(id) {

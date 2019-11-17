@@ -3,7 +3,6 @@ module.exports = function toDOM(obj) {
         obj = JSON.parse(obj);
     }
     var node, nodeType = obj.nodeType;
-    console.log(nodeType);
     switch (nodeType) {
         case 1: //ELEMENT_NODE
             node = document.createElement(obj.tagName);
