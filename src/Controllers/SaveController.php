@@ -57,30 +57,12 @@ class SaveController
 
     function saveNodes($data, $projectID, $connection)
     {
-        $element_data = [];
         foreach ($data as $node) {
             if ((int)$node['nodeType'] == 1) {
                 $attributes = $node['attributes'];
                 $node_data = ['node_id' => $projectID . '_' . $attributes[0][1], 'project_id' => $projectID,
                     'element' => json_encode($node)];
                 $connection->insert('Nodes', $node_data);
-                $element_data = ['node_id' => $projectID . '_' . $attributes[0][1]];
-
-                foreach ($node['childNodes'] as $child) {
-                    if ($child['tagName'] == "rect") {
-                        $element_data['element'] = json_encode($child);
-                        $connection->insert('Rects', $element_data);
-                    } elseif ($child['tagName'] == 'text') {
-                        $element_data['element'] = json_encode($child);
-                        $connection->insert('Texts', $element_data);
-                    } elseif ($child['tagName'] == 'circle') {
-                        $element_data['element'] = json_encode($child);
-                        $connection->insert('Circles', $element_data);
-                    } elseif ($child['tagName'] == 'line') {
-                        $element_data['element'] = json_encode($child);
-                        $connection->insert('Connectors', $element_data);
-                    }
-                }
             }
         }
     }
@@ -88,17 +70,15 @@ class SaveController
     function updateNodes($data, $connection, $projectID)
     {
         $connection->query("DELETE FROM Nodes WHERE project_id=$projectID");
+        $connection->query("DELETE FROM Files WHERE project_id=$projectID");
         $this->saveNodes($data, $projectID, $connection);
     }
 
     function saveFiles($data, $connection, $projectID)
     {
-
         foreach ($data as $file) {
             if ($file['tagName'] == "li") {
-                $id = $file["attributes"][0][1];
-                $id = substr($id, 0, 1);
-                $element_data = ['node_id' => $projectID . '_' . $id];
+                $element_data = ['project_id' => $projectID];
                 $element_data['element'] = json_encode($file);
                 $connection->insert('Files', $element_data);
             }

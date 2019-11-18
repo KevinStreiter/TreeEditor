@@ -20,10 +20,8 @@ let deltaYBorder;
 let width;
 let height;
 let rectCounter = 1;
-document.addEventListener('DOMContentLoaded', function () {
-    loadProject();
-}, false);
 window.onload = () => {
+    loadProject();
     d3.select("#titleText").on("input", function () {
         updateRectText(this);
     });
@@ -66,17 +64,8 @@ window.onload = () => {
             .attr("fill", "#aaa9ad")
             .style("stroke-width", 5)
             .style("stroke", "#7b9eb4")
-            .attr("class", "rect")
-            .on("mouseover", function () {
-            d3.select(this)
-                .style("cursor", "grabbing");
-        })
-            .on("mouseout", function () {
-            d3.select(this)
-                .style("cursor", "default");
-        })
-            .on("dblclick", openNav)
-            .call(dragRect);
+            .attr("class", "rect");
+        initializeRectListeners();
         circleTop = g.append("circle")
             .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
             .attr("cy", +rect.attr("y"))
@@ -106,30 +95,49 @@ window.onload = () => {
             .attr("cy", (+rect.attr("y") + (+rect.attr("height"))))
             .attr("r", 4)
             .attr("id", "circleBottomRight" + rectCounter)
-            .attr("fill", "#7b9eb4")
-            .on("mouseover", function () {
+            .attr("fill", "#7b9eb4");
+        initializeCircleListeners();
+        svg.on("mousemove", mouseMove);
+        rectCounter++;
+    }
+    function initializeRectListeners() {
+        let rect = d3.selectAll("rect");
+        rect.on("mouseover", function () {
             d3.select(this)
-                .style("cursor", "se-resize");
+                .style("cursor", "grabbing");
         })
             .on("mouseout", function () {
             d3.select(this)
                 .style("cursor", "default");
         })
-            .call(dragBorder);
-        d3.selectAll(`#circleRight${rectCounter}, #circleLeft${rectCounter}, #circleTop${rectCounter}, #circleBottom${rectCounter}`)
-            .on('mouseover', function () {
-            d3.select(this)
-                .attr("r", 10)
-                .style("cursor", "crosshair");
-        })
-            .on('mouseout', function () {
-            d3.select(this)
-                .attr("r", 5)
-                .style("cursor", "crosshair");
-        })
-            .on("click", drawLine);
-        svg.on("mousemove", mouseMove);
-        rectCounter++;
+            .on("dblclick", openNav)
+            .call(dragRect);
+    }
+    function initializeCircleListeners() {
+        for (let i = 1; i <= rectCounter; i++) {
+            d3.select(`#circleBottomRight${i}`)
+                .on("mouseover", function () {
+                d3.select(this)
+                    .style("cursor", "se-resize");
+            })
+                .on("mouseout", function () {
+                d3.select(this)
+                    .style("cursor", "default");
+            })
+                .call(dragBorder);
+            d3.selectAll(`#circleRight${i}, #circleLeft${i}, #circleTop${i}, #circleBottom${i}`)
+                .on('mouseover', function () {
+                d3.select(this)
+                    .attr("r", 10)
+                    .style("cursor", "crosshair");
+            })
+                .on('mouseout', function () {
+                d3.select(this)
+                    .attr("r", 5)
+                    .style("cursor", "crosshair");
+            })
+                .on("click", drawLine);
+        }
     }
     function mouseMove() {
         let event = d3.mouse(this);
@@ -483,7 +491,7 @@ window.onload = () => {
                     e.stopPropagation();
                 });
             }
-            li.addEventListener("click", function (event) {
+            li.addEventListener("click", function () {
                 getUploadedFile(filename);
             });
         }
@@ -539,35 +547,60 @@ window.onload = () => {
         let projectTitle = document.getElementById("projectTitle");
         projectTitle.setAttribute("class", projectID);
     }
+    function updateProjectNodes(data) {
+        let svg = document.getElementById("graph");
+        for (let element of data) {
+            rectCounter = Number(element["node_id"].slice(-1));
+            let node = toDOM(element["element"]);
+            svg.appendChild(document.importNode(new DOMParser()
+                .parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + node.outerHTML + '</svg>', 'application/xml').documentElement.firstChild, true));
+        }
+        rectCounter += 1;
+        initializeRectListeners();
+        initializeCircleListeners();
+    }
+    function getProjectNodes(id) {
+        let url = '/treeEditor/nodes?id=' + id;
+        fetch(url, {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(data => updateProjectNodes(data));
+    }
+    function updateProjectFiles(data) {
+        let nav = document.getElementById("fileList");
+        for (let element of data) {
+            let node = toDOM(element["element"]);
+            nav.appendChild(document.importNode(node, true));
+        }
+        let items = nav.getElementsByTagName("li");
+        for (let i = items.length; i--;) {
+            items[i].addEventListener("click", function () {
+                getUploadedFile(items[i].getAttribute("id"));
+            });
+        }
+    }
+    function getProjectFiles(id) {
+        let url = '/treeEditor/projectFiles?id=' + id;
+        fetch(url, {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(data => updateProjectFiles(data));
+    }
+    function loadProject() {
+        let urlParams = new URLSearchParams(window.location.search);
+        let id = urlParams.get('id');
+        let name = urlParams.get('name');
+        if (id != null && name != null) {
+            updateProjectName(name, id);
+            getProjectFiles(id);
+            getProjectNodes(id);
+        }
+    }
+    function updateProjectName(name, id) {
+        let projectTitle = document.getElementById("projectTitle");
+        projectTitle.innerText = name;
+        projectTitle.setAttribute("class", id);
+    }
 };
-function updateProjectNodes(data) {
-    let svg = document.getElementById("graph");
-    for (let element of data) {
-        rectCounter = Number(element["node_id"].slice(-1));
-        let node = toDOM(element["element"]);
-        svg.appendChild(document.importNode(new DOMParser()
-            .parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + node.outerHTML + '</svg>', 'application/xml').documentElement.firstChild, true));
-    }
-    rectCounter += 1;
-}
-function getProjectNodes(id) {
-    let url = '/treeEditor/nodes?id=' + id;
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => updateProjectNodes(data));
-}
-function loadProject() {
-    let urlParams = new URLSearchParams(window.location.search);
-    let id = urlParams.get('id');
-    let name = urlParams.get('name');
-    if (id != null && name != null) {
-        updateProjectName(name);
-        getProjectNodes(id);
-    }
-}
-function updateProjectName(name) {
-    let projectTitle = document.getElementById("projectTitle");
-    projectTitle.innerText = name;
-}

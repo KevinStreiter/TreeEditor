@@ -32,6 +32,14 @@ $app->get('/treeEditor/nodes', function ($request, $response, $args) {
     return $response->withJson($rows);
 });
 
+$app->get('/treeEditor/projectFiles', function ($request, $response, $args) {
+    $id = $request->getParam('id');
+    $query = $this->get(Connection::class)->newQuery();
+    $query = $query->select('*')->from('Files')->andWhere(['project_id' => $id]);;
+    $rows = $query->execute()->fetchAll('assoc') ?: [];
+    return $response->withJson($rows);
+});
+
 $app->post('/treeEditor/files/upload', function($request, $response) {
     $directory = $this->get('upload_directory');
     $uploadedFiles = $request->getUploadedFiles();
