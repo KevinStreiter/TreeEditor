@@ -6,13 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="../static/scripts/projects.js"></script>
     <link rel="stylesheet" href="../static/css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
 <div class="header" id="myHeader">
-    <h1 id="title">Projects</h1>
     <div id="controls">
-        <a href="/treeEditor/project" id="newButton" class="Button">new</a>
+        <h1 id="projectTitle" >Projects</h1>
+        <a href="/treeEditor/project" id="newButton" class="Button"><i class="fa fa-plus-square"></i></a>
+
+        <div id="popup">Project has been saved</div>
+
     </div>
+</div>
 
 </div>
 <div id="main">
@@ -20,6 +25,8 @@
         <ul id="projects">
         </ul>
     </div>
+    <svg id="graph">
+    </svg>
 </div>
 </body>
 </html>

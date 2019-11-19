@@ -1,8 +1,9 @@
 {
-  "name": "quickentry",
+  "name": "treeeditor",
   "version": "1.0.0",
-  "description": "Just a standard web-application to get used to the technology",
-  "main": "test.js",
+  "description": "Tree-Editor",
+  "main": "bundle.js",
+  "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,11 +11,6 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^12.11.2",
-    "babelify": "^10.0.0",
-    "esmify": "^2.1.1",
     "typescript": "^3.6.2"
-  },
-  "dependencies": {
-    "brfs": "^2.0.2"
   }
 }

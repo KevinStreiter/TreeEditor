@@ -21,7 +21,23 @@ let width;
 let height;
 let rectCounter = 1;
 window.onload = () => {
+    window.onscroll = function () {
+        stickyHeader();
+    };
+    function stickyHeader() {
+        let header = document.getElementById("myHeader");
+        let sticky = header.offsetTop;
+        if (window.pageYOffset > sticky) {
+            header.classList.add("sticky");
+        }
+        else {
+            header.classList.remove("sticky");
+        }
+    }
     loadProject();
+    d3.select(".closebtn").on("click", function () {
+        closeNav();
+    });
     d3.select("#titleText").on("input", function () {
         updateRectText(this);
     });
@@ -399,7 +415,6 @@ window.onload = () => {
         let id = parent.attr("id");
         resetListeners();
         document.getElementById("mySidebar").style.width = "250px";
-        document.getElementById("main").style.marginLeft = "250px";
         document.getElementById('rectInfo').innerHTML = id;
         let titleText = document.getElementById("titleText");
         let contentText = document.getElementById("contentText");
@@ -416,7 +431,6 @@ window.onload = () => {
     }
     function closeNav() {
         document.getElementById("mySidebar").style.width = "0";
-        document.getElementById("main").style.marginLeft = "0";
         document.getElementById('rectInfo').innerHTML = "";
         let titleText = document.getElementById("titleText");
         let contentText = document.getElementById("contentText");
@@ -424,8 +438,7 @@ window.onload = () => {
         contentText.value = "";
         svg.selectAll("rect")
             .style("stroke", "#7b9eb4");
-        d3.select(this)
-            .on("dblclick", openNav);
+        resetListeners();
     }
     function updateRectText(object) {
         let id = document.getElementById('rectInfo').innerHTML;
@@ -546,6 +559,15 @@ window.onload = () => {
     function saveProjectID(projectID) {
         let projectTitle = document.getElementById("projectTitle");
         projectTitle.setAttribute("class", projectID);
+        showSavePopup();
+    }
+    function showSavePopup() {
+        let popup = document.getElementById("popup");
+        popup.style.opacity = '50%';
+        popup.style.display = "block";
+        setTimeout(function () {
+            popup.style.opacity = '0';
+        }, 2000);
     }
     function updateProjectNodes(data) {
         let svg = document.getElementById("graph");

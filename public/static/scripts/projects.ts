@@ -1,5 +1,9 @@
 window.onload = () => {
-    getProjects()
+    getProjects();
+
+    window.onscroll = function() {
+        stickyHeader()
+    };
 };
 
 function getProjects() {
@@ -31,4 +35,13 @@ function openProject(id, name) {
     window.location.href = "/treeEditor/project?id=" + id + "&name=" + name;
 }
 
+function stickyHeader() {
+    let header = document.getElementById("myHeader");
+    let sticky = header.offsetTop;
+    if (window.pageYOffset > sticky) {
+        header.classList.add("sticky");
+    } else {
+        header.classList.remove("sticky");
+    }
+}
 
