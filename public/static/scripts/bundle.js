@@ -1,4 +1,58 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const d3 = require("./modules/d3");
+let target;
+function showMenu(x, y) {
+    let menu = document.querySelector('.menu');
+    if (target.tagName == "rect" || target.tagName == "line") {
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+        menu.classList.add('show-menu');
+    }
+    else {
+        menu.classList.remove('show-menu');
+    }
+}
+function hideMenu() {
+    let menu = document.querySelector('.menu');
+    menu.classList.remove('show-menu');
+}
+function onContextMenu(e) {
+    e.preventDefault();
+    target = e.target;
+    showMenu(e.pageX, e.pageY);
+    document.addEventListener('click', onClick, false);
+}
+function onClick(e) {
+    if (e.target.innerText == "Delete" || e.target.parentNode.innerText == "Delete") {
+        removeNode(target);
+    }
+    hideMenu();
+    document.removeEventListener('click', onClick);
+}
+document.addEventListener('contextmenu', onContextMenu, false);
+function removeNode(node) {
+    if (node.nodeName == "rect") {
+        d3.selectAll("g").each(function () {
+            let element = d3.select(this);
+            if (element.attr("id") == node.parentNode.id) {
+                element.remove();
+            }
+            element.selectAll("line").each(function () {
+                let line = d3.select(this);
+                if (line.attr("class").search(node.parentNode.id) != -1) {
+                    line.remove();
+                }
+            });
+        });
+    }
+    else if (node.nodeName == "line") {
+        target.remove();
+    }
+}
+
+},{"./modules/d3":2}],2:[function(require,module,exports){
 // https://d3js.org v5.12.0 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -18428,7 +18482,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 module.exports = function toDOM(obj) {
     if (typeof obj == 'string') {
         obj = JSON.parse(obj);
@@ -18469,7 +18523,7 @@ module.exports = function toDOM(obj) {
     }
     return node;
 };
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 module.exports = function toJSON(node) {
     node = node || this;
     var obj = {
@@ -18504,12 +18558,13 @@ module.exports = function toJSON(node) {
 };
 
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
+/// <reference path="menu.ts"/>
 let g;
 let rect;
 let title;
@@ -18573,55 +18628,57 @@ window.onload = () => {
         .on("start", dragStartBorder)
         .on("drag", dragMoveBorder);
     function mousedown() {
-        let event = d3.mouse(this);
-        g = svg.append("g")
-            .attr("id", rectCounter)
-            .call(dragRect);
-        rect = g.append("rect")
-            .attr("x", event[0] + 5)
-            .attr("y", event[1] + 5)
-            .attr("rx", 5)
-            .attr("ry", 5)
-            .attr('height', 0)
-            .attr('width', 0)
-            .attr("fill", "#aaa9ad")
-            .style("stroke-width", 5)
-            .style("stroke", "#7b9eb4")
-            .attr("class", "rect");
-        initializeRectListeners();
-        circleTop = g.append("circle")
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", +rect.attr("y"))
-            .attr("r", 5)
-            .attr("id", "circleTop" + rectCounter)
-            .attr("fill", "grey");
-        circleBottom = g.append("circle")
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", (+rect.attr("y") + +rect.attr("height")))
-            .attr("r", 5)
-            .attr("id", "circleBottom" + rectCounter)
-            .attr("fill", "grey");
-        circleLeft = g.append("circle")
-            .attr("cx", +rect.attr("x"))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
-            .attr("r", 5)
-            .attr("id", "circleLeft" + rectCounter)
-            .attr("fill", "grey");
-        circleRight = g.append("circle")
-            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
-            .attr("r", 5)
-            .attr("id", "circleRight" + rectCounter)
-            .attr("fill", "grey");
-        circleBottomRight = g.append("circle")
-            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height"))))
-            .attr("r", 4)
-            .attr("id", "circleBottomRight" + rectCounter)
-            .attr("fill", "#7b9eb4");
-        initializeCircleListeners();
-        svg.on("mousemove", mouseMove);
-        rectCounter++;
+        if (d3.event.button != 2) {
+            let event = d3.mouse(this);
+            g = svg.append("g")
+                .attr("id", rectCounter)
+                .call(dragRect);
+            rect = g.append("rect")
+                .attr("x", event[0] + 5)
+                .attr("y", event[1] + 5)
+                .attr("rx", 5)
+                .attr("ry", 5)
+                .attr('height', 0)
+                .attr('width', 0)
+                .attr("fill", "#aaa9ad")
+                .style("stroke-width", 5)
+                .style("stroke", "#7b9eb4")
+                .attr("class", "rect");
+            initializeRectListeners();
+            circleTop = g.append("circle")
+                .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
+                .attr("cy", +rect.attr("y"))
+                .attr("r", 5)
+                .attr("id", "circleTop" + rectCounter)
+                .attr("fill", "grey");
+            circleBottom = g.append("circle")
+                .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
+                .attr("cy", (+rect.attr("y") + +rect.attr("height")))
+                .attr("r", 5)
+                .attr("id", "circleBottom" + rectCounter)
+                .attr("fill", "grey");
+            circleLeft = g.append("circle")
+                .attr("cx", +rect.attr("x"))
+                .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
+                .attr("r", 5)
+                .attr("id", "circleLeft" + rectCounter)
+                .attr("fill", "grey");
+            circleRight = g.append("circle")
+                .attr("cx", (+rect.attr("x") + +rect.attr("width")))
+                .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
+                .attr("r", 5)
+                .attr("id", "circleRight" + rectCounter)
+                .attr("fill", "grey");
+            circleBottomRight = g.append("circle")
+                .attr("cx", (+rect.attr("x") + +rect.attr("width")))
+                .attr("cy", (+rect.attr("y") + (+rect.attr("height"))))
+                .attr("r", 4)
+                .attr("id", "circleBottomRight" + rectCounter)
+                .attr("fill", "#7b9eb4");
+            initializeCircleListeners();
+            svg.on("mousemove", mouseMove);
+            rectCounter++;
+        }
     }
     function initializeRectListeners() {
         let rect = d3.selectAll("rect");
@@ -18764,10 +18821,12 @@ window.onload = () => {
         let counter = parent.attr("id");
         let current = parent.select("rect");
         let tagName = current.node().tagName;
-        if (tagName === "rect") {
+        let newWidth = width + (d3.event.x - deltaXBorder);
+        let newHeight = height + (d3.event.y - deltaYBorder);
+        if (tagName === "rect" && newWidth > 0 && newHeight > 0) {
             current
-                .attr("width", width + (d3.event.x - deltaXBorder))
-                .attr("height", height + (d3.event.y - deltaYBorder));
+                .attr("width", newWidth)
+                .attr("height", newHeight);
             d3.select("#circleTop" + counter)
                 .attr("cx", (+current.attr("x") + (+current.attr("width") / 2)))
                 .attr("cy", +current.attr("y"));
@@ -18810,43 +18869,45 @@ window.onload = () => {
         }
     }
     function mouseUp() {
-        svg.on("mousemove", null);
-        let parent = rect.select(function () {
-            return this.parentNode;
-        });
-        let id = parent.attr("id");
-        let width = +rect.attr("width");
-        let height = +rect.attr("height");
-        let surface = width * height;
-        if (surface < 2000) {
-            parent.remove();
-        }
-        title = g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 20)
-            .attr("font-weight", 20)
-            .attr("class", "titleText")
-            .style('font-size', 22)
-            .text();
-        content = g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 40)
-            .attr("class", "contentText")
-            .text();
-        /*
+        if (d3.event.button != 2) {
+            svg.on("mousemove", null);
+            let parent = rect.select(function () {
+                return this.parentNode;
+            });
+            let id = parent.attr("id");
+            let width = +rect.attr("width");
+            let height = +rect.attr("height");
+            let surface = width * height;
+            if (surface < 2000) {
+                parent.remove();
+            }
+            title = g.append("text")
+                .attr("x", +rect.attr("x") + 10)
+                .attr("y", +rect.attr("y") + 20)
+                .attr("font-weight", 20)
+                .attr("class", "titleText")
+                .style('font-size', 22)
+                .text();
+            content = g.append("text")
+                .attr("x", +rect.attr("x") + 10)
+                .attr("y", +rect.attr("y") + 40)
+                .attr("class", "contentText")
+                .text();
+            /*
 
-                svg.append("foreignObject")
-                    .raise()
-                    .attr("x",+rect.attr("x") + 10)
-                    .attr("y",+rect.attr("y") + 20)
-                    .attr("width", +rect.attr("width") - 20)
-                    .attr("height", +rect.attr("height") - 40)
-                    .append('xhtml:div')
-                    .attr("contentEditable", true)
-                    .append("text")
-                    .attr("maxlength", 300)
-                    .html("Content");
-         */
+                    svg.append("foreignObject")
+                        .raise()
+                        .attr("x",+rect.attr("x") + 10)
+                        .attr("y",+rect.attr("y") + 20)
+                        .attr("width", +rect.attr("width") - 20)
+                        .attr("height", +rect.attr("height") - 40)
+                        .append('xhtml:div')
+                        .attr("contentEditable", true)
+                        .append("text")
+                        .attr("maxlength", 300)
+                        .html("Content");
+             */
+        }
     }
     function drawLine() {
         let current = d3.select(this);
@@ -18908,7 +18969,9 @@ window.onload = () => {
                 sameRect = true;
             }
         });
-        if (!sameRect) {
+        let id = d3.select(this).attr("id");
+        id = id.slice(0, -1);
+        if (!sameRect && id != "circleBottomRight") {
             line
                 .attr("x2", current.attr("cx"))
                 .attr("y2", current.attr("cy"))
@@ -19134,4 +19197,4 @@ window.onload = () => {
     }
 };
 
-},{"./modules/d3.js":1,"./modules/toDOM.js":2,"./modules/toJSON.js":3}]},{},[4]);
+},{"./modules/d3.js":2,"./modules/toDOM.js":3,"./modules/toJSON.js":4}]},{},[5,1]);

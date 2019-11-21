@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
+/// <reference path="menu.ts"/>
 let g;
 let rect;
 let title;
@@ -66,55 +67,57 @@ window.onload = () => {
         .on("start", dragStartBorder)
         .on("drag", dragMoveBorder);
     function mousedown() {
-        let event = d3.mouse(this);
-        g = svg.append("g")
-            .attr("id", rectCounter)
-            .call(dragRect);
-        rect = g.append("rect")
-            .attr("x", event[0] + 5)
-            .attr("y", event[1] + 5)
-            .attr("rx", 5)
-            .attr("ry", 5)
-            .attr('height', 0)
-            .attr('width', 0)
-            .attr("fill", "#aaa9ad")
-            .style("stroke-width", 5)
-            .style("stroke", "#7b9eb4")
-            .attr("class", "rect");
-        initializeRectListeners();
-        circleTop = g.append("circle")
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", +rect.attr("y"))
-            .attr("r", 5)
-            .attr("id", "circleTop" + rectCounter)
-            .attr("fill", "grey");
-        circleBottom = g.append("circle")
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", (+rect.attr("y") + +rect.attr("height")))
-            .attr("r", 5)
-            .attr("id", "circleBottom" + rectCounter)
-            .attr("fill", "grey");
-        circleLeft = g.append("circle")
-            .attr("cx", +rect.attr("x"))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
-            .attr("r", 5)
-            .attr("id", "circleLeft" + rectCounter)
-            .attr("fill", "grey");
-        circleRight = g.append("circle")
-            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
-            .attr("r", 5)
-            .attr("id", "circleRight" + rectCounter)
-            .attr("fill", "grey");
-        circleBottomRight = g.append("circle")
-            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height"))))
-            .attr("r", 4)
-            .attr("id", "circleBottomRight" + rectCounter)
-            .attr("fill", "#7b9eb4");
-        initializeCircleListeners();
-        svg.on("mousemove", mouseMove);
-        rectCounter++;
+        if (d3.event.button != 2) {
+            let event = d3.mouse(this);
+            g = svg.append("g")
+                .attr("id", rectCounter)
+                .call(dragRect);
+            rect = g.append("rect")
+                .attr("x", event[0] + 5)
+                .attr("y", event[1] + 5)
+                .attr("rx", 5)
+                .attr("ry", 5)
+                .attr('height', 0)
+                .attr('width', 0)
+                .attr("fill", "#aaa9ad")
+                .style("stroke-width", 5)
+                .style("stroke", "#7b9eb4")
+                .attr("class", "rect");
+            initializeRectListeners();
+            circleTop = g.append("circle")
+                .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
+                .attr("cy", +rect.attr("y"))
+                .attr("r", 5)
+                .attr("id", "circleTop" + rectCounter)
+                .attr("fill", "grey");
+            circleBottom = g.append("circle")
+                .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
+                .attr("cy", (+rect.attr("y") + +rect.attr("height")))
+                .attr("r", 5)
+                .attr("id", "circleBottom" + rectCounter)
+                .attr("fill", "grey");
+            circleLeft = g.append("circle")
+                .attr("cx", +rect.attr("x"))
+                .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
+                .attr("r", 5)
+                .attr("id", "circleLeft" + rectCounter)
+                .attr("fill", "grey");
+            circleRight = g.append("circle")
+                .attr("cx", (+rect.attr("x") + +rect.attr("width")))
+                .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
+                .attr("r", 5)
+                .attr("id", "circleRight" + rectCounter)
+                .attr("fill", "grey");
+            circleBottomRight = g.append("circle")
+                .attr("cx", (+rect.attr("x") + +rect.attr("width")))
+                .attr("cy", (+rect.attr("y") + (+rect.attr("height"))))
+                .attr("r", 4)
+                .attr("id", "circleBottomRight" + rectCounter)
+                .attr("fill", "#7b9eb4");
+            initializeCircleListeners();
+            svg.on("mousemove", mouseMove);
+            rectCounter++;
+        }
     }
     function initializeRectListeners() {
         let rect = d3.selectAll("rect");
@@ -257,10 +260,12 @@ window.onload = () => {
         let counter = parent.attr("id");
         let current = parent.select("rect");
         let tagName = current.node().tagName;
-        if (tagName === "rect") {
+        let newWidth = width + (d3.event.x - deltaXBorder);
+        let newHeight = height + (d3.event.y - deltaYBorder);
+        if (tagName === "rect" && newWidth > 0 && newHeight > 0) {
             current
-                .attr("width", width + (d3.event.x - deltaXBorder))
-                .attr("height", height + (d3.event.y - deltaYBorder));
+                .attr("width", newWidth)
+                .attr("height", newHeight);
             d3.select("#circleTop" + counter)
                 .attr("cx", (+current.attr("x") + (+current.attr("width") / 2)))
                 .attr("cy", +current.attr("y"));
@@ -303,43 +308,45 @@ window.onload = () => {
         }
     }
     function mouseUp() {
-        svg.on("mousemove", null);
-        let parent = rect.select(function () {
-            return this.parentNode;
-        });
-        let id = parent.attr("id");
-        let width = +rect.attr("width");
-        let height = +rect.attr("height");
-        let surface = width * height;
-        if (surface < 2000) {
-            parent.remove();
-        }
-        title = g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 20)
-            .attr("font-weight", 20)
-            .attr("class", "titleText")
-            .style('font-size', 22)
-            .text();
-        content = g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 40)
-            .attr("class", "contentText")
-            .text();
-        /*
+        if (d3.event.button != 2) {
+            svg.on("mousemove", null);
+            let parent = rect.select(function () {
+                return this.parentNode;
+            });
+            let id = parent.attr("id");
+            let width = +rect.attr("width");
+            let height = +rect.attr("height");
+            let surface = width * height;
+            if (surface < 2000) {
+                parent.remove();
+            }
+            title = g.append("text")
+                .attr("x", +rect.attr("x") + 10)
+                .attr("y", +rect.attr("y") + 20)
+                .attr("font-weight", 20)
+                .attr("class", "titleText")
+                .style('font-size', 22)
+                .text();
+            content = g.append("text")
+                .attr("x", +rect.attr("x") + 10)
+                .attr("y", +rect.attr("y") + 40)
+                .attr("class", "contentText")
+                .text();
+            /*
 
-                svg.append("foreignObject")
-                    .raise()
-                    .attr("x",+rect.attr("x") + 10)
-                    .attr("y",+rect.attr("y") + 20)
-                    .attr("width", +rect.attr("width") - 20)
-                    .attr("height", +rect.attr("height") - 40)
-                    .append('xhtml:div')
-                    .attr("contentEditable", true)
-                    .append("text")
-                    .attr("maxlength", 300)
-                    .html("Content");
-         */
+                    svg.append("foreignObject")
+                        .raise()
+                        .attr("x",+rect.attr("x") + 10)
+                        .attr("y",+rect.attr("y") + 20)
+                        .attr("width", +rect.attr("width") - 20)
+                        .attr("height", +rect.attr("height") - 40)
+                        .append('xhtml:div')
+                        .attr("contentEditable", true)
+                        .append("text")
+                        .attr("maxlength", 300)
+                        .html("Content");
+             */
+        }
     }
     function drawLine() {
         let current = d3.select(this);
@@ -401,7 +408,9 @@ window.onload = () => {
                 sameRect = true;
             }
         });
-        if (!sameRect) {
+        let id = d3.select(this).attr("id");
+        id = id.slice(0, -1);
+        if (!sameRect && id != "circleBottomRight") {
             line
                 .attr("x2", current.attr("cx"))
                 .attr("y2", current.attr("cy"))

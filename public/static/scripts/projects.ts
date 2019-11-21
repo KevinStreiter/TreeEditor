@@ -44,4 +44,3 @@ function stickyHeader() {
         header.classList.remove("sticky");
     }
 }
-

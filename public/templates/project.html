@@ -5,10 +5,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="../static/scripts/bundle.js"></script>
-    <link rel="stylesheet" href="../static/css/style.css" />
+    <link rel="stylesheet" href="../static/css/style.css"/>
+    <link rel="stylesheet" href="../static/css/menu.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
+<menu class="menu">
+    <li class="menu-item">
+        <button type="button" class="menu-btn" id="menu-delete-btn"><i class="fa fa-trash"></i> <span class="menu-text">Delete</span></button>
+    </li>
+</menu>
+
 <div class="header" id="myHeader">
     <div id="controls">
         <h1 id="projectTitle" contenteditable="true">Project Title</h1>
@@ -19,30 +26,29 @@
     </div>
 </div>
 
-</div>
 <div id="main">
-<div id="mySidebar" class="sidebar">
-            <div class="box">
-                <a class="closebtn">&times;</a>
-                <form target="upload_target" method="post" enctype="multipart/form-data">
-                    <h2>Properties</h2>
-                    <p id="rectInfo" style="display: none;"></p>
-                    <h4>Title</h4>
-                    <input id="titleText" type="text" name="Title" value=""><br><br>
-                    <h4>Content</h4>
-                    <input id="contentText" type="text" name="Content" value=""><br><br>
-                    <h4>Color</h4>
-                    <input id="colorPicker" type="color" name="favcolor" value="#ff0000"><br><br>
-                    <h4>Files</h4>
-                    <input id="fileChooserBtn" type="button" value="Upload"><br><br>
-                    <input id="fileChooser" type="file" name="file" style="display: none;">
-                    <ul id="fileList">
-                    </ul>
-                </form>
-            </div>
-</div>
-<svg id="graph">
-</svg>
+    <div id="mySidebar" class="sidebar">
+        <div class="box">
+            <a class="closebtn">&times;</a>
+            <form target="upload_target" method="post" enctype="multipart/form-data">
+                <h2>Properties</h2>
+                <p id="rectInfo" style="display: none;"></p>
+                <h4>Title</h4>
+                <input id="titleText" type="text" name="Title" value=""><br><br>
+                <h4>Content</h4>
+                <input id="contentText" type="text" name="Content" value=""><br><br>
+                <h4>Color</h4>
+                <input id="colorPicker" type="color" name="favcolor" value="#ff0000"><br><br>
+                <h4>Files</h4>
+                <input id="fileChooserBtn" type="button" value="Upload"><br><br>
+                <input id="fileChooser" type="file" name="file" style="display: none;">
+                <ul id="fileList">
+                </ul>
+            </form>
+        </div>
+    </div>
+    <svg id="graph">
+    </svg>
 </div>
 </body>
 </html>
