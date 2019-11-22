@@ -18581,8 +18581,8 @@ let deltaX;
 let deltaY;
 let deltaXBorder;
 let deltaYBorder;
-let width;
-let height;
+let rectWidth;
+let rectHeight;
 let rectCounter = 1;
 window.onload = () => {
     window.onscroll = function () {
@@ -18598,7 +18598,14 @@ window.onload = () => {
             header.classList.remove("sticky");
         }
     }
+    let margin = { top: 20, right: 20, bottom: 20, left: 20 };
+    let graph = document.getElementById('main');
+    let boundaries = graph.getBoundingClientRect();
+    let width = boundaries.width - margin.left - margin.right, height = boundaries.height - margin.top - margin.bottom;
     let svg = d3.select("#graph")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
         .on("mousedown", mousedown)
         .on("mouseup", mouseUp);
     let nodes = svg.append("g").attr("id", "nodes");
@@ -18757,48 +18764,74 @@ window.onload = () => {
         let counter = parent.attr("id");
         let tagName = current.node().tagName;
         if (tagName === "rect") {
+            let newXCoordinate = d3.event.x + deltaX;
+            let gridXCoordinate = newXCoordinate;
+            let newYCoordinate = d3.event.y + deltaY;
+            let gridYCoordinate = newYCoordinate;
+            let coordDifference = 1000;
+            d3.select(".xGridAxis").selectAll(".tick").each(function () {
+                let gridLine = d3.select(this);
+                let coordinate = gridLine.attr("transform");
+                coordinate = coordinate.substring(coordinate.indexOf("(") + 1, coordinate.indexOf(")")).split(",");
+                let tempCoordDifference = Math.abs(newXCoordinate - coordinate[0]);
+                if (tempCoordDifference < coordDifference && (+current.attr("width") + +coordinate[0]) <= width) {
+                    coordDifference = tempCoordDifference;
+                    gridXCoordinate = coordinate[0];
+                }
+            });
+            coordDifference = 1000;
+            d3.select(".yGridAxis").selectAll(".tick").each(function () {
+                let gridLine = d3.select(this);
+                let coordinate = gridLine.attr("transform");
+                coordinate = coordinate.substring(coordinate.indexOf("(") + 1, coordinate.indexOf(")")).split(",");
+                let tempCoordDifference = Math.abs(newYCoordinate - coordinate[1]);
+                if (tempCoordDifference < coordDifference && (+current.attr("height") + +coordinate[1]) <= height) {
+                    coordDifference = tempCoordDifference;
+                    gridYCoordinate = coordinate[1];
+                }
+            });
             current
-                .attr("x", d3.event.x + deltaX)
-                .attr("y", d3.event.y + deltaY);
+                .attr("x", gridXCoordinate)
+                .attr("y", gridYCoordinate);
             d3.select("#circleTop" + counter)
-                .attr("cx", (d3.event.x + deltaX) + (+current.attr("width") / 2))
-                .attr("cy", (d3.event.y + deltaY));
+                .attr("cx", (+current.attr("x")) + (+current.attr("width") / 2))
+                .attr("cy", +current.attr("y"));
             d3.select("#circleBottom" + counter)
-                .attr("cx", (d3.event.x + deltaX) + (+current.attr("width") / 2))
-                .attr("cy", (d3.event.y + deltaY) + +current.attr("height"));
+                .attr("cx", (+current.attr("x")) + (+current.attr("width") / 2))
+                .attr("cy", (+current.attr("y")) + +current.attr("height"));
             d3.select("#circleBottomRight" + counter)
-                .attr("cx", (d3.event.x + deltaX) + (+current.attr("width")) - 2)
-                .attr("cy", (d3.event.y + deltaY) + +current.attr("height") - 2);
+                .attr("cx", (+current.attr("x")) + (+current.attr("width")) - 2)
+                .attr("cy", (+current.attr("y")) + +current.attr("height") - 2);
             d3.select("#circleLeft" + counter)
-                .attr("cx", (d3.event.x + deltaX))
-                .attr("cy", (d3.event.y + deltaY) + (+current.attr("height") / 2));
+                .attr("cx", (+current.attr("x")))
+                .attr("cy", (+current.attr("y")) + (+current.attr("height") / 2));
             d3.select("#circleRight" + counter)
-                .attr("cx", (d3.event.x + deltaX) + +current.attr("width"))
-                .attr("cy", (d3.event.y + deltaY) + (+current.attr("height") / 2));
+                .attr("cx", (+current.attr("x")) + +current.attr("width"))
+                .attr("cy", (+current.attr("y")) + (+current.attr("height") / 2));
             d3.selectAll("line.circleTop" + counter)
-                .attr("x1", (d3.event.x + deltaX) + (+current.attr("width") / 2))
-                .attr("y1", d3.event.y + deltaY);
+                .attr("x1", (+current.attr("x")) + (+current.attr("width") / 2))
+                .attr("y1", +current.attr("y"));
             d3.selectAll("line.circleBottom" + counter)
-                .attr("x1", (d3.event.x + deltaX) + (+current.attr("width") / 2))
-                .attr("y1", (d3.event.y + deltaY) + +current.attr("height"));
+                .attr("x1", (+current.attr("x")) + (+current.attr("width") / 2))
+                .attr("y1", (+current.attr("y")) + +current.attr("height"));
             d3.selectAll("line.circleLeft" + counter)
-                .attr("x1", (d3.event.x + deltaX))
-                .attr("y1", (d3.event.y + deltaY) + (+current.attr("height") / 2));
+                .attr("x1", +current.attr("x"))
+                .attr("y1", (+current.attr("y")) + (+current.attr("height") / 2));
             d3.selectAll("line.circleRight" + counter)
-                .attr("x1", (d3.event.x + deltaX) + +current.attr("width"))
-                .attr("y1", (d3.event.y + deltaY) + (+current.attr("height") / 2));
+                .attr("x1", (+current.attr("x")) + +current.attr("width"))
+                .attr("y1", (+current.attr("y")) + (+current.attr("height") / 2));
             d3.selectAll("line.circleTop" + counter + "Connector")
-                .attr("x2", (d3.event.x + deltaX) + (+current.attr("width") / 2))
-                .attr("y2", d3.event.y + deltaY);
+                .attr("x2", (+current.attr("x")) + (+current.attr("width") / 2))
+                .attr("y2", +current.attr("y"));
             d3.selectAll("line.circleBottom" + counter + "Connector")
-                .attr("x2", (d3.event.x + deltaX) + (+current.attr("width") / 2))
-                .attr("y2", (d3.event.y + deltaY) + +current.attr("height"));
+                .attr("x2", (+current.attr("x")) + (+current.attr("width") / 2))
+                .attr("y2", (+current.attr("y")) + +current.attr("height"));
             d3.selectAll("line.circleLeft" + counter + "Connector")
-                .attr("x2", (d3.event.x + deltaX))
-                .attr("y2", (d3.event.y + deltaY) + (+current.attr("height") / 2));
+                .attr("x2", +current.attr("x"))
+                .attr("y2", (+current.attr("y")) + (+current.attr("height") / 2));
             d3.selectAll("line.circleRight" + counter + "Connector")
-                .attr("x2", (d3.event.x + deltaX) + +current.attr("width"))
-                .attr("y2", (d3.event.y + deltaY) + (+current.attr("height") / 2));
+                .attr("x2", (+current.attr("x")) + +current.attr("width"))
+                .attr("y2", (+current.attr("y")) + (+current.attr("height") / 2));
             parent.select("text.titleText")
                 .attr("x", +current.attr("x") + 10)
                 .attr("y", +current.attr("y") + 20);
@@ -18816,8 +18849,8 @@ window.onload = () => {
             deltaYBorder = d3.event.y;
             deltaX = current.attr("x") - d3.event.x;
             deltaY = current.attr("y") - d3.event.y;
-            width = +current.attr("width");
-            height = +current.attr("height");
+            rectWidth = +current.attr("width");
+            rectHeight = +current.attr("height");
         }
     }
     function dragMoveBorder() {
@@ -18825,12 +18858,12 @@ window.onload = () => {
         let counter = parent.attr("id");
         let current = parent.select("rect");
         let tagName = current.node().tagName;
-        let newWidth = width + (d3.event.x - deltaXBorder);
-        let newHeight = height + (d3.event.y - deltaYBorder);
-        if (tagName === "rect" && newWidth > 0 && newHeight > 0) {
+        let newRectWidth = rectWidth + (d3.event.x - deltaXBorder);
+        let newRectHeight = rectHeight + (d3.event.y - deltaYBorder);
+        if (tagName === "rect" && newRectWidth > 0 && newRectHeight > 0) {
             current
-                .attr("width", newWidth)
-                .attr("height", newHeight);
+                .attr("width", newRectWidth)
+                .attr("height", newRectHeight);
             d3.select("#circleTop" + counter)
                 .attr("cx", (+current.attr("x") + (+current.attr("width") / 2)))
                 .attr("cy", +current.attr("y"));
@@ -19195,18 +19228,16 @@ window.onload = () => {
         projectTitle.setAttribute("class", id);
     }
     function defineGrid() {
-        let graph = document.getElementById('graph');
-        let boundaries = graph.getBoundingClientRect();
-        let margin = { top: 20, right: 20, bottom: 20, left: 20 }, tickAmount = 70;
+        let tickAmount = 70;
         let grid = svg.append("g")
-            .attr("id", "grid")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            .attr("id", "grid");
         let xScale = d3.scaleLinear()
             .range([0, boundaries.width - margin.left - margin.right]);
         let xAxis = d3.axisBottom()
             .ticks(tickAmount)
             .scale(xScale);
         grid.append("g")
+            .attr("class", "xGridAxis")
             .call(xAxis);
         let xGridLines = d3.axisBottom()
             .tickFormat("")
@@ -19214,7 +19245,7 @@ window.onload = () => {
             .tickSize(boundaries.height - margin.top - margin.bottom)
             .scale(xScale);
         grid.append("g")
-            .attr("class", "grid")
+            .attr("class", "xGridLines")
             .call(xGridLines);
         let yScale = d3.scaleLinear()
             .range([0, boundaries.height - margin.top - margin.bottom]);
@@ -19222,6 +19253,7 @@ window.onload = () => {
             .ticks(tickAmount)
             .scale(yScale);
         grid.append("g")
+            .attr("class", "yGridAxis")
             .call(yAxis);
         let yGridLines = d3.axisRight()
             .tickFormat("")
@@ -19229,7 +19261,7 @@ window.onload = () => {
             .tickSize(boundaries.width - margin.left - margin.right)
             .scale(yScale);
         grid.append("g")
-            .attr("class", "grid")
+            .attr("class", "yGridLines")
             .call(yGridLines);
     }
 };
