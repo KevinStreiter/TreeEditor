@@ -24,6 +24,12 @@ $app->get('/treeEditor/projects', function ($request, $response, $args) {
     return $response->withJson($rows);
 });
 
+$app->post('/treeEditor/projects/delete', function (Request $request) {
+    $id = $request->getParam('id');
+    $connection = $this->get(Connection::class);
+    $connection->query("DELETE FROM Projects WHERE project_id={$id}");
+});
+
 $app->get('/treeEditor/nodes', function ($request, $response, $args) {
     $id = $request->getParam('id');
     $query = $this->get(Connection::class)->newQuery();

@@ -44,7 +44,7 @@ class SaveController
 
     function updateProject($connection, $projectName, $projectID)
     {
-        $connection->query("UPDATE Projects SET name = '{$projectName}' WHERE project_id = $projectID");
+        $connection->query("UPDATE Projects SET name = '{$projectName}' WHERE project_id = {$projectID}");
     }
 
     function getRecentProjectID($connection)
@@ -69,8 +69,8 @@ class SaveController
 
     function updateNodes($data, $connection, $projectID)
     {
-        $connection->query("DELETE FROM Nodes WHERE project_id=$projectID");
-        $connection->query("DELETE FROM Files WHERE project_id=$projectID");
+        $connection->query("DELETE FROM Nodes WHERE project_id={$projectID}");
+        $connection->query("DELETE FROM Files WHERE project_id={$projectID}");
         $this->saveNodes($data, $projectID, $connection);
     }
 

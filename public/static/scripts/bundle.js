@@ -18893,20 +18893,6 @@ window.onload = () => {
                 .attr("y", +rect.attr("y") + 40)
                 .attr("class", "contentText")
                 .text();
-            /*
-
-                    svg.append("foreignObject")
-                        .raise()
-                        .attr("x",+rect.attr("x") + 10)
-                        .attr("y",+rect.attr("y") + 20)
-                        .attr("width", +rect.attr("width") - 20)
-                        .attr("height", +rect.attr("height") - 40)
-                        .append('xhtml:div')
-                        .attr("contentEditable", true)
-                        .append("text")
-                        .attr("maxlength", 300)
-                        .html("Content");
-             */
         }
     }
     function drawLine() {
@@ -19006,9 +18992,12 @@ window.onload = () => {
         let contentText = document.getElementById("contentText");
         titleText.value = "";
         contentText.value = "";
+        resetRectBorder();
+        resetListeners();
+    }
+    function resetRectBorder() {
         svg.selectAll("rect")
             .style("stroke", "#7b9eb4");
-        resetListeners();
     }
     function updateRectText(object) {
         let id = document.getElementById('rectInfo').innerHTML;
@@ -19065,17 +19054,21 @@ window.onload = () => {
             span.appendChild(document.createTextNode("x"));
             li.appendChild(span);
             ul.appendChild(li);
-            let btnList = document.getElementsByClassName("close");
-            for (let i = 0; i < btnList.length; i++) {
-                btnList[i].addEventListener("click", function (e) {
-                    let filename = this.parentElement.getAttribute("id");
-                    deleteFile(filename);
-                    this.parentElement.remove();
-                    e.stopPropagation();
-                });
-            }
+            initializeDeleteFileListListener();
             li.addEventListener("click", function () {
                 getUploadedFile(filename);
+            });
+        }
+    }
+    function initializeDeleteFileListListener() {
+        let btnList = document.getElementsByClassName("close");
+        for (let i = 0; i < btnList.length; i++) {
+            btnList[i].addEventListener("click", function (e) {
+                let filename = this.parentElement.getAttribute("id");
+                deleteFile(filename);
+                this.parentElement.remove();
+                saveProject();
+                e.stopPropagation();
             });
         }
     }
@@ -19150,6 +19143,7 @@ window.onload = () => {
         rectCounter += 1;
         initializeRectListeners();
         initializeCircleListeners();
+        resetRectBorder();
     }
     function getProjectNodes(id) {
         let url = '/treeEditor/nodes?id=' + id;
@@ -19171,6 +19165,7 @@ window.onload = () => {
                 getUploadedFile(items[i].getAttribute("id"));
             });
         }
+        initializeDeleteFileListListener();
     }
     function getProjectFiles(id) {
         let url = '/treeEditor/projectFiles?id=' + id;
