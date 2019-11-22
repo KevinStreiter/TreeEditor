@@ -23,7 +23,7 @@ let height;
 let rectCounter = 1;
 window.onload = () => {
     window.onscroll = function () {
-        stickyHeader();
+        //stickyHeader()
     };
     function stickyHeader() {
         let header = document.getElementById("myHeader");
@@ -35,7 +35,16 @@ window.onload = () => {
             header.classList.remove("sticky");
         }
     }
-    loadProject();
+    let svg = d3.select("#graph")
+        .on("mousedown", mousedown)
+        .on("mouseup", mouseUp);
+    let nodes = svg.append("g").attr("id", "nodes");
+    let dragRect = d3.drag()
+        .on("start", dragStart)
+        .on("drag", dragMove);
+    let dragBorder = d3.drag()
+        .on("start", dragStartBorder)
+        .on("drag", dragMoveBorder);
     d3.select(".closebtn").on("click", function () {
         closeNav();
     });
@@ -57,19 +66,12 @@ window.onload = () => {
     d3.select("#saveButton").on("click", function () {
         saveProject();
     });
-    let svg = d3.select("#graph")
-        .on("mousedown", mousedown)
-        .on("mouseup", mouseUp);
-    let dragRect = d3.drag()
-        .on("start", dragStart)
-        .on("drag", dragMove);
-    let dragBorder = d3.drag()
-        .on("start", dragStartBorder)
-        .on("drag", dragMoveBorder);
+    loadProject();
+    defineGrid();
     function mousedown() {
         if (d3.event.button != 2) {
             let event = d3.mouse(this);
-            g = svg.append("g")
+            g = nodes.append("g")
                 .attr("id", rectCounter)
                 .call(dragRect);
             rect = g.append("rect")
@@ -546,7 +548,7 @@ window.onload = () => {
         let projectName = project.innerHTML;
         let projectID = project.className;
         let url = '/treeEditor/save?projectName=' + projectName + '&projectID=' + projectID;
-        let nodes = document.getElementById("graph");
+        let nodes = document.getElementById("nodes");
         let nodes_json = toJSON(nodes);
         let files = document.getElementById("fileList");
         let files_json = toJSON(files);
@@ -572,7 +574,7 @@ window.onload = () => {
         }, 2000);
     }
     function updateProjectNodes(data) {
-        let svg = document.getElementById("graph");
+        let svg = document.getElementById("nodes");
         for (let element of data) {
             rectCounter = Number(element["node_id"].slice(-1));
             let node = toDOM(element["element"]);
@@ -628,5 +630,43 @@ window.onload = () => {
         let projectTitle = document.getElementById("projectTitle");
         projectTitle.innerText = name;
         projectTitle.setAttribute("class", id);
+    }
+    function defineGrid() {
+        let graph = document.getElementById('graph');
+        let boundaries = graph.getBoundingClientRect();
+        let margin = { top: 20, right: 20, bottom: 20, left: 20 }, tickAmount = 70;
+        let grid = svg.append("g")
+            .attr("id", "grid")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        let xScale = d3.scaleLinear()
+            .range([0, boundaries.width - margin.left - margin.right]);
+        let xAxis = d3.axisBottom()
+            .ticks(tickAmount)
+            .scale(xScale);
+        grid.append("g")
+            .call(xAxis);
+        let xGridLines = d3.axisBottom()
+            .tickFormat("")
+            .ticks(tickAmount)
+            .tickSize(boundaries.height - margin.top - margin.bottom)
+            .scale(xScale);
+        grid.append("g")
+            .attr("class", "grid")
+            .call(xGridLines);
+        let yScale = d3.scaleLinear()
+            .range([0, boundaries.height - margin.top - margin.bottom]);
+        let yAxis = d3.axisRight()
+            .ticks(tickAmount)
+            .scale(yScale);
+        grid.append("g")
+            .call(yAxis);
+        let yGridLines = d3.axisRight()
+            .tickFormat("")
+            .ticks(tickAmount)
+            .tickSize(boundaries.width - margin.left - margin.right)
+            .scale(yScale);
+        grid.append("g")
+            .attr("class", "grid")
+            .call(yGridLines);
     }
 };

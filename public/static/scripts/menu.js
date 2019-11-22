@@ -38,12 +38,14 @@ function removeNode(node) {
             if (element.attr("id") == node.parentNode.id) {
                 element.remove();
             }
-            element.selectAll("line").each(function () {
-                let line = d3.select(this);
-                if (line.attr("class").search(node.parentNode.id) != -1) {
-                    line.remove();
-                }
-            });
+            if (element.attr("id") != "grid" && element.attr("id") != null) {
+                element.selectAll("line").each(function () {
+                    let line = d3.select(this);
+                    if (line.attr("class").search(node.parentNode.id) != -1) {
+                        line.remove();
+                    }
+                });
+            }
         });
     }
     else if (node.nodeName == "line") {

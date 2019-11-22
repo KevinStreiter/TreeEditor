@@ -223,3 +223,17 @@ ul li:hover {
     -webkit-transition: opacity 2000ms initial;
     transition: opacity 2000ms initial;
 }
+
+.tick text { display: none; }
+
+.tick line, .domain {
+    stroke: #666666;
+    opacity: 20%;
+}
+
+#grid {
+    z-index: -1;
+}
+
+
+
