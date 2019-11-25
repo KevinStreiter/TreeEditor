@@ -463,20 +463,27 @@ window.onload = () => {
     }
     function uploadFile() {
         let file_input = document.querySelector('[type=file]');
+        console.log(file_input);
         let files = file_input.files;
-        let formData = new FormData();
-        formData.append('file', files[0]);
-        let rectInfo = document.getElementById('rectInfo').innerHTML;
-        let url = '/treeEditor/files/upload?rectInfo=' + rectInfo;
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-        })
-            .then(response => response.text())
-            .then(function (data) {
-            updateFileList(data);
-            saveProject();
-        });
+        let name = files[0].name;
+        if (name.substr(name.length - 3) == "pdf") {
+            let formData = new FormData();
+            formData.append('file', files[0]);
+            let rectInfo = document.getElementById('rectInfo').innerHTML;
+            let url = '/treeEditor/files/upload?rectInfo=' + rectInfo;
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+            })
+                .then(response => response.text())
+                .then(function (data) {
+                updateFileList(data);
+                saveProject();
+            });
+        }
+        else {
+            alert("Only .pdf attachments are allowed");
+        }
     }
     function updateFileList(filename) {
         let file = document.getElementById("fileChooser");

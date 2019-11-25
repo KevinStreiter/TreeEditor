@@ -1,6 +1,14 @@
 CREATE SCHEMA IF NOT EXISTS treeEditor;
 USE treeEditor;
 
+CREATE USER IF NOT EXISTS gegege
+    IDENTIFIED BY 'MWXw9$Ppmjl51drrm7';
+
+GRANT ALL
+    ON treeEditor.*
+    TO gegege;
+FLUSH PRIVILEGES;
+
 CREATE TABLE Projects (
  project_id INT NOT NULL AUTO_INCREMENT,
  name VARCHAR(255) NOT NULL,
