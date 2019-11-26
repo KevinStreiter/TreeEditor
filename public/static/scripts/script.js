@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
-let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, line, deltaX, deltaY, deltaXBorder, deltaYBorder, rectWidth, rectHeight, rectCounter = 1;
+let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, line, deltaX, deltaY, deltaXBorder, deltaYBorder, rectWidth, rectHeight;
 window.onload = () => {
     initializePage();
     loadProject();
@@ -91,6 +91,14 @@ function initializePage() {
 function mousedown() {
     if (d3.event.button != 2) {
         let event = d3.mouse(this);
+        let rectCounter = 1;
+        svg.selectAll("rect").each(function () {
+            let id = +d3.select(this.parentNode).attr("id");
+            console.log(id);
+            if (id >= rectCounter) {
+                rectCounter = id + 1;
+            }
+        });
         g = nodes.append("g")
             .attr("id", rectCounter)
             .call(dragRect);
@@ -143,12 +151,6 @@ function mousedown() {
             .attr("fill", "#7b9eb4");
         initializeCircleListeners();
         svg.on("mousemove", mouseMove);
-        svg.selectAll("rect").each(function () {
-            let id = d3.select(this.parentNode).attr("id");
-            if (id > rectCounter) {
-                rectCounter = id + 1;
-            }
-        });
     }
 }
 function initializeRectListeners() {
@@ -167,7 +169,7 @@ function initializeRectListeners() {
 function initializeCircleListeners() {
     let count = null;
     svg.selectAll("rect").each(function () {
-        count = d3.select(this.parentNode).attr("id");
+        count = +d3.select(this.parentNode).attr("id");
         d3.select(`#circleBottomRight${count}`)
             .on("mouseover", function () {
             d3.select(this)
@@ -193,8 +195,15 @@ function initializeCircleListeners() {
     });
 }
 function mouseMove() {
+    let rectCounter = 1;
+    svg.selectAll("rect").each(function () {
+        let id = +d3.select(this.parentNode).attr("id");
+        if (id >= rectCounter) {
+            rectCounter = id;
+        }
+    });
     let event = d3.mouse(this), newXCoordinate = Math.max(0, event[0] - +rect.attr("x")), newYCoordinate = Math.max(0, event[1] - +rect.attr("y"));
-    updateRectSize(newXCoordinate, newYCoordinate, rectCounter - 1, null, rect, true);
+    updateRectSize(newXCoordinate, newYCoordinate, rectCounter, null, rect, true);
 }
 function dragStart() {
     let current = d3.select(this);
