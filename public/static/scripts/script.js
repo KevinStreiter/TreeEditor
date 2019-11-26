@@ -94,7 +94,6 @@ function mousedown() {
         let rectCounter = 1;
         svg.selectAll("rect").each(function () {
             let id = +d3.select(this.parentNode).attr("id");
-            console.log(id);
             if (id >= rectCounter) {
                 rectCounter = id + 1;
             }
@@ -182,6 +181,7 @@ function initializeCircleListeners() {
             .call(dragBorder);
         d3.selectAll(`#circleRight${count}, #circleLeft${count}, #circleTop${count}, #circleBottom${count}`)
             .on('mouseover', function () {
+            console.log(d3.select(this).attr("class"));
             d3.select(this)
                 .attr("r", 10)
                 .style("cursor", "crosshair");
@@ -372,6 +372,7 @@ function drawLine() {
         .attr("class", current.attr("id"))
         .attr("marker-end", "url(#arrow)");
     svg.on("mousemove", moveLine);
+    parent.lower();
 }
 function removeLine() {
     line.remove();
@@ -385,7 +386,6 @@ function resetListeners() {
         .on("mouseup", mouseUp)
         .on("dblclick", null);
     d3.selectAll("circle")
-        .raise()
         .on("click", drawLine);
     svg.selectAll("rect")
         .on("dblclick", openNav)
@@ -403,9 +403,6 @@ function moveLine() {
         .on("mousedown", null)
         .on("mouseup", null)
         .on("dblclick", removeLine);
-    d3.selectAll("circle")
-        .raise()
-        .on("click", combineRect);
 }
 function combineRect() {
     let current = d3.select(this);
