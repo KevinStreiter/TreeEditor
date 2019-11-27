@@ -18744,7 +18744,6 @@ function initializeCircleListeners() {
             .call(dragBorder);
         d3.selectAll(`#circleRight${count}, #circleLeft${count}, #circleTop${count}, #circleBottom${count}`)
             .on('mouseover', function () {
-            console.log(d3.select(this).attr("class"));
             d3.select(this)
                 .attr("r", 10)
                 .style("cursor", "crosshair");
@@ -18966,6 +18965,9 @@ function moveLine() {
         .on("mousedown", null)
         .on("mouseup", null)
         .on("dblclick", removeLine);
+    d3.selectAll("circle")
+        .raise()
+        .on("click", combineRect);
 }
 function combineRect() {
     let current = d3.select(this);
