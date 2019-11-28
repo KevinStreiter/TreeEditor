@@ -18748,6 +18748,16 @@ function initializeCircleListeners() {
     let count = null;
     svg.selectAll("rect").each(function () {
         count = +d3.select(this.parentNode).attr("id");
+        d3.selectAll(".lineCircle")
+            .on("mouseover", function () {
+            d3.select(this)
+                .style("cursor", "grabbing");
+        })
+            .on("mouseout", function () {
+            d3.select(this)
+                .style("cursor", "default");
+        })
+            .call(dragLine);
         d3.select(`#circleBottomRight${count}`)
             .on("mouseover", function () {
             d3.select(this)
@@ -18839,6 +18849,8 @@ function dragStartLine() {
 }
 function dragMoveLine() {
     let current = d3.select(this);
+    current.attr("cx", d3.event.x);
+    current.attr("cy", d3.event.y);
     let parent = d3.select(this.parentNode);
     let classes = current.attr("class").split(" ");
     let path = parent.select("path." + classes[0] + "." + classes[1]);
@@ -19065,7 +19077,7 @@ function combineRect() {
             .attr("cy", midpointY)
             .attr("r", 5)
             .attr("fill", "rgba(179,178,180,0.39)")
-            .attr("class", line.attr("class"))
+            .attr("class", line.attr("class") + " " + "lineCircle")
             .on("mouseover", function () {
             d3.select(this)
                 .style("cursor", "grabbing");
@@ -19307,4 +19319,4 @@ function updateProjectName(name, id) {
     projectTitle.setAttribute("class", id);
 }
 
-},{"./modules/d3.js":2,"./modules/toDOM.js":3,"./modules/toJSON.js":4}]},{},[5,1]);
+},{"./modules/d3.js":2,"./modules/toDOM.js":3,"./modules/toJSON.js":4}]},{},[1,5]);
