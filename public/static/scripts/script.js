@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
-let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, line, deltaX, deltaY, deltaXBorder, deltaYBorder, rectWidth, rectHeight, lineData, lineFunction;
+let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, rectWidth, rectHeight, lineData, lineFunction;
 window.onload = () => {
     initializePage();
     loadProject();
@@ -70,6 +70,9 @@ function initializePage() {
         .x(function (d) { return d.x; })
         .y(function (d) { return d.y; })
         .curve(d3.curveBasis);
+    dragLine = d3.drag()
+        .on("start", dragStartLine)
+        .on("drag", dragMoveLine);
     d3.select(".closebtn").on("click", function () {
         closeNav();
     });
@@ -250,6 +253,31 @@ function dragMoveBorder() {
     if (tagName === "rect" && newRectWidth > 0 && newRectHeight > 0) {
         updateRectSize(newRectWidth, newRectHeight, counter, parent, current, true);
     }
+}
+function dragStartLine() {
+    let current = d3.select(this);
+    let parent = d3.select(this.parentNode);
+    let classes = current.attr("class").split(" ");
+    let path = parent.select("path." + classes[0] + "." + classes[1]);
+    let length = path.node().getTotalLength();
+    let middle = path.node().getPointAtLength(length / 2);
+    middle = { "x": middle.x, "y": middle.y };
+    deltaXLine = middle.x - d3.event.x;
+    deltaYLine = middle.y - d3.event.y;
+}
+function dragMoveLine() {
+    let current = d3.select(this);
+    let parent = d3.select(this.parentNode);
+    let classes = current.attr("class").split(" ");
+    let path = parent.select("path." + classes[0] + "." + classes[1]);
+    let length = path.node().getTotalLength();
+    let start = path.node().getPointAtLength(0);
+    start = { "x": start.x, "y": start.y };
+    let end = path.node().getPointAtLength(length);
+    end = { "x": end.x, "y": end.y };
+    let middle = { "x": d3.event.x + deltaXLine, "y": d3.event.y + deltaYLine };
+    let data = [start, middle, end];
+    path.attr("d", lineFunction(data));
 }
 function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current, borderMove) {
     if (borderMove) {
@@ -465,7 +493,16 @@ function combineRect() {
             .attr("cy", midpointY)
             .attr("r", 5)
             .attr("fill", "rgba(179,178,180,0.39)")
-            .attr("class", line.attr("class"));
+            .attr("class", line.attr("class"))
+            .on("mouseover", function () {
+            d3.select(this)
+                .style("cursor", "grabbing");
+        })
+            .on("mouseout", function () {
+            d3.select(this)
+                .style("cursor", "default");
+        })
+            .call(dragLine);
     }
 }
 function openNav() {
