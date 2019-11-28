@@ -18575,7 +18575,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
-let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, rectWidth, rectHeight, lineData, lineFunction;
+let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction;
 window.onload = () => {
     initializePage();
     loadProject();
@@ -18641,7 +18641,7 @@ function initializePage() {
     lineFunction = d3.line()
         .x(function (d) { return d.x; })
         .y(function (d) { return d.y; })
-        .curve(d3.curveBasis);
+        .curve(d3.curveCardinal);
     dragLine = d3.drag()
         .on("start", dragStartLine)
         .on("drag", dragMoveLine);
@@ -18838,6 +18838,8 @@ function dragMoveBorder() {
 }
 function dragStartLine() {
     let current = d3.select(this);
+    deltaXCircle = current.attr("cx") - d3.event.x;
+    deltaYCircle = current.attr("cy") - d3.event.y;
     let parent = d3.select(this.parentNode);
     let classes = current.attr("class").split(" ");
     let path = parent.select("path." + classes[0] + "." + classes[1]);
@@ -18849,8 +18851,8 @@ function dragStartLine() {
 }
 function dragMoveLine() {
     let current = d3.select(this);
-    current.attr("cx", d3.event.x);
-    current.attr("cy", d3.event.y);
+    current.attr("cx", d3.event.x + deltaXCircle);
+    current.attr("cy", d3.event.y + deltaYCircle);
     let parent = d3.select(this.parentNode);
     let classes = current.attr("class").split(" ");
     let path = parent.select("path." + classes[0] + "." + classes[1]);
