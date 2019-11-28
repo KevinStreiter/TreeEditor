@@ -4,7 +4,7 @@ let target;
 
 function showMenu(x, y){
     let menu = <HTMLInputElement> document.querySelector('.menu');
-    if (target.tagName == "rect" || target.tagName == "line") {
+    if (target.tagName == "rect" || target.tagName == "path") {
         menu.style.left = x + 'px';
         menu.style.top = y + 'px';
         menu.classList.add('show-menu');
@@ -45,17 +45,27 @@ function removeNode(node) {
                 element.remove()
             }
             if (element.attr("id") != "grid" && element.attr("id") != null) {
-                element.selectAll("line").each(function () {
+                element.selectAll("path").each(function () {
                     let line = d3.select(this);
                     if (line.attr("class").search(node.parentNode.id) != -1) {
                         line.remove()
+                    }
+                });
+                element.selectAll("circle").each(function () {
+                    let circle = d3.select(this);
+                    if (circle.attr("class").search(node.parentNode.id) != -1) {
+                        circle.remove()
                     }
                 })
             }
         });
     }
 
-    else if (node.nodeName == "line") {
-        target.remove()
+    else if (node.nodeName == "path") {
+        let parent = d3.select(node.parentNode);
+        let classes = d3.select(target).attr("class").split(" ");
+        parent.select("circle." + classes[0] + "." + classes[1]).remove();
+        target.remove();
+
     }
 }

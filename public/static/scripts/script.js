@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
-let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, line, deltaX, deltaY, deltaXBorder, deltaYBorder, rectWidth, rectHeight;
+let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, line, deltaX, deltaY, deltaXBorder, deltaYBorder, rectWidth, rectHeight, lineData, lineFunction;
 window.onload = () => {
     initializePage();
     loadProject();
@@ -66,6 +66,10 @@ function initializePage() {
     dragBorder = d3.drag()
         .on("start", dragStartBorder)
         .on("drag", dragMoveBorder);
+    lineFunction = d3.line()
+        .x(function (d) { return d.x; })
+        .y(function (d) { return d.y; })
+        .curve(d3.curveBasis);
     d3.select(".closebtn").on("click", function () {
         closeNav();
     });
@@ -297,30 +301,30 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
     d3.select("#circleRight" + counter)
         .attr("cx", (+current.attr("x")) + +current.attr("width"))
         .attr("cy", (+current.attr("y")) + (+current.attr("height") / 2));
-    d3.selectAll("line.circleTop" + counter)
-        .attr("x1", (+current.attr("x")) + (+current.attr("width") / 2))
-        .attr("y1", +current.attr("y"));
-    d3.selectAll("line.circleBottom" + counter)
-        .attr("x1", (+current.attr("x")) + (+current.attr("width") / 2))
-        .attr("y1", (+current.attr("y")) + +current.attr("height"));
-    d3.selectAll("line.circleLeft" + counter)
-        .attr("x1", +current.attr("x"))
-        .attr("y1", (+current.attr("y")) + (+current.attr("height") / 2));
-    d3.selectAll("line.circleRight" + counter)
-        .attr("x1", (+current.attr("x")) + +current.attr("width"))
-        .attr("y1", (+current.attr("y")) + (+current.attr("height") / 2));
-    d3.selectAll("line.circleTop" + counter + "Connector")
-        .attr("x2", (+current.attr("x")) + (+current.attr("width") / 2))
-        .attr("y2", +current.attr("y"));
-    d3.selectAll("line.circleBottom" + counter + "Connector")
-        .attr("x2", (+current.attr("x")) + (+current.attr("width") / 2))
-        .attr("y2", (+current.attr("y")) + +current.attr("height"));
-    d3.selectAll("line.circleLeft" + counter + "Connector")
-        .attr("x2", +current.attr("x"))
-        .attr("y2", (+current.attr("y")) + (+current.attr("height") / 2));
-    d3.selectAll("line.circleRight" + counter + "Connector")
-        .attr("x2", (+current.attr("x")) + +current.attr("width"))
-        .attr("y2", (+current.attr("y")) + (+current.attr("height") / 2));
+    d3.selectAll("path.circleTop" + counter).each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width") / 2, +current.attr("y"), false);
+    });
+    d3.selectAll("path.circleBottom" + counter).each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width") / 2, +current.attr("y") + +current.attr("height"), false);
+    });
+    d3.selectAll("path.circleLeft" + counter).each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x"), +current.attr("y") + +current.attr("height") / 2, false);
+    });
+    d3.selectAll("path.circleRight" + counter).each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width"), +current.attr("y") + +current.attr("height") / 2, false);
+    });
+    d3.selectAll("path.circleTop" + counter + "Connector").each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width") / 2, +current.attr("y"), true);
+    });
+    d3.selectAll("path.circleBottom" + counter + "Connector").each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width") / 2, +current.attr("y") + +current.attr("height"), true);
+    });
+    d3.selectAll("path.circleLeft" + counter + "Connector").each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x"), +current.attr("y") + +current.attr("height") / 2, true);
+    });
+    d3.selectAll("path.circleRight" + counter + "Connector").each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width"), +current.attr("y") + +current.attr("height") / 2, true);
+    });
     if (parent != null) {
         parent.select("text.titleText")
             .attr("x", +current.attr("x") + 10)
@@ -329,6 +333,30 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
             .attr("x", +current.attr("x") + 10)
             .attr("y", +current.attr("y") + 40);
     }
+}
+function updateLinePath(element, current, x, y, isConnector) {
+    let length = element.node().getTotalLength();
+    let start = null;
+    let end = null;
+    if (isConnector) {
+        start = element.node().getPointAtLength(0);
+        start = { "x": start.x, "y": start.y };
+        end = { "x": x, "y": y };
+    }
+    else {
+        start = { "x": x, "y": y };
+        end = element.node().getPointAtLength(length);
+        end = { "x": end.x, "y": end.y };
+    }
+    let middle = element.node().getPointAtLength(length / 2);
+    middle = { "x": middle.x, "y": middle.y };
+    let data = [start, middle, end];
+    element.attr("d", lineFunction(data));
+    let parent = d3.select(element.node().parentNode);
+    let classes = element.attr("class").split(" ");
+    parent.select("circle." + classes[0] + "." + classes[1])
+        .attr("cx", middle.x)
+        .attr("cy", middle.y);
 }
 function mouseUp() {
     if (d3.event.button != 2) {
@@ -361,15 +389,15 @@ function drawLine() {
     let parent = d3.select(this.parentNode);
     let cx = current.attr("cx");
     let cy = current.attr("cy");
-    line = parent.append("line");
-    line.attr("x1", cx)
-        .attr("y1", cy)
-        .attr("x2", cx)
-        .attr("y2", cy)
+    lineData = [{ "x": cx, "y": cy }];
+    line = parent.append("path");
+    line
+        .attr("d", lineFunction(lineData))
         .attr("stroke", "grey")
         .attr("stroke-width", 3)
         .attr("class", current.attr("id"))
-        .attr("marker-end", "url(#arrow)");
+        .attr("marker-end", "url(#arrow)")
+        .attr("fill", "none");
     svg.on("mousemove", moveLine);
     parent.lower();
 }
@@ -396,8 +424,10 @@ function resetListeners() {
 }
 function moveLine() {
     let event = d3.mouse(this);
-    line.attr("x2", event[0])
-        .attr("y2", event[1]);
+    let newLineData = [lineData[0]];
+    newLineData.push({ "x": event[0], "y": event[1] });
+    lineData = newLineData;
+    line.attr("d", lineFunction(lineData));
     svg
         .on("mousedown", null)
         .on("mouseup", null)
@@ -409,24 +439,33 @@ function moveLine() {
 function combineRect() {
     let current = d3.select(this);
     let parent = d3.select(this.parentNode);
-    let x1 = line.attr("x1");
-    let y1 = line.attr("y1");
+    let x = lineData[0]["x"];
+    let y = lineData[0]["y"];
     let sameRect = false;
     parent.selectAll("circle").each(function () {
         let cx = d3.select(this).attr("cx");
         let cy = d3.select(this).attr("cy");
-        if (x1 == cx && y1 == cy) {
+        if (x == cx && y == cy) {
             sameRect = true;
         }
     });
     let id = d3.select(this).attr("id");
     id = id.slice(0, -1);
     if (!sameRect && id != "circleBottomRight") {
+        lineData[1] = { "x": +current.attr("cx"), "y": current.attr("cy") };
         line
-            .attr("x2", current.attr("cx"))
-            .attr("y2", current.attr("cy"))
+            .attr("d", lineFunction(lineData))
             .attr("class", line.attr("class") + " " + current.attr("id") + "Connector");
         resetListeners();
+        let midpointX = (+lineData[0]["x"] + +lineData[1]["x"]) / 2;
+        let midpointY = (+lineData[0]["y"] + +lineData[1]["y"]) / 2;
+        let lineParent = d3.select(line.node().parentNode);
+        lineParent.append("circle")
+            .attr("cx", midpointX)
+            .attr("cy", midpointY)
+            .attr("r", 5)
+            .attr("fill", "rgba(179,178,180,0.39)")
+            .attr("class", line.attr("class"));
     }
 }
 function openNav() {
