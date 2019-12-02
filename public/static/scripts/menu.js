@@ -4,14 +4,31 @@ const d3 = require("./modules/d3");
 let target;
 function showMenu(x, y) {
     let menu = document.querySelector('.menu');
+    let delEntry = document.getElementById('menu-delete-btn');
+    menu.style.left = x + 'px';
+    menu.style.top = y + 'px';
     if (target.tagName == "rect" || target.tagName == "path") {
-        menu.style.left = x + 'px';
-        menu.style.top = y + 'px';
+        delEntry.style.display = 'inherit';
         menu.classList.add('show-menu');
+    }
+    else if (target.tagName == "svg") {
+        delEntry.style.display = 'none';
+        getProjects();
     }
     else {
         menu.classList.remove('show-menu');
     }
+}
+function getProjects() {
+    let url = '/treeEditor/projects';
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectMenu(data));
+}
+function updateProjectMenu(data) {
+    console.log(data);
 }
 function hideMenu() {
     let menu = document.querySelector('.menu');
