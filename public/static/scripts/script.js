@@ -289,7 +289,7 @@ function dragMoveLine() {
     start = { "x": start.x, "y": start.y };
     let end = path.node().getPointAtLength(length);
     end = { "x": end.x, "y": end.y };
-    let middle = { "x": d3.event.x + deltaXLine, "y": d3.event.y + deltaYLine };
+    let middle = { "x": d3.event.x + deltaXCircle, "y": d3.event.y + deltaYCircle };
     let data = [start, middle, end];
     path.attr("d", lineFunction(data));
 }

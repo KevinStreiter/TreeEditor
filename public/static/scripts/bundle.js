@@ -18861,7 +18861,7 @@ function dragMoveLine() {
     start = { "x": start.x, "y": start.y };
     let end = path.node().getPointAtLength(length);
     end = { "x": end.x, "y": end.y };
-    let middle = { "x": d3.event.x + deltaXLine, "y": d3.event.y + deltaYLine };
+    let middle = { "x": d3.event.x + deltaXCircle, "y": d3.event.y + deltaYCircle };
     let data = [start, middle, end];
     path.attr("d", lineFunction(data));
 }
@@ -19321,4 +19321,4 @@ function updateProjectName(name, id) {
     projectTitle.setAttribute("class", id);
 }
 
-},{"./modules/d3.js":2,"./modules/toDOM.js":3,"./modules/toJSON.js":4}]},{},[1,5]);
+},{"./modules/d3.js":2,"./modules/toDOM.js":3,"./modules/toJSON.js":4}]},{},[5,1]);
