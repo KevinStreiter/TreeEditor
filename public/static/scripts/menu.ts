@@ -1,4 +1,5 @@
 import * as d3 from "./modules/d3";
+import {updateProjectNodes} from "./script";
 
 let target;
 
@@ -37,10 +38,10 @@ function updateProjectMenu(data) {
     for (let item of data) {
         if (tempId != item["project_id"]) {
             menu.insertAdjacentHTML('beforeend', `<li class="menu-item submenu" id="${item["project_id"]}">\n` +
-                `<button type="button" class="menu-btn"> <i class="fa fa-share"></i>` +
+                `<button type="button" class="menu-btn"> <i class="fa fa-folder-open"></i>` +
                 `<span class="menu-text">${item["name"]}</span> </button>\n` +
                 `<menu class="menu"><li class="menu-item" id="${item["node_id"]}">\n`+
-                `<button type="button" class="menu-btn"><i class="fa fa-trash"></i> <span class="menu-text">${item["node_id"]}</span></button>\n` +
+                `<button type="button" class="menu-btn"><i class="fa fa-link"></i> <span class="menu-text">${item["node_id"]}</span></button>\n` +
                 `            </li></menu>`);
             tempId = item["project_id"]
         }
@@ -50,7 +51,7 @@ function updateProjectMenu(data) {
                 let submenuEntry = <HTMLInputElement> submenu.querySelector('.menu');
                 submenuEntry.insertAdjacentHTML('beforeend',
                     `            <li class="menu-item" id="${item["node_id"]}">\n` +
-                    `                <button type="button" class="menu-btn"><i class="fa fa-trash"></i> <span class="menu-text">${item["node_id"]}</span></button>\n` +
+                    `                <button type="button" class="menu-btn"><i class="fa fa-link"></i> <span class="menu-text">${item["node_id"]}</span></button>\n` +
                     `            </li>`)
             }
     }
@@ -71,6 +72,15 @@ function onContextMenu(e){
 function onClick(e){
     if (e.target.innerText == "Delete" || e.target.parentNode.innerText == "Delete") {
         removeNode(target);
+    }
+
+    else {
+        let nodeId = e.target.innerText;
+        if (nodeId == "") {
+            nodeId = e.target.parentNode.innerText;
+        }
+        console.log(nodeId);
+        //updateProjectNodes(null)
     }
     hideMenu();
     document.removeEventListener('click', onClick);

@@ -703,6 +703,7 @@ function updateProjectNodes(data) {
     initializeCircleListeners();
     resetRectBorder();
 }
+exports.updateProjectNodes = updateProjectNodes;
 function getProjectNodes(id) {
     let url = '/treeEditor/nodes?id=' + id;
     fetch(url, {
