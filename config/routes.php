@@ -24,6 +24,13 @@ $app->get('/treeEditor/projects', function ($request, $response, $args) {
     return $response->withJson($rows);
 });
 
+$app->get('/treeEditor/projectsAndNodes', function ($request, $response, $args) {
+    $connection = $this->get(Connection::class);
+    $rows = $connection->execute('SELECT * FROM Projects INNER JOIN Nodes using (project_id)')
+        ->fetchAll('assoc');
+    return $response->withJson($rows);
+});
+
 $app->post('/treeEditor/projects/delete', function (Request $request) {
     $id = $request->getParam('id');
     $connection = $this->get(Connection::class);

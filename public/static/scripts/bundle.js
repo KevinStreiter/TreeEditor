@@ -4,13 +4,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
 let target;
 function showMenu(x, y) {
+    d3.selectAll(".submenu").remove();
     let menu = document.querySelector('.menu');
     let delEntry = document.getElementById('menu-delete-btn');
+    menu.classList.add('show-menu');
     menu.style.left = x + 'px';
     menu.style.top = y + 'px';
     if (target.tagName == "rect" || target.tagName == "path") {
         delEntry.style.display = 'inherit';
-        menu.classList.add('show-menu');
     }
     else if (target.tagName == "svg") {
         delEntry.style.display = 'none';
@@ -21,7 +22,7 @@ function showMenu(x, y) {
     }
 }
 function getProjects() {
-    let url = '/treeEditor/projects';
+    let url = '/treeEditor/projectsAndNodes';
     fetch(url, {
         method: 'GET',
     })
@@ -30,6 +31,26 @@ function getProjects() {
 }
 function updateProjectMenu(data) {
     console.log(data);
+    let menu = document.querySelector('.menu');
+    let tempId = null;
+    for (let item of data) {
+        if (tempId != item["project_id"]) {
+            menu.insertAdjacentHTML('beforeend', `<li class="menu-item submenu" id="${item["project_id"]}">\n` +
+                `<button type="button" class="menu-btn"> <i class="fa fa-share"></i>` +
+                `<span class="menu-text">${item["name"]}</span> </button>\n` +
+                `<menu class="menu"><li class="menu-item" id="${item["node_id"]}">\n` +
+                `<button type="button" class="menu-btn"><i class="fa fa-trash"></i> <span class="menu-text">${item["node_id"]}</span></button>\n` +
+                `            </li></menu>`);
+            tempId = item["project_id"];
+        }
+        else {
+            let submenu = document.getElementById(`${item["project_id"]}`);
+            let submenuEntry = submenu.querySelector('.menu');
+            submenuEntry.insertAdjacentHTML('beforeend', `            <li class="menu-item" id="${item["node_id"]}">\n` +
+                `                <button type="button" class="menu-btn"><i class="fa fa-trash"></i> <span class="menu-text">${item["node_id"]}</span></button>\n` +
+                `            </li>`);
+        }
+    }
 }
 function hideMenu() {
     let menu = document.querySelector('.menu');
