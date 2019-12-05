@@ -57,7 +57,7 @@ $app->post('/treeEditor/files/upload', function($request, $response) {
     $directory = $this->get('upload_directory');
     $uploadedFiles = $request->getUploadedFiles();
     $uploadedFile = $uploadedFiles['file'];
-    $filename = "";
+    $filename = null;
     $rectIndex = $request->getParam('rectInfo');
     if ($uploadedFile->getError() === UPLOAD_ERR_OK) {
         $filename = moveUploadedFile($directory, $uploadedFile, $rectIndex);

@@ -1,7 +1,185 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const script_1 = require("./script");
 const d3 = require("./modules/d3");
+let toJSON = require("./modules/toJSON.js");
+let toDOM = require("./modules/toDOM.js");
+function getUploadedFile(filename) {
+    let url = '/treeEditor/files?filename=' + filename;
+    fetch(url, {
+        method: 'GET',
+        credentials: 'include'
+    })
+        .then(response => response.blob())
+        .then(function (blob) {
+        url = URL.createObjectURL(blob);
+        window.open(url);
+    });
+}
+function deleteFile(filename) {
+    let url = '/treeEditor/files/delete?filename=' + filename;
+    fetch(url, {
+        method: 'POST'
+    });
+}
+function saveProject() {
+    let project = document.getElementById("projectTitle");
+    let projectName = project.innerHTML;
+    let projectID = project.className;
+    let url = '/treeEditor/save?projectName=' + projectName + '&projectID=' + projectID;
+    let nodes = document.getElementById("nodes");
+    let nodes_json = toJSON(nodes);
+    let files = document.getElementById("fileList");
+    let files_json = toJSON(files);
+    let data = JSON.stringify({ nodes: nodes_json, files: files_json });
+    fetch(url, {
+        method: 'POST',
+        body: data
+    })
+        .then(response => response.json())
+        .then(data => saveProjectID(data));
+}
+exports.saveProject = saveProject;
+function saveProjectID(projectID) {
+    let projectTitle = document.getElementById("projectTitle");
+    projectTitle.setAttribute("class", projectID);
+    showSavePopup();
+}
+function showSavePopup() {
+    let popup = document.getElementById("popup");
+    popup.style.opacity = '50%';
+    popup.style.display = "block";
+    setTimeout(function () {
+        popup.style.opacity = '0';
+    }, 2000);
+}
+function updateProjectNodes(data) {
+    let svg = document.getElementById("nodes");
+    for (let element of data) {
+        let node = toDOM(element["element"]);
+        svg.appendChild(document.importNode(new DOMParser()
+            .parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + node.outerHTML + '</svg>', 'application/xml').documentElement.firstChild, true));
+    }
+    script_1.initializeRectListeners();
+    script_1.initializeCircleListeners();
+    script_1.resetRectBorder();
+}
+exports.updateProjectNodes = updateProjectNodes;
+function getProjectNodes(id) {
+    let url = '/treeEditor/nodes?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectNodes(data));
+}
+function updateProjectFiles(data) {
+    let nav = document.getElementById("fileList");
+    for (let element of data) {
+        let node = toDOM(element["element"]);
+        nav.appendChild(document.importNode(node, true));
+    }
+    let items = nav.getElementsByTagName("li");
+    for (let i = items.length; i--;) {
+        items[i].addEventListener("click", function () {
+            getUploadedFile(items[i].getAttribute("id"));
+        });
+    }
+    initializeDeleteFileListListener();
+}
+function getProjectFiles(id) {
+    let url = '/treeEditor/projectFiles?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectFiles(data));
+}
+function loadProject() {
+    let urlParams = new URLSearchParams(window.location.search);
+    let id = urlParams.get('id');
+    let name = urlParams.get('name');
+    if (id != null && name != null) {
+        updateProjectName(name, id);
+        getProjectFiles(id);
+        getProjectNodes(id);
+    }
+}
+exports.loadProject = loadProject;
+function updateProjectName(name, id) {
+    let projectTitle = document.getElementById("projectTitle");
+    projectTitle.innerText = name;
+    projectTitle.setAttribute("class", id);
+}
+function uploadFile() {
+    let file_input = document.querySelector('[type=file]');
+    let files = file_input.files;
+    let name = files[0].name;
+    if (name.substr(name.length - 3) == "pdf") {
+        let formData = new FormData();
+        formData.append('file', files[0]);
+        let rectInfo = document.getElementById('rectInfo').innerHTML;
+        let url = '/treeEditor/files/upload?rectInfo=' + rectInfo;
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+        })
+            .then(response => response.text())
+            .then(function (data) {
+            updateFileList(data);
+            saveProject();
+        });
+    }
+    else {
+        alert("Only .pdf attachments are allowed");
+    }
+}
+exports.uploadFile = uploadFile;
+function updateFileList(filename) {
+    let file = document.getElementById("fileChooser");
+    let ul = document.getElementById("fileList");
+    let entries = d3.select("#fileList").selectAll("li");
+    let isDuplicate = false;
+    entries.each(function () {
+        let str = this.textContent.slice(0, -1);
+        if (str == file.files[0].name) {
+            isDuplicate = true;
+        }
+    });
+    if (!isDuplicate) {
+        let li = document.createElement("li");
+        let span = document.createElement("span");
+        li.appendChild(document.createTextNode(file.files[0].name));
+        li.setAttribute("id", filename);
+        span.setAttribute("class", "close");
+        span.appendChild(document.createTextNode("x"));
+        li.appendChild(span);
+        ul.appendChild(li);
+        initializeDeleteFileListListener();
+        li.addEventListener("click", function () {
+            getUploadedFile(filename);
+        });
+    }
+}
+function initializeDeleteFileListListener() {
+    let btnList = document.getElementsByClassName("close");
+    for (let i = 0; i < btnList.length; i++) {
+        btnList[i].addEventListener("click", function (e) {
+            let filename = this.parentElement.getAttribute("id");
+            deleteFile(filename);
+            this.parentElement.remove();
+            saveProject();
+            e.stopPropagation();
+        });
+    }
+}
+
+},{"./modules/d3":3,"./modules/toDOM.js":4,"./modules/toJSON.js":5,"./script":7}],2:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const d3 = require("./modules/d3");
+//import {updateProjectNodes} from "./script";
 let target;
 function showMenu(x, y) {
     d3.selectAll(".submenu").remove();
@@ -108,7 +286,7 @@ function removeNode(node) {
     }
 }
 
-},{"./modules/d3":2}],2:[function(require,module,exports){
+},{"./modules/d3":3}],3:[function(require,module,exports){
 // https://d3js.org v5.12.0 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -18538,7 +18716,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 module.exports = function toDOM(obj) {
     if (typeof obj == 'string') {
         obj = JSON.parse(obj);
@@ -18579,7 +18757,7 @@ module.exports = function toDOM(obj) {
     }
     return node;
 };
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 module.exports = function toJSON(node) {
     node = node || this;
     var obj = {
@@ -18614,16 +18792,67 @@ module.exports = function toJSON(node) {
 };
 
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const d3 = require("./modules/d3");
+const script_1 = require("./script");
+function openNav() {
+    let current = d3.select(this);
+    let parent = d3.select(this.parentNode);
+    let id = parent.attr("id");
+    script_1.resetListeners();
+    document.getElementById("mySidebar").style.width = "250px";
+    document.getElementById('rectInfo').innerHTML = id;
+    let titleText = document.getElementById("titleText");
+    let contentText = document.getElementById("contentText");
+    let colorPicker = document.getElementById("colorPicker");
+    titleText.value = parent.select("text.titleText").text();
+    contentText.value = parent.select("text.contentText").text();
+    colorPicker.value = current.attr("fill");
+    listFiles(id);
+    script_1.resetRectBorder();
+    d3.select(this)
+        .style("stroke", "red")
+        .on("dblclick", closeNav);
+    d3.select(".closebtn").on("click", function () {
+        closeNav();
+    });
+}
+exports.openNav = openNav;
+function closeNav() {
+    document.getElementById("mySidebar").style.width = "0";
+    document.getElementById('rectInfo').innerHTML = "";
+    let titleText = document.getElementById("titleText");
+    let contentText = document.getElementById("contentText");
+    titleText.value = "";
+    contentText.value = "";
+    script_1.resetRectBorder();
+    script_1.resetListeners();
+}
+function listFiles(id) {
+    let entries = d3.select("#fileList").selectAll("li");
+    entries.each(function () {
+        let li = d3.select(this);
+        if (li.attr("id").slice(0, 1) == id) {
+            li.style("display", 'inherit');
+        }
+        else {
+            li.style("display", 'none');
+        }
+    });
+}
+
+},{"./modules/d3":3,"./script":7}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
-let toJSON = require("./modules/toJSON.js");
-let toDOM = require("./modules/toDOM.js");
+const navbar_1 = require("./navbar");
+const controller_1 = require("./controller");
 let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction;
 window.onload = () => {
     initializePage();
-    loadProject();
+    controller_1.loadProject();
     defineGrid();
 };
 function defineGrid() {
@@ -18691,9 +18920,6 @@ function initializePage() {
     dragLine = d3.drag()
         .on("start", dragStartLine)
         .on("drag", dragMoveLine);
-    d3.select(".closebtn").on("click", function () {
-        closeNav();
-    });
     d3.select("#titleText").on("input", function () {
         updateRectText(this);
     });
@@ -18707,16 +18933,15 @@ function initializePage() {
         document.getElementById("fileChooser").click();
     });
     d3.select("#fileChooser").on("input", function () {
-        uploadFile();
+        controller_1.uploadFile();
     });
     d3.select("#saveButton").on("click", function () {
-        saveProject();
+        controller_1.saveProject();
     });
 }
 function mousedown() {
     if (d3.event.button != 2) {
         let event = d3.mouse(this);
-        console.log(event);
         let rectCounter = 1;
         svg.selectAll("rect").each(function () {
             let id = +d3.select(this.parentNode).attr("id");
@@ -18788,9 +19013,10 @@ function initializeRectListeners() {
         d3.select(this)
             .style("cursor", "default");
     })
-        .on("dblclick", openNav)
+        .on("dblclick", navbar_1.openNav)
         .call(dragRect);
 }
+exports.initializeRectListeners = initializeRectListeners;
 function initializeCircleListeners() {
     let count = null;
     svg.selectAll("rect").each(function () {
@@ -18829,6 +19055,7 @@ function initializeCircleListeners() {
             .on("click", drawLine);
     });
 }
+exports.initializeCircleListeners = initializeCircleListeners;
 function mouseMove() {
     let rectCounter = 1;
     svg.selectAll("rect").each(function () {
@@ -18838,7 +19065,6 @@ function mouseMove() {
         }
     });
     let event = d3.mouse(this), newXCoordinate = Math.max(0, event[0] - +rect.attr("x")), newYCoordinate = Math.max(0, event[1] - +rect.attr("y"));
-    console.log(newXCoordinate);
     updateRectSize(newXCoordinate, newYCoordinate, rectCounter, null, rect, true);
 }
 function dragStart() {
@@ -19078,13 +19304,14 @@ function resetListeners() {
     d3.selectAll("circle")
         .on("click", drawLine);
     svg.selectAll("rect")
-        .on("dblclick", openNav)
+        .on("dblclick", navbar_1.openNav)
         .each(function () {
         count = d3.select(this.parentNode).attr("id");
         d3.select(`#circleBottomRight${count}`)
             .on("click", null);
     });
 }
+exports.resetListeners = resetListeners;
 function moveLine() {
     let event = d3.mouse(this);
     let newLineData = [lineData[0]];
@@ -19141,40 +19368,6 @@ function combineRect() {
             .call(dragLine);
     }
 }
-function openNav() {
-    let current = d3.select(this);
-    let parent = d3.select(this.parentNode);
-    let id = parent.attr("id");
-    resetListeners();
-    document.getElementById("mySidebar").style.width = "250px";
-    document.getElementById('rectInfo').innerHTML = id;
-    let titleText = document.getElementById("titleText");
-    let contentText = document.getElementById("contentText");
-    let colorPicker = document.getElementById("colorPicker");
-    titleText.value = parent.select("text.titleText").text();
-    contentText.value = parent.select("text.contentText").text();
-    colorPicker.value = current.attr("fill");
-    listFiles(id);
-    svg.selectAll("rect")
-        .style("stroke", "#7b9eb4");
-    d3.select(this)
-        .style("stroke", "red")
-        .on("dblclick", closeNav);
-}
-function closeNav() {
-    document.getElementById("mySidebar").style.width = "0";
-    document.getElementById('rectInfo').innerHTML = "";
-    let titleText = document.getElementById("titleText");
-    let contentText = document.getElementById("contentText");
-    titleText.value = "";
-    contentText.value = "";
-    resetRectBorder();
-    resetListeners();
-}
-function resetRectBorder() {
-    svg.selectAll("rect")
-        .style("stroke", "#7b9eb4");
-}
 function updateRectText(object) {
     let id = document.getElementById('rectInfo').innerHTML;
     svg.selectAll("g").each(function () {
@@ -19193,183 +19386,10 @@ function updateRectColor(object) {
         }
     });
 }
-function uploadFile() {
-    let file_input = document.querySelector('[type=file]');
-    let files = file_input.files;
-    let name = files[0].name;
-    if (name.substr(name.length - 3) == "pdf") {
-        let formData = new FormData();
-        formData.append('file', files[0]);
-        let rectInfo = document.getElementById('rectInfo').innerHTML;
-        let url = '/treeEditor/files/upload?rectInfo=' + rectInfo;
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-        })
-            .then(response => response.text())
-            .then(function (data) {
-            updateFileList(data);
-            saveProject();
-        });
-    }
-    else {
-        alert("Only .pdf attachments are allowed");
-    }
+function resetRectBorder() {
+    svg.selectAll("rect")
+        .style("stroke", "#7b9eb4");
 }
-function updateFileList(filename) {
-    let file = document.getElementById("fileChooser");
-    let ul = document.getElementById("fileList");
-    let entries = d3.select("#fileList").selectAll("li");
-    let isDuplicate = false;
-    entries.each(function () {
-        let str = this.textContent.slice(0, -1);
-        if (str == file.files[0].name) {
-            isDuplicate = true;
-        }
-    });
-    if (!isDuplicate) {
-        let li = document.createElement("li");
-        let span = document.createElement("span");
-        li.appendChild(document.createTextNode(file.files[0].name));
-        li.setAttribute("id", filename);
-        span.setAttribute("class", "close");
-        span.appendChild(document.createTextNode("x"));
-        li.appendChild(span);
-        ul.appendChild(li);
-        initializeDeleteFileListListener();
-        li.addEventListener("click", function () {
-            getUploadedFile(filename);
-        });
-    }
-}
-function initializeDeleteFileListListener() {
-    let btnList = document.getElementsByClassName("close");
-    for (let i = 0; i < btnList.length; i++) {
-        btnList[i].addEventListener("click", function (e) {
-            let filename = this.parentElement.getAttribute("id");
-            deleteFile(filename);
-            this.parentElement.remove();
-            saveProject();
-            e.stopPropagation();
-        });
-    }
-}
-function getUploadedFile(filename) {
-    let url = '/treeEditor/files?filename=' + filename;
-    fetch(url, {
-        method: 'GET',
-        credentials: 'include'
-    })
-        .then(response => response.blob())
-        .then(function (blob) {
-        url = URL.createObjectURL(blob);
-        window.open(url);
-    });
-}
-function deleteFile(filename) {
-    let url = '/treeEditor/files/delete?filename=' + filename;
-    fetch(url, {
-        method: 'POST'
-    });
-}
-function listFiles(id) {
-    let entries = d3.select("#fileList").selectAll("li");
-    entries.each(function () {
-        let li = d3.select(this);
-        if (li.attr("id").slice(0, 1) == id) {
-            li.style("display", 'inherit');
-        }
-        else {
-            li.style("display", 'none');
-        }
-    });
-}
-function saveProject() {
-    let project = document.getElementById("projectTitle");
-    let projectName = project.innerHTML;
-    let projectID = project.className;
-    let url = '/treeEditor/save?projectName=' + projectName + '&projectID=' + projectID;
-    let nodes = document.getElementById("nodes");
-    let nodes_json = toJSON(nodes);
-    let files = document.getElementById("fileList");
-    let files_json = toJSON(files);
-    let data = JSON.stringify({ nodes: nodes_json, files: files_json });
-    fetch(url, {
-        method: 'POST',
-        body: data
-    })
-        .then(response => response.json())
-        .then(data => saveProjectID(data));
-}
-function saveProjectID(projectID) {
-    let projectTitle = document.getElementById("projectTitle");
-    projectTitle.setAttribute("class", projectID);
-    showSavePopup();
-}
-function showSavePopup() {
-    let popup = document.getElementById("popup");
-    popup.style.opacity = '50%';
-    popup.style.display = "block";
-    setTimeout(function () {
-        popup.style.opacity = '0';
-    }, 2000);
-}
-function updateProjectNodes(data) {
-    let svg = document.getElementById("nodes");
-    for (let element of data) {
-        let node = toDOM(element["element"]);
-        svg.appendChild(document.importNode(new DOMParser()
-            .parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + node.outerHTML + '</svg>', 'application/xml').documentElement.firstChild, true));
-    }
-    initializeRectListeners();
-    initializeCircleListeners();
-    resetRectBorder();
-}
-exports.updateProjectNodes = updateProjectNodes;
-function getProjectNodes(id) {
-    let url = '/treeEditor/nodes?id=' + id;
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => updateProjectNodes(data));
-}
-function updateProjectFiles(data) {
-    let nav = document.getElementById("fileList");
-    for (let element of data) {
-        let node = toDOM(element["element"]);
-        nav.appendChild(document.importNode(node, true));
-    }
-    let items = nav.getElementsByTagName("li");
-    for (let i = items.length; i--;) {
-        items[i].addEventListener("click", function () {
-            getUploadedFile(items[i].getAttribute("id"));
-        });
-    }
-    initializeDeleteFileListListener();
-}
-function getProjectFiles(id) {
-    let url = '/treeEditor/projectFiles?id=' + id;
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => updateProjectFiles(data));
-}
-function loadProject() {
-    let urlParams = new URLSearchParams(window.location.search);
-    let id = urlParams.get('id');
-    let name = urlParams.get('name');
-    if (id != null && name != null) {
-        updateProjectName(name, id);
-        getProjectFiles(id);
-        getProjectNodes(id);
-    }
-}
-function updateProjectName(name, id) {
-    let projectTitle = document.getElementById("projectTitle");
-    projectTitle.innerText = name;
-    projectTitle.setAttribute("class", id);
-}
+exports.resetRectBorder = resetRectBorder;
 
-},{"./modules/d3.js":2,"./modules/toDOM.js":3,"./modules/toJSON.js":4}]},{},[5,1]);
+},{"./controller":1,"./modules/d3.js":3,"./navbar":6}]},{},[7,2,6,1]);

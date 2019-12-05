@@ -1,5 +1,5 @@
 import * as d3 from "./modules/d3";
-import {updateProjectNodes} from "./script";
+//import {updateProjectNodes} from "./script";
 
 let target;
 

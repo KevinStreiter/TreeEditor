@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
+//import {updateProjectNodes} from "./script";
 let target;
 function showMenu(x, y) {
     d3.selectAll(".submenu").remove();
