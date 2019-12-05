@@ -48,7 +48,7 @@ function defineGrid() {
         .call(yGridLines);
 }
 function initializePage() {
-    margin = { top: 20, right: 20, bottom: 20, left: 20 };
+    margin = { top: 2, right: 2, bottom: 2, left: 2 };
     graph = document.getElementById('main');
     boundaries = graph.getBoundingClientRect();
     width = boundaries.width - margin.left - margin.right;
@@ -58,7 +58,8 @@ function initializePage() {
         .attr("height", height + margin.top + margin.bottom)
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
         .on("mousedown", mousedown)
-        .on("mouseup", mouseUp);
+        .on("mouseup", mouseUp)
+        .on("mouseleave", mouseUp);
     nodes = svg.append("g").attr("id", "nodes");
     dragRect = d3.drag()
         .on("start", dragStart)
@@ -98,6 +99,7 @@ function initializePage() {
 function mousedown() {
     if (d3.event.button != 2) {
         let event = d3.mouse(this);
+        console.log(event);
         let rectCounter = 1;
         svg.selectAll("rect").each(function () {
             let id = +d3.select(this.parentNode).attr("id");
@@ -219,6 +221,7 @@ function mouseMove() {
         }
     });
     let event = d3.mouse(this), newXCoordinate = Math.max(0, event[0] - +rect.attr("x")), newYCoordinate = Math.max(0, event[1] - +rect.attr("y"));
+    console.log(newXCoordinate);
     updateRectSize(newXCoordinate, newYCoordinate, rectCounter, null, rect, true);
 }
 function dragStart() {
@@ -401,7 +404,7 @@ function updateLinePath(element, current, x, y, isConnector) {
         .attr("cy", middle.y);
 }
 function mouseUp() {
-    if (d3.event.button != 2) {
+    if (d3.event.button != 2 && rect != null) {
         svg.on("mousemove", null);
         let parent = rect.select(function () {
             return this.parentNode;
@@ -453,6 +456,7 @@ function resetListeners() {
         .on("mousemove", null)
         .on("mousedown", mousedown)
         .on("mouseup", mouseUp)
+        .on("mouseleave", mouseUp)
         .on("dblclick", null);
     d3.selectAll("circle")
         .on("click", drawLine);
@@ -473,6 +477,7 @@ function moveLine() {
     svg
         .on("mousedown", null)
         .on("mouseup", null)
+        .on("mouseleave", null)
         .on("dblclick", removeLine);
     d3.selectAll("circle")
         .raise()
