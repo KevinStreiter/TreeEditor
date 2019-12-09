@@ -1,5 +1,5 @@
 import * as d3 from "./modules/d3";
-//import {updateProjectNodes} from "./script";
+import {getNode} from "./controller";
 
 let target;
 
@@ -41,18 +41,17 @@ function updateProjectMenu(data) {
                 `<button type="button" class="menu-btn"> <i class="fa fa-folder-open"></i>` +
                 `<span class="menu-text">${item["name"]}</span> </button>\n` +
                 `<menu class="menu"><li class="menu-item" id="${item["node_id"]}">\n`+
-                `<button type="button" class="menu-btn"><i class="fa fa-link"></i> <span class="menu-text">${item["node_id"]}</span></button>\n` +
-                `            </li></menu>`);
+                `<button type="button" class="menu-btn"><i class="fa fa-link"></i>`+
+                `<span class="menu-text">${item["node_id"]}</span></button>\n</li></menu>`);
             tempId = item["project_id"]
         }
         else
             {
                 let submenu = document.getElementById(`${item["project_id"]}`);
                 let submenuEntry = <HTMLInputElement> submenu.querySelector('.menu');
-                submenuEntry.insertAdjacentHTML('beforeend',
-                    `            <li class="menu-item" id="${item["node_id"]}">\n` +
-                    `                <button type="button" class="menu-btn"><i class="fa fa-link"></i> <span class="menu-text">${item["node_id"]}</span></button>\n` +
-                    `            </li>`)
+                submenuEntry.insertAdjacentHTML('beforeend', `<li class="menu-item" id="${item["node_id"]}">\n` +
+                    `<button type="button" class="menu-btn"><i class="fa fa-link"></i>`+
+                    `<span class="menu-text">${item["node_id"]}</span></button>\n</li>`)
             }
     }
 }
@@ -79,8 +78,7 @@ function onClick(e){
         if (nodeId == "") {
             nodeId = e.target.parentNode.innerText;
         }
-        console.log(nodeId);
-        //updateProjectNodes(null)
+        getNode(nodeId, true);
     }
     hideMenu();
     document.removeEventListener('click', onClick);

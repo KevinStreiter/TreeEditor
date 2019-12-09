@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
-//import {updateProjectNodes} from "./script";
+const controller_1 = require("./controller");
 let target;
 function showMenu(x, y) {
     d3.selectAll(".submenu").remove();
@@ -38,16 +38,16 @@ function updateProjectMenu(data) {
                 `<button type="button" class="menu-btn"> <i class="fa fa-folder-open"></i>` +
                 `<span class="menu-text">${item["name"]}</span> </button>\n` +
                 `<menu class="menu"><li class="menu-item" id="${item["node_id"]}">\n` +
-                `<button type="button" class="menu-btn"><i class="fa fa-link"></i> <span class="menu-text">${item["node_id"]}</span></button>\n` +
-                `            </li></menu>`);
+                `<button type="button" class="menu-btn"><i class="fa fa-link"></i>` +
+                `<span class="menu-text">${item["node_id"]}</span></button>\n</li></menu>`);
             tempId = item["project_id"];
         }
         else {
             let submenu = document.getElementById(`${item["project_id"]}`);
             let submenuEntry = submenu.querySelector('.menu');
-            submenuEntry.insertAdjacentHTML('beforeend', `            <li class="menu-item" id="${item["node_id"]}">\n` +
-                `                <button type="button" class="menu-btn"><i class="fa fa-link"></i> <span class="menu-text">${item["node_id"]}</span></button>\n` +
-                `            </li>`);
+            submenuEntry.insertAdjacentHTML('beforeend', `<li class="menu-item" id="${item["node_id"]}">\n` +
+                `<button type="button" class="menu-btn"><i class="fa fa-link"></i>` +
+                `<span class="menu-text">${item["node_id"]}</span></button>\n</li>`);
         }
     }
 }
@@ -70,8 +70,7 @@ function onClick(e) {
         if (nodeId == "") {
             nodeId = e.target.parentNode.innerText;
         }
-        console.log(nodeId);
-        //updateProjectNodes(null)
+        controller_1.getNode(nodeId, true);
     }
     hideMenu();
     document.removeEventListener('click', onClick);

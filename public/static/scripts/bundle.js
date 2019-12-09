@@ -54,18 +54,43 @@ function showSavePopup() {
         popup.style.opacity = '0';
     }, 2000);
 }
-function updateProjectNodes(data) {
-    let svg = document.getElementById("nodes");
+function updateProjectNodes(data, fromDifferentProject = false) {
+    let nodes = document.getElementById("nodes");
     for (let element of data) {
         let node = toDOM(element["element"]);
-        svg.appendChild(document.importNode(new DOMParser()
+        nodes.appendChild(document.importNode(new DOMParser()
             .parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + node.outerHTML + '</svg>', 'application/xml').documentElement.firstChild, true));
+        if (fromDifferentProject) {
+            let rectCounter = 1;
+            d3.select("#nodes").selectAll("rect").each(function () {
+                let id = +d3.select(this.parentNode).attr("id");
+                if (id >= rectCounter) {
+                    rectCounter = id + 1;
+                }
+            });
+            let foreignNode = d3.select("#nodes>g:last-child").attr("id", rectCounter);
+            foreignNode.selectAll("path").remove();
+            foreignNode.selectAll("circle.lineCircle").remove();
+            foreignNode.selectAll("circle").each(function () {
+                let element = d3.select(this);
+                element.attr("id", element.attr("id").slice(0, -1).concat(rectCounter));
+            });
+        }
     }
     script_1.initializeRectListeners();
     script_1.initializeCircleListeners();
     script_1.resetRectBorder();
 }
 exports.updateProjectNodes = updateProjectNodes;
+function getNode(id, fromDifferentProject) {
+    let url = '/treeEditor/node?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectNodes(data, fromDifferentProject));
+}
+exports.getNode = getNode;
 function getProjectNodes(id) {
     let url = '/treeEditor/nodes?id=' + id;
     fetch(url, {
@@ -179,7 +204,7 @@ function initializeDeleteFileListListener() {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
-//import {updateProjectNodes} from "./script";
+const controller_1 = require("./controller");
 let target;
 function showMenu(x, y) {
     d3.selectAll(".submenu").remove();
@@ -216,16 +241,16 @@ function updateProjectMenu(data) {
                 `<button type="button" class="menu-btn"> <i class="fa fa-folder-open"></i>` +
                 `<span class="menu-text">${item["name"]}</span> </button>\n` +
                 `<menu class="menu"><li class="menu-item" id="${item["node_id"]}">\n` +
-                `<button type="button" class="menu-btn"><i class="fa fa-link"></i> <span class="menu-text">${item["node_id"]}</span></button>\n` +
-                `            </li></menu>`);
+                `<button type="button" class="menu-btn"><i class="fa fa-link"></i>` +
+                `<span class="menu-text">${item["node_id"]}</span></button>\n</li></menu>`);
             tempId = item["project_id"];
         }
         else {
             let submenu = document.getElementById(`${item["project_id"]}`);
             let submenuEntry = submenu.querySelector('.menu');
-            submenuEntry.insertAdjacentHTML('beforeend', `            <li class="menu-item" id="${item["node_id"]}">\n` +
-                `                <button type="button" class="menu-btn"><i class="fa fa-link"></i> <span class="menu-text">${item["node_id"]}</span></button>\n` +
-                `            </li>`);
+            submenuEntry.insertAdjacentHTML('beforeend', `<li class="menu-item" id="${item["node_id"]}">\n` +
+                `<button type="button" class="menu-btn"><i class="fa fa-link"></i>` +
+                `<span class="menu-text">${item["node_id"]}</span></button>\n</li>`);
         }
     }
 }
@@ -248,8 +273,7 @@ function onClick(e) {
         if (nodeId == "") {
             nodeId = e.target.parentNode.innerText;
         }
-        console.log(nodeId);
-        //updateProjectNodes(null)
+        controller_1.getNode(nodeId, true);
     }
     hideMenu();
     document.removeEventListener('click', onClick);
@@ -286,7 +310,7 @@ function removeNode(node) {
     }
 }
 
-},{"./modules/d3":3}],3:[function(require,module,exports){
+},{"./controller":1,"./modules/d3":3}],3:[function(require,module,exports){
 // https://d3js.org v5.12.0 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -18855,44 +18879,6 @@ window.onload = () => {
     controller_1.loadProject();
     defineGrid();
 };
-function defineGrid() {
-    let tickAmount = 70;
-    let grid = svg.append("g")
-        .attr("id", "grid")
-        .attr("pointer-events", "none");
-    let xScale = d3.scaleLinear()
-        .range([0, boundaries.width - margin.left - margin.right]);
-    let xAxis = d3.axisBottom()
-        .ticks(tickAmount)
-        .scale(xScale);
-    grid.append("g")
-        .attr("class", "xGridAxis")
-        .call(xAxis);
-    let xGridLines = d3.axisBottom()
-        .tickFormat("")
-        .ticks(tickAmount)
-        .tickSize(boundaries.height - margin.top - margin.bottom)
-        .scale(xScale);
-    grid.append("g")
-        .attr("class", "xGridLines")
-        .call(xGridLines);
-    let yScale = d3.scaleLinear()
-        .range([0, boundaries.height - margin.top - margin.bottom]);
-    let yAxis = d3.axisRight()
-        .ticks(tickAmount)
-        .scale(yScale);
-    grid.append("g")
-        .attr("class", "yGridAxis")
-        .call(yAxis);
-    let yGridLines = d3.axisRight()
-        .tickFormat("")
-        .ticks(tickAmount)
-        .tickSize(boundaries.width - margin.left - margin.right)
-        .scale(yScale);
-    grid.append("g")
-        .attr("class", "yGridLines")
-        .call(yGridLines);
-}
 function initializePage() {
     margin = { top: 2, right: 2, bottom: 2, left: 2 };
     graph = document.getElementById('main');
@@ -18939,6 +18925,44 @@ function initializePage() {
         controller_1.saveProject();
     });
 }
+function defineGrid() {
+    let tickAmount = 70;
+    let grid = svg.append("g")
+        .attr("id", "grid")
+        .attr("pointer-events", "none");
+    let xScale = d3.scaleLinear()
+        .range([0, boundaries.width - margin.left - margin.right]);
+    let xAxis = d3.axisBottom()
+        .ticks(tickAmount)
+        .scale(xScale);
+    grid.append("g")
+        .attr("class", "xGridAxis")
+        .call(xAxis);
+    let xGridLines = d3.axisBottom()
+        .tickFormat("")
+        .ticks(tickAmount)
+        .tickSize(boundaries.height - margin.top - margin.bottom)
+        .scale(xScale);
+    grid.append("g")
+        .attr("class", "xGridLines")
+        .call(xGridLines);
+    let yScale = d3.scaleLinear()
+        .range([0, boundaries.height - margin.top - margin.bottom]);
+    let yAxis = d3.axisRight()
+        .ticks(tickAmount)
+        .scale(yScale);
+    grid.append("g")
+        .attr("class", "yGridAxis")
+        .call(yAxis);
+    let yGridLines = d3.axisRight()
+        .tickFormat("")
+        .ticks(tickAmount)
+        .tickSize(boundaries.width - margin.left - margin.right)
+        .scale(yScale);
+    grid.append("g")
+        .attr("class", "yGridLines")
+        .call(yGridLines);
+}
 function mousedown() {
     if (d3.event.button != 2) {
         let event = d3.mouse(this);
@@ -18960,8 +18984,6 @@ function mousedown() {
             .attr('height', 0)
             .attr('width', 0)
             .attr("fill", "#aaa9ad")
-            .style("stroke-width", 5)
-            .style("stroke", "#7b9eb4")
             .attr("class", "rect");
         initializeRectListeners();
         g.append("circle")
@@ -18969,29 +18991,25 @@ function mousedown() {
             .attr("cy", +rect.attr("y"))
             .attr("r", 5)
             .attr("id", "circleTop" + rectCounter)
-            .attr("class", "circle")
-            .attr("fill", "grey");
+            .attr("class", "circle");
         g.append("circle")
             .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
             .attr("cy", (+rect.attr("y") + +rect.attr("height")))
             .attr("r", 5)
             .attr("id", "circleBottom" + rectCounter)
-            .attr("class", "circle")
-            .attr("fill", "grey");
+            .attr("class", "circle");
         g.append("circle")
             .attr("cx", +rect.attr("x"))
             .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
             .attr("r", 5)
             .attr("id", "circleLeft" + rectCounter)
-            .attr("class", "circle")
-            .attr("fill", "grey");
+            .attr("class", "circle");
         g.append("circle")
             .attr("cx", (+rect.attr("x") + +rect.attr("width")))
             .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
             .attr("r", 5)
             .attr("id", "circleRight" + rectCounter)
-            .attr("class", "circle")
-            .attr("fill", "grey");
+            .attr("class", "circle");
         g.append("circle")
             .attr("cx", (+rect.attr("x") + +rect.attr("width")))
             .attr("cy", (+rect.attr("y") + (+rect.attr("height"))))

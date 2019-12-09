@@ -37,6 +37,14 @@ $app->post('/treeEditor/projects/delete', function (Request $request) {
     $connection->query("DELETE FROM Projects WHERE project_id={$id}");
 });
 
+$app->get('/treeEditor/node', function ($request, $response, $args) {
+    $id = $request->getParam('id');
+    $query = $this->get(Connection::class)->newQuery();
+    $query = $query->select('*')->from('Nodes')->andWhere(['node_id' => $id]);;
+    $rows = $query->execute()->fetchAll('assoc') ?: [];
+    return $response->withJson($rows);
+});
+
 $app->get('/treeEditor/nodes', function ($request, $response, $args) {
     $id = $request->getParam('id');
     $query = $this->get(Connection::class)->newQuery();

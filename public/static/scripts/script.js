@@ -9,44 +9,6 @@ window.onload = () => {
     controller_1.loadProject();
     defineGrid();
 };
-function defineGrid() {
-    let tickAmount = 70;
-    let grid = svg.append("g")
-        .attr("id", "grid")
-        .attr("pointer-events", "none");
-    let xScale = d3.scaleLinear()
-        .range([0, boundaries.width - margin.left - margin.right]);
-    let xAxis = d3.axisBottom()
-        .ticks(tickAmount)
-        .scale(xScale);
-    grid.append("g")
-        .attr("class", "xGridAxis")
-        .call(xAxis);
-    let xGridLines = d3.axisBottom()
-        .tickFormat("")
-        .ticks(tickAmount)
-        .tickSize(boundaries.height - margin.top - margin.bottom)
-        .scale(xScale);
-    grid.append("g")
-        .attr("class", "xGridLines")
-        .call(xGridLines);
-    let yScale = d3.scaleLinear()
-        .range([0, boundaries.height - margin.top - margin.bottom]);
-    let yAxis = d3.axisRight()
-        .ticks(tickAmount)
-        .scale(yScale);
-    grid.append("g")
-        .attr("class", "yGridAxis")
-        .call(yAxis);
-    let yGridLines = d3.axisRight()
-        .tickFormat("")
-        .ticks(tickAmount)
-        .tickSize(boundaries.width - margin.left - margin.right)
-        .scale(yScale);
-    grid.append("g")
-        .attr("class", "yGridLines")
-        .call(yGridLines);
-}
 function initializePage() {
     margin = { top: 2, right: 2, bottom: 2, left: 2 };
     graph = document.getElementById('main');
@@ -93,6 +55,44 @@ function initializePage() {
         controller_1.saveProject();
     });
 }
+function defineGrid() {
+    let tickAmount = 70;
+    let grid = svg.append("g")
+        .attr("id", "grid")
+        .attr("pointer-events", "none");
+    let xScale = d3.scaleLinear()
+        .range([0, boundaries.width - margin.left - margin.right]);
+    let xAxis = d3.axisBottom()
+        .ticks(tickAmount)
+        .scale(xScale);
+    grid.append("g")
+        .attr("class", "xGridAxis")
+        .call(xAxis);
+    let xGridLines = d3.axisBottom()
+        .tickFormat("")
+        .ticks(tickAmount)
+        .tickSize(boundaries.height - margin.top - margin.bottom)
+        .scale(xScale);
+    grid.append("g")
+        .attr("class", "xGridLines")
+        .call(xGridLines);
+    let yScale = d3.scaleLinear()
+        .range([0, boundaries.height - margin.top - margin.bottom]);
+    let yAxis = d3.axisRight()
+        .ticks(tickAmount)
+        .scale(yScale);
+    grid.append("g")
+        .attr("class", "yGridAxis")
+        .call(yAxis);
+    let yGridLines = d3.axisRight()
+        .tickFormat("")
+        .ticks(tickAmount)
+        .tickSize(boundaries.width - margin.left - margin.right)
+        .scale(yScale);
+    grid.append("g")
+        .attr("class", "yGridLines")
+        .call(yGridLines);
+}
 function mousedown() {
     if (d3.event.button != 2) {
         let event = d3.mouse(this);
@@ -114,8 +114,6 @@ function mousedown() {
             .attr('height', 0)
             .attr('width', 0)
             .attr("fill", "#aaa9ad")
-            .style("stroke-width", 5)
-            .style("stroke", "#7b9eb4")
             .attr("class", "rect");
         initializeRectListeners();
         g.append("circle")
@@ -123,29 +121,25 @@ function mousedown() {
             .attr("cy", +rect.attr("y"))
             .attr("r", 5)
             .attr("id", "circleTop" + rectCounter)
-            .attr("class", "circle")
-            .attr("fill", "grey");
+            .attr("class", "circle");
         g.append("circle")
             .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
             .attr("cy", (+rect.attr("y") + +rect.attr("height")))
             .attr("r", 5)
             .attr("id", "circleBottom" + rectCounter)
-            .attr("class", "circle")
-            .attr("fill", "grey");
+            .attr("class", "circle");
         g.append("circle")
             .attr("cx", +rect.attr("x"))
             .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
             .attr("r", 5)
             .attr("id", "circleLeft" + rectCounter)
-            .attr("class", "circle")
-            .attr("fill", "grey");
+            .attr("class", "circle");
         g.append("circle")
             .attr("cx", (+rect.attr("x") + +rect.attr("width")))
             .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
             .attr("r", 5)
             .attr("id", "circleRight" + rectCounter)
-            .attr("class", "circle")
-            .attr("fill", "grey");
+            .attr("class", "circle");
         g.append("circle")
             .attr("cx", (+rect.attr("x") + +rect.attr("width")))
             .attr("cy", (+rect.attr("y") + (+rect.attr("height"))))

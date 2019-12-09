@@ -234,6 +234,12 @@ ul li:hover {
 
 .circle {
     z-index: 10;
+    fill: grey;
+}
+
+.rect {
+    stroke-width: 5;
+    stroke: #7b9eb4;
 }
 
 
