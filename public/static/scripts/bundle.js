@@ -18896,8 +18896,8 @@ function initializePage() {
     width = boundaries.width - margin.left - margin.right;
     height = boundaries.height - margin.top - margin.bottom;
     svg = d3.select("#graph")
-        .attr("width", width + margin.left)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", width)
+        .attr("height", height)
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
         .on("mousedown", mousedown)
         .on("mouseup", mouseUp)
@@ -18941,7 +18941,7 @@ function defineGrid() {
         .attr("id", "grid")
         .attr("pointer-events", "none");
     let xScale = d3.scaleLinear()
-        .range([0, boundaries.width - margin.left - margin.right]);
+        .range([0, width - margin.right]);
     let xAxis = d3.axisBottom()
         .ticks(tickAmount)
         .scale(xScale);
@@ -18951,13 +18951,13 @@ function defineGrid() {
     let xGridLines = d3.axisBottom()
         .tickFormat("")
         .ticks(tickAmount)
-        .tickSize(boundaries.height - margin.top - margin.bottom)
+        .tickSize(height - margin.top)
         .scale(xScale);
     grid.append("g")
         .attr("class", "xGridLines")
         .call(xGridLines);
     let yScale = d3.scaleLinear()
-        .range([0, boundaries.height - margin.top - margin.bottom]);
+        .range([0, height - margin.top]);
     let yAxis = d3.axisRight()
         .ticks(tickAmount)
         .scale(yScale);
@@ -18967,7 +18967,7 @@ function defineGrid() {
     let yGridLines = d3.axisRight()
         .tickFormat("")
         .ticks(tickAmount)
-        .tickSize(boundaries.width - margin.left - margin.right)
+        .tickSize(width - margin.right)
         .scale(yScale);
     grid.append("g")
         .attr("class", "yGridLines")
@@ -19423,10 +19423,12 @@ function resetRectBorder() {
 exports.resetRectBorder = resetRectBorder;
 function checkBoundaries(element) {
     if (elementIsNearBottomBoundary(element)) {
-        console.log("bottom");
+        svg.attr("height", +svg.attr("height") + 20);
+        redrawGrid();
     }
     if (elementIsNearRightBoundary(element)) {
-        console.log("right");
+        svg.attr("width", +svg.attr("width") + 20);
+        redrawGrid();
     }
 }
 function elementIsNearBottomBoundary(element) {
@@ -19434,6 +19436,10 @@ function elementIsNearBottomBoundary(element) {
 }
 function elementIsNearRightBoundary(element) {
     return Math.abs(svg.attr("width") - (+element.attr("x") + +element.attr("width"))) < 20;
+}
+function redrawGrid() {
+    svg.select("#grid").remove();
+    defineGrid();
 }
 function stickyHeader() {
     let header = document.getElementById("myHeader");
