@@ -54,7 +54,7 @@ function showSavePopup() {
         popup.style.opacity = '0';
     }, 2000);
 }
-function updateProjectNodes(data, fromDifferentProject = false) {
+function updateProjectNodes(data, fromDifferentProject = false, event = null) {
     let nodes = document.getElementById("nodes");
     for (let element of data) {
         let node = toDOM(element["element"]);
@@ -69,12 +69,16 @@ function updateProjectNodes(data, fromDifferentProject = false) {
                 }
             });
             let foreignNode = d3.select("#nodes>g:last-child").attr("id", rectCounter);
+            foreignNode.select("rect")
+                .attr("x", event.pageX)
+                .attr("y", event.pageY);
             foreignNode.selectAll("path").remove();
             foreignNode.selectAll("circle.lineCircle").remove();
             foreignNode.selectAll("circle").each(function () {
                 let element = d3.select(this);
                 element.attr("id", element.attr("id").slice(0, -1).concat(rectCounter));
             });
+            script_1.updateRectSize(event.pageX, event.pageY, rectCounter, foreignNode, foreignNode.select("rect"), false);
         }
     }
     script_1.initializeRectListeners();
@@ -82,13 +86,16 @@ function updateProjectNodes(data, fromDifferentProject = false) {
     script_1.resetRectBorder();
 }
 exports.updateProjectNodes = updateProjectNodes;
-function getNode(id, fromDifferentProject) {
+function getNode(id, fromDifferentProject, event) {
     let url = '/treeEditor/node?id=' + id;
     fetch(url, {
         method: 'GET',
     })
         .then(response => response.json())
-        .then(data => updateProjectNodes(data, fromDifferentProject));
+        .then(data => {
+        updateProjectNodes(data, fromDifferentProject, event);
+        getProjectFiles(data[0]["node_id"]);
+    });
 }
 exports.getNode = getNode;
 function getProjectNodes(id) {
@@ -206,6 +213,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
 const controller_1 = require("./controller");
 let target;
+document.addEventListener('contextmenu', onContextMenu, false);
 function showMenu(x, y) {
     d3.selectAll(".submenu").remove();
     let menu = document.querySelector('.menu');
@@ -273,12 +281,11 @@ function onClick(e) {
         if (nodeId == "") {
             nodeId = e.target.parentNode.innerText;
         }
-        controller_1.getNode(nodeId, true);
+        controller_1.getNode(nodeId, true, e);
     }
     hideMenu();
     document.removeEventListener('click', onClick);
 }
-document.addEventListener('contextmenu', onContextMenu, false);
 function removeNode(node) {
     if (node.nodeName == "rect") {
         d3.selectAll("g").each(function () {
@@ -18878,6 +18885,9 @@ window.onload = () => {
     initializePage();
     controller_1.loadProject();
     defineGrid();
+    window.onscroll = function () {
+        stickyHeader();
+    };
 };
 function initializePage() {
     margin = { top: 2, right: 2, bottom: 2, left: 2 };
@@ -18886,7 +18896,7 @@ function initializePage() {
     width = boundaries.width - margin.left - margin.right;
     height = boundaries.height - margin.top - margin.bottom;
     svg = d3.select("#graph")
-        .attr("width", width + margin.left + margin.right)
+        .attr("width", width + margin.left)
         .attr("height", height + margin.top + margin.bottom)
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
         .on("mousedown", mousedown)
@@ -19239,7 +19249,9 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
             .attr("x", +current.attr("x") + 10)
             .attr("y", +current.attr("y") + 40);
     }
+    checkBoundaries(current);
 }
+exports.updateRectSize = updateRectSize;
 function updateLinePath(element, current, x, y, isConnector) {
     let length = element.node().getTotalLength();
     let start = null;
@@ -19409,5 +19421,30 @@ function resetRectBorder() {
         .style("stroke", "#7b9eb4");
 }
 exports.resetRectBorder = resetRectBorder;
+function checkBoundaries(element) {
+    if (elementIsNearBottomBoundary(element)) {
+        console.log("bottom");
+    }
+    if (elementIsNearRightBoundary(element)) {
+        console.log("right");
+    }
+}
+function elementIsNearBottomBoundary(element) {
+    return Math.abs(svg.attr("height") - (+element.attr("y") + +element.attr("height"))) < 20;
+}
+function elementIsNearRightBoundary(element) {
+    return Math.abs(svg.attr("width") - (+element.attr("x") + +element.attr("width"))) < 20;
+}
+function stickyHeader() {
+    let header = document.getElementById("myHeader");
+    let stickyY = header.offsetTop;
+    let stickyX = header.offsetLeft;
+    if (window.pageYOffset > stickyY || window.pageXOffset > stickyX) {
+        header.classList.add("sticky");
+    }
+    else {
+        header.classList.remove("sticky");
+    }
+}
 
 },{"./controller":1,"./modules/d3.js":3,"./navbar":6}]},{},[7,2,6,1]);

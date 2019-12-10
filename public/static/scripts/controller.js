@@ -53,7 +53,7 @@ function showSavePopup() {
         popup.style.opacity = '0';
     }, 2000);
 }
-function updateProjectNodes(data, fromDifferentProject = false) {
+function updateProjectNodes(data, fromDifferentProject = false, event = null) {
     let nodes = document.getElementById("nodes");
     for (let element of data) {
         let node = toDOM(element["element"]);
@@ -68,12 +68,16 @@ function updateProjectNodes(data, fromDifferentProject = false) {
                 }
             });
             let foreignNode = d3.select("#nodes>g:last-child").attr("id", rectCounter);
+            foreignNode.select("rect")
+                .attr("x", event.pageX)
+                .attr("y", event.pageY);
             foreignNode.selectAll("path").remove();
             foreignNode.selectAll("circle.lineCircle").remove();
             foreignNode.selectAll("circle").each(function () {
                 let element = d3.select(this);
                 element.attr("id", element.attr("id").slice(0, -1).concat(rectCounter));
             });
+            script_1.updateRectSize(event.pageX, event.pageY, rectCounter, foreignNode, foreignNode.select("rect"), false);
         }
     }
     script_1.initializeRectListeners();
@@ -81,13 +85,16 @@ function updateProjectNodes(data, fromDifferentProject = false) {
     script_1.resetRectBorder();
 }
 exports.updateProjectNodes = updateProjectNodes;
-function getNode(id, fromDifferentProject) {
+function getNode(id, fromDifferentProject, event) {
     let url = '/treeEditor/node?id=' + id;
     fetch(url, {
         method: 'GET',
     })
         .then(response => response.json())
-        .then(data => updateProjectNodes(data, fromDifferentProject));
+        .then(data => {
+        updateProjectNodes(data, fromDifferentProject, event);
+        getProjectFiles(data[0]["node_id"]);
+    });
 }
 exports.getNode = getNode;
 function getProjectNodes(id) {

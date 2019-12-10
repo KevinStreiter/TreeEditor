@@ -27,7 +27,7 @@ body {
 }
 
 .sticky + #main {
-    padding-top: 105px;
+    padding-top: 147px;
 }
 
 #title, #projectTitle {
@@ -242,4 +242,5 @@ ul li:hover {
     stroke: #7b9eb4;
 }
 
+h1 { white-space: nowrap; }
 

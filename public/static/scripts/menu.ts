@@ -2,6 +2,7 @@ import * as d3 from "./modules/d3";
 import {getNode} from "./controller";
 
 let target;
+document.addEventListener('contextmenu', onContextMenu, false);
 
 function showMenu(x, y){
     d3.selectAll(".submenu").remove();
@@ -72,19 +73,16 @@ function onClick(e){
     if (e.target.innerText == "Delete" || e.target.parentNode.innerText == "Delete") {
         removeNode(target);
     }
-
     else {
         let nodeId = e.target.innerText;
         if (nodeId == "") {
             nodeId = e.target.parentNode.innerText;
         }
-        getNode(nodeId, true);
+        getNode(nodeId, true, e);
     }
     hideMenu();
     document.removeEventListener('click', onClick);
 }
-
-document.addEventListener('contextmenu', onContextMenu, false);
 
 function removeNode(node) {
 

@@ -8,6 +8,9 @@ window.onload = () => {
     initializePage();
     controller_1.loadProject();
     defineGrid();
+    window.onscroll = function () {
+        stickyHeader();
+    };
 };
 function initializePage() {
     margin = { top: 2, right: 2, bottom: 2, left: 2 };
@@ -16,7 +19,7 @@ function initializePage() {
     width = boundaries.width - margin.left - margin.right;
     height = boundaries.height - margin.top - margin.bottom;
     svg = d3.select("#graph")
-        .attr("width", width + margin.left + margin.right)
+        .attr("width", width + margin.left)
         .attr("height", height + margin.top + margin.bottom)
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
         .on("mousedown", mousedown)
@@ -369,7 +372,9 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
             .attr("x", +current.attr("x") + 10)
             .attr("y", +current.attr("y") + 40);
     }
+    checkBoundaries(current);
 }
+exports.updateRectSize = updateRectSize;
 function updateLinePath(element, current, x, y, isConnector) {
     let length = element.node().getTotalLength();
     let start = null;
@@ -539,3 +544,28 @@ function resetRectBorder() {
         .style("stroke", "#7b9eb4");
 }
 exports.resetRectBorder = resetRectBorder;
+function checkBoundaries(element) {
+    if (elementIsNearBottomBoundary(element)) {
+        console.log("bottom");
+    }
+    if (elementIsNearRightBoundary(element)) {
+        console.log("right");
+    }
+}
+function elementIsNearBottomBoundary(element) {
+    return Math.abs(svg.attr("height") - (+element.attr("y") + +element.attr("height"))) < 20;
+}
+function elementIsNearRightBoundary(element) {
+    return Math.abs(svg.attr("width") - (+element.attr("x") + +element.attr("width"))) < 20;
+}
+function stickyHeader() {
+    let header = document.getElementById("myHeader");
+    let stickyY = header.offsetTop;
+    let stickyX = header.offsetLeft;
+    if (window.pageYOffset > stickyY || window.pageXOffset > stickyX) {
+        header.classList.add("sticky");
+    }
+    else {
+        header.classList.remove("sticky");
+    }
+}

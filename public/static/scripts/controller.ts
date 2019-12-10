@@ -1,4 +1,4 @@
-import {resetRectBorder, initializeRectListeners, initializeCircleListeners} from "./script";
+import {resetRectBorder, initializeRectListeners, initializeCircleListeners, updateRectSize} from "./script";
 import * as d3 from "./modules/d3";
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
@@ -57,7 +57,7 @@ function showSavePopup() {
     },2000);
 }
 
-export function updateProjectNodes(data, fromDifferentProject: Boolean = false) {
+export function updateProjectNodes(data, fromDifferentProject: Boolean = false, event = null) {
     let nodes = document.getElementById("nodes");
     for (let element of data) {
         let node = toDOM(element["element"]);
@@ -73,12 +73,16 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false) 
                 }
             });
             let foreignNode = d3.select("#nodes>g:last-child").attr("id", rectCounter);
+            foreignNode.select("rect")
+                .attr("x", event.pageX)
+                .attr("y", event.pageY);
             foreignNode.selectAll("path").remove();
             foreignNode.selectAll("circle.lineCircle").remove();
             foreignNode.selectAll("circle").each(function () {
                 let element = d3.select(this);
                 element.attr("id", element.attr("id").slice(0, -1).concat(rectCounter));
-            })
+            });
+            updateRectSize(event.pageX,  event.pageY, rectCounter, foreignNode, foreignNode.select("rect"), false);
 
         }
     }
@@ -87,13 +91,16 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false) 
     resetRectBorder();
 }
 
-export function getNode(id, fromDifferentProject: Boolean) {
+export function getNode(id, fromDifferentProject: Boolean, event) {
     let url = '/treeEditor/node?id=' + id;
     fetch(url, {
         method: 'GET',
     })
         .then(response => response.json())
-        .then(data => updateProjectNodes(data, fromDifferentProject));
+        .then(data => {
+            updateProjectNodes(data, fromDifferentProject, event);
+            getProjectFiles(data[0]["node_id"]);
+        });
 }
 
 function getProjectNodes(id) {

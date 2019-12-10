@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
 const controller_1 = require("./controller");
 let target;
+document.addEventListener('contextmenu', onContextMenu, false);
 function showMenu(x, y) {
     d3.selectAll(".submenu").remove();
     let menu = document.querySelector('.menu');
@@ -70,12 +71,11 @@ function onClick(e) {
         if (nodeId == "") {
             nodeId = e.target.parentNode.innerText;
         }
-        controller_1.getNode(nodeId, true);
+        controller_1.getNode(nodeId, true, e);
     }
     hideMenu();
     document.removeEventListener('click', onClick);
 }
-document.addEventListener('contextmenu', onContextMenu, false);
 function removeNode(node) {
     if (node.nodeName == "rect") {
         d3.selectAll("g").each(function () {
