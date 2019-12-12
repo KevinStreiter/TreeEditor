@@ -13,7 +13,7 @@ window.onload = () => {
     };
 };
 function initializePage() {
-    margin = { top: 2, right: 2, bottom: 2, left: 2 };
+    margin = { top: 3, right: 2, bottom: 2, left: 2 };
     graph = document.getElementById('main');
     boundaries = graph.getBoundingClientRect();
     width = boundaries.width - margin.left - margin.right;
@@ -59,21 +59,27 @@ function initializePage() {
     });
 }
 function defineGrid() {
-    let tickAmount = 70;
+    graph = document.getElementById('graph');
+    boundaries = graph.getBoundingClientRect();
+    width = boundaries.width - margin.left - margin.right;
+    height = boundaries.height - margin.top - margin.bottom;
+    let gridSize = 20;
+    let tickAmountX = Math.round((width - margin.right) / gridSize);
+    let tickAmountY = Math.round((height - margin.top) / gridSize);
     let grid = svg.append("g")
         .attr("id", "grid")
         .attr("pointer-events", "none");
     let xScale = d3.scaleLinear()
         .range([0, width - margin.right]);
     let xAxis = d3.axisBottom()
-        .ticks(tickAmount)
+        .ticks(tickAmountX)
         .scale(xScale);
     grid.append("g")
         .attr("class", "xGridAxis")
         .call(xAxis);
     let xGridLines = d3.axisBottom()
         .tickFormat("")
-        .ticks(tickAmount)
+        .ticks(tickAmountX)
         .tickSize(height - margin.top)
         .scale(xScale);
     grid.append("g")
@@ -82,14 +88,14 @@ function defineGrid() {
     let yScale = d3.scaleLinear()
         .range([0, height - margin.top]);
     let yAxis = d3.axisRight()
-        .ticks(tickAmount)
+        .ticks(tickAmountY)
         .scale(yScale);
     grid.append("g")
         .attr("class", "yGridAxis")
         .call(yAxis);
     let yGridLines = d3.axisRight()
         .tickFormat("")
-        .ticks(tickAmount)
+        .ticks(tickAmountY)
         .tickSize(width - margin.right)
         .scale(yScale);
     grid.append("g")
@@ -291,6 +297,7 @@ function dragMoveLine() {
     path.attr("d", lineFunction(data));
 }
 function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current, borderMove) {
+    checkBoundaries(current);
     if (borderMove) {
         current
             .attr("width", newXCoordinate)
@@ -305,7 +312,7 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
             let coordinate = gridLine.attr("transform");
             coordinate = coordinate.substring(coordinate.indexOf("(") + 1, coordinate.indexOf(")")).split(",");
             let tempCoordDifference = Math.abs(newXCoordinate - coordinate[0]);
-            if (tempCoordDifference < coordDifference && (+current.attr("width") + +coordinate[0]) <= width) {
+            if (tempCoordDifference < coordDifference && (+current.attr("width") + +coordinate[0]) <= (width + margin.left)) {
                 coordDifference = tempCoordDifference;
                 gridXCoordinate = coordinate[0];
             }
@@ -316,7 +323,7 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
             let coordinate = gridLine.attr("transform");
             coordinate = coordinate.substring(coordinate.indexOf("(") + 1, coordinate.indexOf(")")).split(",");
             let tempCoordDifference = Math.abs(newYCoordinate - coordinate[1]);
-            if (tempCoordDifference < coordDifference && (+current.attr("height") + +coordinate[1]) <= height) {
+            if (tempCoordDifference < coordDifference && (+current.attr("height") + +coordinate[1]) <= (height + margin.top)) {
                 coordDifference = tempCoordDifference;
                 gridYCoordinate = coordinate[1];
             }
@@ -372,7 +379,6 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
             .attr("x", +current.attr("x") + 10)
             .attr("y", +current.attr("y") + 40);
     }
-    checkBoundaries(current);
 }
 exports.updateRectSize = updateRectSize;
 function updateLinePath(element, current, x, y, isConnector) {
@@ -546,19 +552,19 @@ function resetRectBorder() {
 exports.resetRectBorder = resetRectBorder;
 function checkBoundaries(element) {
     if (elementIsNearBottomBoundary(element)) {
-        svg.attr("height", +svg.attr("height") + 20);
+        svg.attr("height", +svg.attr("height") + 20 + margin.top);
         redrawGrid();
     }
     if (elementIsNearRightBoundary(element)) {
-        svg.attr("width", +svg.attr("width") + 20);
+        svg.attr("width", +svg.attr("width") + 20 + margin.right);
         redrawGrid();
     }
 }
 function elementIsNearBottomBoundary(element) {
-    return Math.abs(svg.attr("height") - (+element.attr("y") + +element.attr("height"))) < 20;
+    return Math.abs(svg.attr("height") - (+element.attr("y") + +element.attr("height"))) < 30;
 }
 function elementIsNearRightBoundary(element) {
-    return Math.abs(svg.attr("width") - (+element.attr("x") + +element.attr("width"))) < 20;
+    return Math.abs(svg.attr("width") - (+element.attr("x") + +element.attr("width"))) < 30;
 }
 function redrawGrid() {
     svg.select("#grid").remove();
