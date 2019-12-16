@@ -26,7 +26,7 @@ body {
     width: 100%;
 }
 
-.sticky + #main {
+.sticky + #main + #mainProjects {
     padding-top: 147px;
 }
 
@@ -77,6 +77,10 @@ input[type="text"], textarea {
 #main {
     height: 85%;
     overflow:auto;
+}
+
+#mainProjects {
+    height: 85%;
 }
 
 @media screen and (max-height: 450px) {

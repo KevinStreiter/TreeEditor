@@ -20,15 +20,16 @@ class SaveController
         $data = json_decode($nodes, true);
         $nodes = $data["nodes"]["childNodes"];
         $files = $data["files"]["childNodes"];
+        $size = $data["size"];
         $projectName = $request->getParam('projectName');
         $projectID = $request->getParam('projectID');
         if (is_numeric($projectID)) {
-            $this->updateProject($connection, $projectName, $projectID);
+            $this->updateProject($connection, $projectName, $projectID, $size);
             $this->updateNodes($nodes, $connection, $projectID);
             $this->saveFiles($files, $connection, $projectID);
             return $response->withJson($projectID);
         } else {
-            $this->saveProject($connection, $projectName);
+            $this->saveProject($connection, $projectName, $size);
             $projectID = $this->getRecentProjectID($connection);
             $this->saveNodes($nodes, $projectID, $connection);
             $this->saveFiles($nodes, $projectID, $connection);
@@ -36,15 +37,16 @@ class SaveController
         }
     }
 
-    function saveProject($connection, $projectName)
+    function saveProject($connection, $projectName, $size)
     {
-        $project = ['name' => $projectName];
+        $project = ['name' => $projectName, 'width' => $size[0], 'height' => $size[1]];
         $connection->insert('Projects', $project);
     }
 
-    function updateProject($connection, $projectName, $projectID)
+    function updateProject($connection, $projectName, $projectID, $size)
     {
-        $connection->query("UPDATE Projects SET name = '{$projectName}' WHERE project_id = {$projectID}");
+        $connection->query("UPDATE Projects SET name = '{$projectName}', 
+            width = '$size[0]', height = '$size[1]' WHERE project_id = {$projectID}");
     }
 
     function getRecentProjectID($connection)

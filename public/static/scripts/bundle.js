@@ -32,7 +32,9 @@ function saveProject() {
     let nodes_json = toJSON(nodes);
     let files = document.getElementById("fileList");
     let files_json = toJSON(files);
-    let data = JSON.stringify({ nodes: nodes_json, files: files_json });
+    let graph = d3.select('#graph');
+    let size = [graph.attr("width"), graph.attr("height")];
+    let data = JSON.stringify({ nodes: nodes_json, files: files_json, size: size });
     fetch(url, {
         method: 'POST',
         body: data
@@ -132,13 +134,21 @@ function loadProject() {
     let urlParams = new URLSearchParams(window.location.search);
     let id = urlParams.get('id');
     let name = urlParams.get('name');
+    let width = urlParams.get('width');
+    let height = urlParams.get('height');
     if (id != null && name != null) {
+        updateProjectSize(width, height);
         updateProjectName(name, id);
         getProjectFiles(id);
         getProjectNodes(id);
     }
 }
 exports.loadProject = loadProject;
+function updateProjectSize(width, height) {
+    d3.select("#graph")
+        .attr("width", width)
+        .attr("height", height);
+}
 function updateProjectName(name, id) {
     let projectTitle = document.getElementById("projectTitle");
     projectTitle.innerText = name;
@@ -18886,7 +18896,7 @@ window.onload = () => {
     controller_1.loadProject();
     defineGrid();
     window.onscroll = function () {
-        stickyHeader();
+        //stickyHeader()
     };
 };
 function initializePage() {
@@ -19459,4 +19469,4 @@ function stickyHeader() {
     }
 }
 
-},{"./controller":1,"./modules/d3.js":3,"./navbar":6}]},{},[2,7]);
+},{"./controller":1,"./modules/d3.js":3,"./navbar":6}]},{},[2,7,1,6]);

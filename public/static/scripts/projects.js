@@ -1,7 +1,7 @@
 window.onload = () => {
     getProjects();
     window.onscroll = function () {
-        stickyHeader();
+        //stickyHeader()
     };
 };
 function getProjects() {
@@ -30,7 +30,7 @@ function listProjects(data) {
         li.appendChild(span);
         ul.appendChild(li);
         li.addEventListener("click", function () {
-            openProject(project["project_id"], project["name"]);
+            openProject(project["project_id"], project["name"], project["width"], project["height"]);
         });
         let btnList = document.getElementsByClassName("close");
         for (let i = 0; i < btnList.length; i++) {
@@ -43,8 +43,8 @@ function listProjects(data) {
         }
     }
 }
-function openProject(id, name) {
-    window.location.href = "/treeEditor/project?id=" + id + "&name=" + name;
+function openProject(id, name, width, height) {
+    window.location.href = "/treeEditor/project?id=" + id + "&name=" + name + "&width=" + width + "&height=" + height;
 }
 function stickyHeader() {
     let header = document.getElementById("myHeader");

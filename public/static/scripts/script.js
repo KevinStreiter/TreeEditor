@@ -9,7 +9,7 @@ window.onload = () => {
     controller_1.loadProject();
     defineGrid();
     window.onscroll = function () {
-        stickyHeader();
+        //stickyHeader()
     };
 };
 function initializePage() {
