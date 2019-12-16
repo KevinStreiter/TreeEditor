@@ -8,13 +8,10 @@ window.onload = () => {
     initializePage();
     controller_1.loadProject();
     defineGrid();
-    window.onscroll = function () {
-        //stickyHeader()
-    };
 };
 function initializePage() {
     margin = { top: 3, right: 2, bottom: 2, left: 2 };
-    graph = document.getElementById('main');
+    graph = document.getElementById('GraphContainer');
     boundaries = graph.getBoundingClientRect();
     width = boundaries.width - margin.left - margin.right;
     height = boundaries.height - margin.top - margin.bottom;
@@ -569,15 +566,4 @@ function elementIsNearRightBoundary(element) {
 function redrawGrid() {
     svg.select("#grid").remove();
     defineGrid();
-}
-function stickyHeader() {
-    let header = document.getElementById("myHeader");
-    let stickyY = header.offsetTop;
-    let stickyX = header.offsetLeft;
-    if (window.pageYOffset > stickyY || window.pageXOffset > stickyX) {
-        header.classList.add("sticky");
-    }
-    else {
-        header.classList.remove("sticky");
-    }
 }
