@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 const navbar_1 = require("./navbar");
 const controller_1 = require("./controller");
-let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction;
+let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, grid, tickAmountX, tickAmountY, xAxis, xScale, xTickDistance, yTickDistance;
 window.onload = () => {
     initializePage();
     controller_1.loadProject();
@@ -61,15 +61,15 @@ function defineGrid() {
     width = boundaries.width - margin.left - margin.right;
     height = boundaries.height - margin.top - margin.bottom;
     let gridSize = 20;
-    let tickAmountX = Math.round((width - margin.right) / gridSize);
-    let tickAmountY = Math.round((height - margin.top) / gridSize);
-    let grid = svg.append("g")
+    tickAmountX = (width - margin.right) / gridSize;
+    tickAmountY = (height - margin.top) / gridSize;
+    grid = svg.append("g")
         .attr("id", "grid")
         .attr("pointer-events", "none");
-    let xScale = d3.scaleLinear()
+    xScale = d3.scaleLinear()
         .range([0, width - margin.right]);
-    let xAxis = d3.axisBottom()
-        .ticks(tickAmountX)
+    xAxis = d3.axisBottom()
+        .tickValues([])
         .scale(xScale);
     grid.append("g")
         .attr("class", "xGridAxis")
@@ -98,6 +98,12 @@ function defineGrid() {
     grid.append("g")
         .attr("class", "yGridLines")
         .call(yGridLines);
+    let tickArr = yScale.ticks(tickAmountY);
+    yTickDistance = yScale(tickArr[tickArr.length - 1]) - yScale(tickArr[tickArr.length - 2]);
+    tickArr = xScale.ticks(tickAmountY);
+    xTickDistance = xScale(tickArr[tickArr.length - 1]) - xScale(tickArr[tickArr.length - 2]);
+    console.log(xTickDistance);
+    console.log(yTickDistance);
 }
 function mousedown() {
     if (d3.event.button != 2) {
@@ -549,12 +555,15 @@ function resetRectBorder() {
 exports.resetRectBorder = resetRectBorder;
 function checkBoundaries(element) {
     if (elementIsNearBottomBoundary(element)) {
-        svg.attr("height", +svg.attr("height") + 20 + margin.top);
-        redrawGrid();
+        svg.attr("height", +svg.attr("height") + yTickDistance + margin.left);
+        height += yTickDistance;
+        //redrawGrid();
     }
     if (elementIsNearRightBoundary(element)) {
-        svg.attr("width", +svg.attr("width") + 20 + margin.right);
-        redrawGrid();
+        svg.attr("width", +svg.attr("width") + xTickDistance + margin.right);
+        width += xTickDistance;
+        appendXGridLine();
+        //redrawGrid();
     }
 }
 function elementIsNearBottomBoundary(element) {
@@ -566,4 +575,22 @@ function elementIsNearRightBoundary(element) {
 function redrawGrid() {
     svg.select("#grid").remove();
     defineGrid();
+}
+function appendXGridLine() {
+    let child = null;
+    let gridLines = d3.select('.xGridLines');
+    gridLines.each(function () {
+        d3.select(this).select("line").attr("y2", function (d) {
+            return d + 20;
+        });
+        child = this.lastChild;
+    });
+    child = d3.select(child);
+    let position = child.attr("transform");
+    position = position.substring(position.indexOf("(") + 1, position.indexOf(")")).split(",");
+    child.attr("transform", "translate(" + (+position[0] + xTickDistance) + "," + 0 + ")");
+    gridLines.node().append(child.node());
+    xScale = d3.scaleLinear()
+        .range([0, width - margin.right]);
+    d3.select("g.xGridAxis").call(d3.axisBottom().scale(xScale));
 }
