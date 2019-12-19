@@ -36,7 +36,7 @@ export function saveProject() {
     let size = [graph.attr("width"), graph.attr("height")];
     let data = JSON.stringify({nodes: nodes_json, files: files_json, size: size});
 
-    fetch(url, {
+    return fetch(url, {
         method: 'POST',
         body: data
     })
@@ -97,6 +97,13 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
     resetRectBorder();
 }
 
+async function saveForeignNode(id, x, y) {
+    let project_id = document.getElementById("projectTitle").getAttribute("class");
+    let url = '/treeEditor/foreignNode?node_id=' + id + '&project_id=' + project_id +
+        '&x=' + x + '&y=' + y;
+    console.log(url)
+}
+
 export function getNode(id, fromDifferentProject: Boolean, event) {
     let url = '/treeEditor/node?id=' + id;
     fetch(url, {
@@ -107,6 +114,10 @@ export function getNode(id, fromDifferentProject: Boolean, event) {
             if(data.length > 0) {
                 updateProjectNodes(data, fromDifferentProject, event);
                 getProjectFiles(data[0]["node_id"]);
+                if (fromDifferentProject) {
+                    saveForeignNode(data[0]["node_id"], event.pageX, event.pageY)
+                }
+
             }
         });
 }

@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const script_1 = require("./script");
 const d3 = require("./modules/d3");
@@ -34,7 +43,7 @@ function saveProject() {
     let graph = d3.select('#graph');
     let size = [graph.attr("width"), graph.attr("height")];
     let data = JSON.stringify({ nodes: nodes_json, files: files_json, size: size });
-    fetch(url, {
+    return fetch(url, {
         method: 'POST',
         body: data
     })
@@ -90,6 +99,14 @@ function updateProjectNodes(data, fromDifferentProject = false, event = null) {
     script_1.resetRectBorder();
 }
 exports.updateProjectNodes = updateProjectNodes;
+function saveForeignNode(id, x, y) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let project_id = document.getElementById("projectTitle").getAttribute("class");
+        let url = '/treeEditor/foreignNode?node_id=' + id + '&project_id=' + project_id +
+            '&x=' + x + '&y=' + y;
+        console.log(url);
+    });
+}
 function getNode(id, fromDifferentProject, event) {
     let url = '/treeEditor/node?id=' + id;
     fetch(url, {
@@ -100,6 +117,9 @@ function getNode(id, fromDifferentProject, event) {
         if (data.length > 0) {
             updateProjectNodes(data, fromDifferentProject, event);
             getProjectFiles(data[0]["node_id"]);
+            if (fromDifferentProject) {
+                saveForeignNode(data[0]["node_id"], event.pageX, event.pageY);
+            }
         }
     });
 }

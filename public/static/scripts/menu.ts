@@ -1,5 +1,5 @@
 import * as d3 from "./modules/d3";
-import {getNode} from "./controller";
+import {getNode, saveProject} from "./controller";
 
 let target;
 document.addEventListener('contextmenu', onContextMenu, false);
@@ -62,8 +62,9 @@ function hideMenu(){
     menu.classList.remove('show-menu');
 }
 
-function onContextMenu(e){
+async function onContextMenu(e){
     e.preventDefault();
+    await saveProject();
     target = e.target;
     showMenu(e.pageX, e.pageY);
     document.addEventListener('click', onClick, false);

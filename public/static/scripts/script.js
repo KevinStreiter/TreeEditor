@@ -164,7 +164,6 @@ function initializeRectListeners() {
         .call(dragRect);
     let foreign = d3.selectAll(".foreign").select("rect")
         .on("dblclick", null);
-    console.log(foreign);
 }
 exports.initializeRectListeners = initializeRectListeners;
 function initializeCircleListeners() {
