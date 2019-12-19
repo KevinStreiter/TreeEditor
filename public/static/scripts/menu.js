@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
 const controller_1 = require("./controller");
-let target;
+let target, event;
 document.addEventListener('contextmenu', onContextMenu, false);
 function showMenu(x, y) {
     d3.selectAll(".submenu").remove();
@@ -69,6 +69,7 @@ function onContextMenu(e) {
     return __awaiter(this, void 0, void 0, function* () {
         e.preventDefault();
         yield controller_1.saveProject();
+        event = e;
         target = e.target;
         showMenu(e.pageX, e.pageY);
         document.addEventListener('click', onClick, false);
@@ -83,7 +84,8 @@ function onClick(e) {
         if (nodeId == "") {
             nodeId = e.target.parentNode.innerText;
         }
-        controller_1.getNode(nodeId, true, e);
+        let graph = document.getElementById('GraphContainer').getBoundingClientRect();
+        controller_1.getNode(nodeId, true, event.pageX, event.pageY - graph.top);
     }
     hideMenu();
     document.removeEventListener('click', onClick);

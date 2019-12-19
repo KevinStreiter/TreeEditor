@@ -1,7 +1,7 @@
 import * as d3 from "./modules/d3";
 import {getNode, saveProject} from "./controller";
 
-let target;
+let target, event;
 document.addEventListener('contextmenu', onContextMenu, false);
 
 function showMenu(x, y){
@@ -65,6 +65,7 @@ function hideMenu(){
 async function onContextMenu(e){
     e.preventDefault();
     await saveProject();
+    event = e;
     target = e.target;
     showMenu(e.pageX, e.pageY);
     document.addEventListener('click', onClick, false);
@@ -79,7 +80,8 @@ function onClick(e){
         if (nodeId == "") {
             nodeId = e.target.parentNode.innerText;
         }
-        getNode(nodeId, true, e);
+        let graph = document.getElementById('GraphContainer').getBoundingClientRect();
+        getNode(nodeId, true, event.pageX, event.pageY - graph.top);
     }
     hideMenu();
     document.removeEventListener('click', onClick);

@@ -59,7 +59,7 @@ function showSavePopup() {
     },2000);
 }
 
-export function updateProjectNodes(data, fromDifferentProject: Boolean = false, event = null) {
+export function updateProjectNodes(data, fromDifferentProject: Boolean = false, x = null, y = null) {
     let nodes = document.getElementById("nodes");
     for (let element of data) {
         let node = toDOM(element["element"]);
@@ -79,8 +79,8 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
                 .attr("id", rectCounter)
                 .attr("class", "foreign");
             let foreignRect = foreignNode.select("rect")
-                .attr("x", event.pageX)
-                .attr("y", event.pageY);
+                .attr("x", x)
+                .attr("y", y);
 
             foreignNode.selectAll("path").remove();
             foreignNode.selectAll("circle.lineCircle").remove();
@@ -88,7 +88,7 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
                 let element = d3.select(this);
                 element.attr("id", element.attr("id").slice(0, -1).concat(rectCounter));
             });
-            updateRectSize(event.pageX,  event.pageY, rectCounter, foreignNode, foreignRect, false);
+            updateRectSize(x,  y, rectCounter, foreignNode, foreignRect, false);
             foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
         }
     }
@@ -108,7 +108,7 @@ function saveForeignNode(id, x, y) {
     })
 }
 
-export function getNode(id, fromDifferentProject: Boolean, event) {
+export function getNode(id, fromDifferentProject: Boolean, x, y) {
     let url = '/treeEditor/node?id=' + id;
     fetch(url, {
         method: 'GET',
@@ -116,10 +116,10 @@ export function getNode(id, fromDifferentProject: Boolean, event) {
         .then(response => response.json())
         .then(data => {
             if(data.length > 0) {
-                updateProjectNodes(data, fromDifferentProject, event);
+                updateProjectNodes(data, fromDifferentProject, x, y);
                 getProjectFiles(data[0]["node_id"]);
                 if (fromDifferentProject) {
-                    saveForeignNode(data[0]["node_id"], event.pageX, event.pageY)
+                    saveForeignNode(data[0]["node_id"], x, y)
                 }
             }
         });
