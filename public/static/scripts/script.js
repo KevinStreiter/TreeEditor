@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 const navbar_1 = require("./navbar");
 const controller_1 = require("./controller");
-let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, tickAmountX, tickAmountY, xTickDistance, yTickDistance;
+let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, xTickDistance, yTickDistance;
 window.onload = () => {
     initializePage();
     controller_1.loadProject();
@@ -61,8 +61,8 @@ function defineGrid() {
     width = boundaries.width - margin.left - margin.right;
     height = boundaries.height - margin.top - margin.bottom;
     let gridSize = 20;
-    tickAmountX = (width - margin.right) / gridSize;
-    tickAmountY = (height - margin.top) / gridSize;
+    let tickAmountX = (width - margin.right) / gridSize;
+    let tickAmountY = (height - margin.top) / gridSize;
     let grid = svg.append("g")
         .attr("id", "grid")
         .attr("pointer-events", "none");
@@ -89,10 +89,8 @@ function defineGrid() {
     d3.selectAll("path.domain").remove();
     let tickArr = yScale.ticks(tickAmountY);
     yTickDistance = yScale(tickArr[tickArr.length - 1]) - yScale(tickArr[tickArr.length - 2]);
-    tickArr = xScale.ticks(tickAmountY);
+    tickArr = xScale.ticks(tickAmountX);
     xTickDistance = xScale(tickArr[tickArr.length - 1]) - xScale(tickArr[tickArr.length - 2]);
-    console.log(xTickDistance);
-    console.log(yTickDistance);
 }
 function mousedown() {
     if (d3.event.button != 2) {
@@ -555,10 +553,10 @@ function checkBoundaries(element) {
     }
 }
 function elementIsNearBottomBoundary(element) {
-    return Math.abs(svg.attr("height") - (+element.attr("y") + +element.attr("height"))) < 30;
+    return Math.abs(svg.attr("height") - (+element.attr("y") + +element.attr("height"))) <= yTickDistance;
 }
 function elementIsNearRightBoundary(element) {
-    return Math.abs(svg.attr("width") - (+element.attr("x") + +element.attr("width"))) < 30;
+    return Math.abs(svg.attr("width") - (+element.attr("x") + +element.attr("width"))) <= xTickDistance;
 }
 function appendXGridLine() {
     let child = getLastGridLine('g.xGridLines');
