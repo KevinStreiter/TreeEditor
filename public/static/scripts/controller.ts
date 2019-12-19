@@ -66,6 +66,7 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
         nodes.appendChild(document.importNode(new DOMParser()
             .parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + node.outerHTML + '</svg>',
                 'application/xml').documentElement.firstChild, true));
+
         if (fromDifferentProject) {
             let rectCounter = 1;
             d3.select("#nodes").selectAll("rect").each(function () {
@@ -74,18 +75,21 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
                     rectCounter = id + 1;
                 }
             });
-            let foreignNode = d3.select("#nodes>g:last-child").attr("id", rectCounter);
-            foreignNode.select("rect")
+            let foreignNode = d3.select("#nodes>g:last-child")
+                .attr("id", rectCounter)
+                .attr("class", "foreign");
+            let foreignRect = foreignNode.select("rect")
                 .attr("x", event.pageX)
                 .attr("y", event.pageY);
+
             foreignNode.selectAll("path").remove();
             foreignNode.selectAll("circle.lineCircle").remove();
             foreignNode.selectAll("circle").each(function () {
                 let element = d3.select(this);
                 element.attr("id", element.attr("id").slice(0, -1).concat(rectCounter));
             });
-            updateRectSize(event.pageX,  event.pageY, rectCounter, foreignNode, foreignNode.select("rect"), false);
-
+            updateRectSize(event.pageX,  event.pageY, rectCounter, foreignNode, foreignRect, false);
+            foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
         }
     }
     initializeRectListeners();
@@ -100,8 +104,10 @@ export function getNode(id, fromDifferentProject: Boolean, event) {
     })
         .then(response => response.json())
         .then(data => {
-            updateProjectNodes(data, fromDifferentProject, event);
-            getProjectFiles(data[0]["node_id"]);
+            if(data.length > 0) {
+                updateProjectNodes(data, fromDifferentProject, event);
+                getProjectFiles(data[0]["node_id"]);
+            }
         });
 }
 

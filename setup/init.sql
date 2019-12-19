@@ -15,7 +15,7 @@ CREATE TABLE Projects (
  width FLOAT NOT NULL,
  height FLOAT NOT NULL,
  PRIMARY KEY (project_id)
-) ENGINE=INNODB;
+)ENGINE=INNODB;
 
 CREATE TABLE Nodes (
     node_id VARCHAR(128) NOT NULL,
@@ -32,5 +32,18 @@ CREATE TABLE Files (
     element JSON NOT NULL,
     FOREIGN KEY (project_id)
         REFERENCES Projects(project_id)
+        ON DELETE CASCADE
+)ENGINE=INNODB;
+
+CREATE TABLE Imported_Nodes (
+    project_id INT NOT NULL,
+    imported_node_id VARCHAR(128) NOT NULL,
+    x FLOAT,
+    y FLOAT,
+    FOREIGN KEY (project_id)
+        REFERENCES Projects(project_id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (imported_node_id)
+        REFERENCES Nodes(node_id)
         ON DELETE CASCADE
 )ENGINE=INNODB;

@@ -242,3 +242,9 @@ ul li:hover {
 
 h1 { white-space: nowrap; }
 
+.foreign {
+    opacity: 70%;
+    stroke-dasharray: 5px;
+    stroke: #aaa9ad;
+    fill: #aaa9ad;
+}

@@ -70,8 +70,10 @@ function updateProjectNodes(data, fromDifferentProject = false, event = null) {
                     rectCounter = id + 1;
                 }
             });
-            let foreignNode = d3.select("#nodes>g:last-child").attr("id", rectCounter);
-            foreignNode.select("rect")
+            let foreignNode = d3.select("#nodes>g:last-child")
+                .attr("id", rectCounter)
+                .attr("class", "foreign");
+            let foreignRect = foreignNode.select("rect")
                 .attr("x", event.pageX)
                 .attr("y", event.pageY);
             foreignNode.selectAll("path").remove();
@@ -80,7 +82,8 @@ function updateProjectNodes(data, fromDifferentProject = false, event = null) {
                 let element = d3.select(this);
                 element.attr("id", element.attr("id").slice(0, -1).concat(rectCounter));
             });
-            script_1.updateRectSize(event.pageX, event.pageY, rectCounter, foreignNode, foreignNode.select("rect"), false);
+            script_1.updateRectSize(event.pageX, event.pageY, rectCounter, foreignNode, foreignRect, false);
+            foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
         }
     }
     script_1.initializeRectListeners();
@@ -95,8 +98,10 @@ function getNode(id, fromDifferentProject, event) {
     })
         .then(response => response.json())
         .then(data => {
-        updateProjectNodes(data, fromDifferentProject, event);
-        getProjectFiles(data[0]["node_id"]);
+        if (data.length > 0) {
+            updateProjectNodes(data, fromDifferentProject, event);
+            getProjectFiles(data[0]["node_id"]);
+        }
     });
 }
 exports.getNode = getNode;
@@ -19049,6 +19054,9 @@ function initializeRectListeners() {
     })
         .on("dblclick", navbar_1.openNav)
         .call(dragRect);
+    let foreign = d3.selectAll(".foreign").select("rect")
+        .on("dblclick", null);
+    console.log(foreign);
 }
 exports.initializeRectListeners = initializeRectListeners;
 function initializeCircleListeners() {
@@ -19173,6 +19181,10 @@ function dragMoveLine() {
     let data = [start, middle, end];
     path.attr("d", lineFunction(data));
 }
+function getGridLinePos(selector) {
+    let coordinate = selector.attr("transform");
+    return coordinate.substring(coordinate.indexOf("(") + 1, coordinate.indexOf(")")).split(",");
+}
 function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current, borderMove) {
     checkBoundaries(current);
     if (borderMove) {
@@ -19185,9 +19197,7 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
         let gridYCoordinate = newYCoordinate;
         let coordDifference = 1000;
         d3.select('g.xGridLines').selectAll(".tick").each(function () {
-            let gridLine = d3.select(this);
-            let coordinate = gridLine.attr("transform");
-            coordinate = coordinate.substring(coordinate.indexOf("(") + 1, coordinate.indexOf(")")).split(",");
+            let coordinate = getGridLinePos(d3.select(this));
             let tempCoordDifference = Math.abs(newXCoordinate - coordinate[0]);
             if (tempCoordDifference < coordDifference && (+current.attr("width") + +coordinate[0]) <= (width + margin.left)) {
                 coordDifference = tempCoordDifference;
@@ -19196,9 +19206,7 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
         });
         coordDifference = 1000;
         d3.select('g.yGridLines').selectAll(".tick").each(function () {
-            let gridLine = d3.select(this);
-            let coordinate = gridLine.attr("transform");
-            coordinate = coordinate.substring(coordinate.indexOf("(") + 1, coordinate.indexOf(")")).split(",");
+            let coordinate = getGridLinePos(d3.select(this));
             let tempCoordDifference = Math.abs(newYCoordinate - coordinate[1]);
             if (tempCoordDifference < coordDifference && (+current.attr("height") + +coordinate[1]) <= (height + margin.top)) {
                 coordDifference = tempCoordDifference;
@@ -19346,6 +19354,8 @@ function resetListeners() {
         d3.select(`#circleBottomRight${count}`)
             .on("click", null);
     });
+    d3.selectAll(".foreign").select("rect")
+        .on("dblclick", null);
 }
 exports.resetListeners = resetListeners;
 function moveLine() {
@@ -19446,35 +19456,31 @@ function elementIsNearRightBoundary(element) {
     return Math.abs(svg.attr("width") - (+element.attr("x") + +element.attr("width"))) <= xTickDistance;
 }
 function appendXGridLine() {
-    let child = getLastGridLine('g.xGridLines');
-    let newChild = clone(child);
-    let position = newChild.attr("transform");
-    position = position.substring(position.indexOf("(") + 1, position.indexOf(")")).split(",");
-    newChild.attr("transform", "translate(" + (+position[0] + xTickDistance) + "," + 0 + ")");
-    d3.select('g.xGridLines').node().append(newChild.node());
+    let newChild = getLastGridLineAndPos('g.xGridLines');
+    newChild[0].attr("transform", "translate(" + (+newChild[1][0] + xTickDistance) + "," + 0 + ")");
+    d3.select('g.xGridLines').node().append(newChild[0].node());
     d3.select("g.yGridLines").selectAll("line").each(function () {
         let line = d3.select(this);
         line.attr("x2", +line.attr("x2") + xTickDistance);
     });
 }
 function appendYGridLine() {
-    let child = getLastGridLine('g.yGridLines');
-    let newChild = clone(child);
-    let position = newChild.attr("transform");
-    position = position.substring(position.indexOf("(") + 1, position.indexOf(")")).split(",");
-    newChild.attr("transform", "translate(" + 0 + "," + (+position[1] + yTickDistance) + ")");
-    d3.select('g.yGridLines').node().append(newChild.node());
+    let newChild = getLastGridLineAndPos('g.yGridLines');
+    newChild[0].attr("transform", "translate(" + 0 + "," + (+newChild[1][1] + yTickDistance) + ")");
+    d3.select('g.yGridLines').node().append(newChild[0].node());
     d3.select("g.xGridLines").selectAll("line").each(function () {
         let line = d3.select(this);
         line.attr("y2", +line.attr("y2") + yTickDistance);
     });
 }
-function getLastGridLine(selector) {
+function getLastGridLineAndPos(selector) {
     let child = null;
     d3.select(selector).each(function () {
         child = this.lastChild;
     });
-    return child;
+    let newChild = clone(child);
+    let position = newChild.attr("transform");
+    return [newChild, position.substring(position.indexOf("(") + 1, position.indexOf(")")).split(",")];
 }
 function clone(selector) {
     let node = d3.select(selector).node();

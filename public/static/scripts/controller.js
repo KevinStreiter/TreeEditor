@@ -69,8 +69,10 @@ function updateProjectNodes(data, fromDifferentProject = false, event = null) {
                     rectCounter = id + 1;
                 }
             });
-            let foreignNode = d3.select("#nodes>g:last-child").attr("id", rectCounter);
-            foreignNode.select("rect")
+            let foreignNode = d3.select("#nodes>g:last-child")
+                .attr("id", rectCounter)
+                .attr("class", "foreign");
+            let foreignRect = foreignNode.select("rect")
                 .attr("x", event.pageX)
                 .attr("y", event.pageY);
             foreignNode.selectAll("path").remove();
@@ -79,7 +81,8 @@ function updateProjectNodes(data, fromDifferentProject = false, event = null) {
                 let element = d3.select(this);
                 element.attr("id", element.attr("id").slice(0, -1).concat(rectCounter));
             });
-            script_1.updateRectSize(event.pageX, event.pageY, rectCounter, foreignNode, foreignNode.select("rect"), false);
+            script_1.updateRectSize(event.pageX, event.pageY, rectCounter, foreignNode, foreignRect, false);
+            foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
         }
     }
     script_1.initializeRectListeners();
@@ -94,8 +97,10 @@ function getNode(id, fromDifferentProject, event) {
     })
         .then(response => response.json())
         .then(data => {
-        updateProjectNodes(data, fromDifferentProject, event);
-        getProjectFiles(data[0]["node_id"]);
+        if (data.length > 0) {
+            updateProjectNodes(data, fromDifferentProject, event);
+            getProjectFiles(data[0]["node_id"]);
+        }
     });
 }
 exports.getNode = getNode;
