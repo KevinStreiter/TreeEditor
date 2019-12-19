@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const script_1 = require("./script");
 const d3 = require("./modules/d3");
@@ -100,11 +91,12 @@ function updateProjectNodes(data, fromDifferentProject = false, event = null) {
 }
 exports.updateProjectNodes = updateProjectNodes;
 function saveForeignNode(id, x, y) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let project_id = document.getElementById("projectTitle").getAttribute("class");
-        let url = '/treeEditor/foreignNode?node_id=' + id + '&project_id=' + project_id +
-            '&x=' + x + '&y=' + y;
-        console.log(url);
+    let project_id = document.getElementById("projectTitle").getAttribute("class");
+    let url = '/treeEditor/foreignNode/save';
+    let data = JSON.stringify({ node_id: id, project_id: project_id, x: x, y: y });
+    return fetch(url, {
+        method: 'POST',
+        body: data
     });
 }
 function getNode(id, fromDifferentProject, event) {

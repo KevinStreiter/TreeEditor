@@ -101,6 +101,20 @@ $app->post('/treeEditor/files/delete', function (Request $request) {
     unlink($directory . DIRECTORY_SEPARATOR . $filename);
 });
 
+
+$app->post('/treeEditor/foreignNode/save', function (Request $request) {
+    $connection = $this->get(Connection::class);
+    $data = $request->getBody();
+    $data = json_decode($data, true);
+    $node_id = $data["node_id"];
+    $project_id = $data["project_id"];
+    $x = $data["x"];
+    $y = $data["y"];
+
+    $node = ['imported_node_id' => $node_id, 'project_id' => $project_id, 'x' => $x, 'y' => $y];
+    $connection->insert('Imported_Nodes', $node);
+});
+
 $app->post('/treeEditor/save', \App\Controllers\SaveController::class);
 
 

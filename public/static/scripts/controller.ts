@@ -97,11 +97,15 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
     resetRectBorder();
 }
 
-async function saveForeignNode(id, x, y) {
+function saveForeignNode(id, x, y) {
     let project_id = document.getElementById("projectTitle").getAttribute("class");
-    let url = '/treeEditor/foreignNode?node_id=' + id + '&project_id=' + project_id +
-        '&x=' + x + '&y=' + y;
-    console.log(url)
+    let url = '/treeEditor/foreignNode/save';
+    let data = JSON.stringify({node_id: id, project_id: project_id, x: x, y: y});
+
+    return fetch(url, {
+        method: 'POST',
+        body: data
+    })
 }
 
 export function getNode(id, fromDifferentProject: Boolean, event) {
@@ -117,7 +121,6 @@ export function getNode(id, fromDifferentProject: Boolean, event) {
                 if (fromDifferentProject) {
                     saveForeignNode(data[0]["node_id"], event.pageX, event.pageY)
                 }
-
             }
         });
 }
