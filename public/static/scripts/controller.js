@@ -22,12 +22,22 @@ function deleteFile(filename) {
         method: 'POST'
     });
 }
+function filterNodes() {
+    let nodes = document.getElementById("nodes");
+    let cloned_nodes = nodes.cloneNode(false);
+    let children = nodes.querySelectorAll("g:not(.foreign)");
+    children.forEach.call(children, function (item) {
+        let cloned_item = item.cloneNode(true);
+        cloned_nodes.appendChild(cloned_item);
+    });
+    return cloned_nodes;
+}
 function saveProject() {
     let project = document.getElementById("projectTitle");
     let projectName = project.innerHTML;
     let projectID = project.className;
     let url = '/treeEditor/save?projectName=' + projectName + '&projectID=' + projectID;
-    let nodes = document.getElementById("nodes");
+    let nodes = filterNodes();
     let nodes_json = toJSON(nodes);
     let files = document.getElementById("fileList");
     let files_json = toJSON(files);
