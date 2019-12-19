@@ -18890,7 +18890,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 const navbar_1 = require("./navbar");
 const controller_1 = require("./controller");
-let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, grid, tickAmountX, tickAmountY, xAxis, xScale, xTickDistance, yTickDistance;
+let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, tickAmountX, tickAmountY, xTickDistance, yTickDistance;
 window.onload = () => {
     initializePage();
     controller_1.loadProject();
@@ -18950,17 +18950,11 @@ function defineGrid() {
     let gridSize = 20;
     tickAmountX = (width - margin.right) / gridSize;
     tickAmountY = (height - margin.top) / gridSize;
-    grid = svg.append("g")
+    let grid = svg.append("g")
         .attr("id", "grid")
         .attr("pointer-events", "none");
-    xScale = d3.scaleLinear()
+    let xScale = d3.scaleLinear()
         .range([0, width - margin.right]);
-    xAxis = d3.axisBottom()
-        .tickValues([])
-        .scale(xScale);
-    grid.append("g")
-        .attr("class", "xGridAxis")
-        .call(xAxis);
     let xGridLines = d3.axisBottom()
         .tickFormat("")
         .ticks(tickAmountX)
@@ -18971,12 +18965,6 @@ function defineGrid() {
         .call(xGridLines);
     let yScale = d3.scaleLinear()
         .range([0, height - margin.top]);
-    let yAxis = d3.axisRight()
-        .ticks(tickAmountY)
-        .scale(yScale);
-    grid.append("g")
-        .attr("class", "yGridAxis")
-        .call(yAxis);
     let yGridLines = d3.axisRight()
         .tickFormat("")
         .ticks(tickAmountY)
@@ -18985,6 +18973,7 @@ function defineGrid() {
     grid.append("g")
         .attr("class", "yGridLines")
         .call(yGridLines);
+    d3.selectAll("path.domain").remove();
     let tickArr = yScale.ticks(tickAmountY);
     yTickDistance = yScale(tickArr[tickArr.length - 1]) - yScale(tickArr[tickArr.length - 2]);
     tickArr = xScale.ticks(tickAmountY);
@@ -19197,7 +19186,7 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
         let gridXCoordinate = newXCoordinate;
         let gridYCoordinate = newYCoordinate;
         let coordDifference = 1000;
-        d3.select(".xGridAxis").selectAll(".tick").each(function () {
+        d3.select('g.xGridLines').selectAll(".tick").each(function () {
             let gridLine = d3.select(this);
             let coordinate = gridLine.attr("transform");
             coordinate = coordinate.substring(coordinate.indexOf("(") + 1, coordinate.indexOf(")")).split(",");
@@ -19208,7 +19197,7 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
             }
         });
         coordDifference = 1000;
-        d3.select(".yGridAxis").selectAll(".tick").each(function () {
+        d3.select('g.yGridLines').selectAll(".tick").each(function () {
             let gridLine = d3.select(this);
             let coordinate = gridLine.attr("transform");
             coordinate = coordinate.substring(coordinate.indexOf("(") + 1, coordinate.indexOf(")")).split(",");
@@ -19442,15 +19431,14 @@ function resetRectBorder() {
 exports.resetRectBorder = resetRectBorder;
 function checkBoundaries(element) {
     if (elementIsNearBottomBoundary(element)) {
-        svg.attr("height", +svg.attr("height") + yTickDistance + margin.left);
+        svg.attr("height", +svg.attr("height") + yTickDistance);
         height += yTickDistance;
-        //redrawGrid();
+        appendYGridLine();
     }
     if (elementIsNearRightBoundary(element)) {
-        svg.attr("width", +svg.attr("width") + xTickDistance + margin.right);
+        svg.attr("width", +svg.attr("width") + xTickDistance);
         width += xTickDistance;
         appendXGridLine();
-        //redrawGrid();
     }
 }
 function elementIsNearBottomBoundary(element) {
@@ -19459,27 +19447,40 @@ function elementIsNearBottomBoundary(element) {
 function elementIsNearRightBoundary(element) {
     return Math.abs(svg.attr("width") - (+element.attr("x") + +element.attr("width"))) < 30;
 }
-function redrawGrid() {
-    svg.select("#grid").remove();
-    defineGrid();
-}
 function appendXGridLine() {
+    let child = getLastGridLine('g.xGridLines');
+    let newChild = clone(child);
+    let position = newChild.attr("transform");
+    position = position.substring(position.indexOf("(") + 1, position.indexOf(")")).split(",");
+    newChild.attr("transform", "translate(" + (+position[0] + xTickDistance) + "," + 0 + ")");
+    d3.select('g.xGridLines').node().append(newChild.node());
+    d3.select("g.yGridLines").selectAll("line").each(function () {
+        let line = d3.select(this);
+        line.attr("x2", +line.attr("x2") + xTickDistance);
+    });
+}
+function appendYGridLine() {
+    let child = getLastGridLine('g.yGridLines');
+    let newChild = clone(child);
+    let position = newChild.attr("transform");
+    position = position.substring(position.indexOf("(") + 1, position.indexOf(")")).split(",");
+    newChild.attr("transform", "translate(" + 0 + "," + (+position[1] + yTickDistance) + ")");
+    d3.select('g.yGridLines').node().append(newChild.node());
+    d3.select("g.xGridLines").selectAll("line").each(function () {
+        let line = d3.select(this);
+        line.attr("y2", +line.attr("y2") + yTickDistance);
+    });
+}
+function getLastGridLine(selector) {
     let child = null;
-    let gridLines = d3.select('.xGridLines');
-    gridLines.each(function () {
-        d3.select(this).select("line").attr("y2", function (d) {
-            return d + 20;
-        });
+    d3.select(selector).each(function () {
         child = this.lastChild;
     });
-    child = d3.select(child);
-    let position = child.attr("transform");
-    position = position.substring(position.indexOf("(") + 1, position.indexOf(")")).split(",");
-    child.attr("transform", "translate(" + (+position[0] + xTickDistance) + "," + 0 + ")");
-    gridLines.node().append(child.node());
-    xScale = d3.scaleLinear()
-        .range([0, width - margin.right]);
-    d3.select("g.xGridAxis").call(d3.axisBottom().scale(xScale));
+    return child;
+}
+function clone(selector) {
+    let node = d3.select(selector).node();
+    return d3.select(node.parentNode.insertBefore(node.cloneNode(true), node.nextSibling));
 }
 
 },{"./controller":1,"./modules/d3.js":3,"./navbar":6}]},{},[7,2,6,1]);
