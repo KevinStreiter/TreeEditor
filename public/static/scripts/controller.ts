@@ -136,6 +136,15 @@ export function getNode(id, fromDifferentProject: Boolean, x, y) {
         });
 }
 
+function getForeignNodes(id) {
+    let url = '/treeEditor/foreignNodes?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => console.log(data));
+}
+
 function getProjectNodes(id) {
     let url = '/treeEditor/nodes?id=' + id;
     fetch(url, {
@@ -181,6 +190,7 @@ export function loadProject() {
         updateProjectName(name, id);
         getProjectFiles(id);
         getProjectNodes(id);
+        getForeignNodes(id);
     }
 }
 

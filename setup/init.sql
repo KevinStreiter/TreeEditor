@@ -35,15 +35,15 @@ CREATE TABLE Files (
         ON DELETE CASCADE
 )ENGINE=INNODB;
 
-CREATE TABLE Imported_Nodes (
+CREATE TABLE Foreign_Nodes (
     project_id INT NOT NULL,
-    imported_node_id VARCHAR(128) NOT NULL,
+    node_id VARCHAR(128) NOT NULL,
     x FLOAT,
     y FLOAT,
     FOREIGN KEY (project_id)
         REFERENCES Projects(project_id)
         ON DELETE CASCADE,
-    FOREIGN KEY (imported_node_id)
+    FOREIGN KEY (node_id)
         REFERENCES Nodes(node_id)
         ON DELETE CASCADE
 )ENGINE=INNODB;

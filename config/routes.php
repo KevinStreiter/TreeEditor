@@ -111,8 +111,18 @@ $app->post('/treeEditor/foreignNode/save', function (Request $request) {
     $x = $data["x"];
     $y = $data["y"];
 
-    $node = ['imported_node_id' => $node_id, 'project_id' => $project_id, 'x' => $x, 'y' => $y];
-    $connection->insert('Imported_Nodes', $node);
+    $node = ['node_id' => $node_id, 'project_id' => $project_id, 'x' => $x, 'y' => $y];
+    $connection->insert('Foreign_Nodes', $node);
+});
+
+$app->get('/treeEditor/foreignNodes', function ($request, $response, $args) {
+    $id = $request->getParam('id');
+    $connection = $this->get(Connection::class);
+    $rows = $connection->execute("SELECT F.project_id, F.node_id, F.x, F.y, N.element 
+        FROM Foreign_Nodes AS F INNER JOIN Nodes as N ON F.node_id=N.node_id 
+        WHERE F.project_id={$id}")
+        ->fetchAll('assoc');
+    return $response->withJson($rows);
 });
 
 $app->post('/treeEditor/save', \App\Controllers\SaveController::class);
