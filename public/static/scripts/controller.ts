@@ -71,6 +71,7 @@ function showSavePopup() {
 }
 
 export function updateProjectNodes(data, fromDifferentProject: Boolean = false, x = null, y = null) {
+    let newCoordinates = false;
     let nodes = document.getElementById("nodes");
     for (let element of data) {
         let node = toDOM(element["element"]);
@@ -86,6 +87,12 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
                     rectCounter = id + 1;
                 }
             });
+            if (x == null && y == null || newCoordinates) {
+                x = element["x"];
+                y = element["y"];
+                newCoordinates = true;
+            }
+
             let foreignNode = d3.select("#nodes>g:last-child")
                 .attr("id", rectCounter)
                 .attr("class", "foreign");
@@ -142,7 +149,7 @@ function getForeignNodes(id) {
         method: 'GET',
     })
         .then(response => response.json())
-        .then(data => console.log(data));
+        .then(data => updateProjectNodes(data, true));
 }
 
 function getProjectNodes(id) {

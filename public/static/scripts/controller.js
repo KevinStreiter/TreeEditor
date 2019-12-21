@@ -66,6 +66,7 @@ function showSavePopup() {
     }, 2000);
 }
 function updateProjectNodes(data, fromDifferentProject = false, x = null, y = null) {
+    let newCoordinates = false;
     let nodes = document.getElementById("nodes");
     for (let element of data) {
         let node = toDOM(element["element"]);
@@ -79,6 +80,11 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
                     rectCounter = id + 1;
                 }
             });
+            if (x == null && y == null || newCoordinates) {
+                x = element["x"];
+                y = element["y"];
+                newCoordinates = true;
+            }
             let foreignNode = d3.select("#nodes>g:last-child")
                 .attr("id", rectCounter)
                 .attr("class", "foreign");
@@ -132,7 +138,7 @@ function getForeignNodes(id) {
         method: 'GET',
     })
         .then(response => response.json())
-        .then(data => console.log(data));
+        .then(data => updateProjectNodes(data, true));
 }
 function getProjectNodes(id) {
     let url = '/treeEditor/nodes?id=' + id;
