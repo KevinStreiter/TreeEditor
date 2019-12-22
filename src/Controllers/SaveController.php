@@ -25,7 +25,9 @@ class SaveController
         $projectID = $request->getParam('projectID');
         if (is_numeric($projectID)) {
             $this->updateProject($connection, $projectName, $projectID, $size);
+            $foreignData = $this->getForeignData($connection);
             $this->updateNodes($nodes, $connection, $projectID);
+            $this->insertForeignData($connection, $foreignData, $nodes, $projectID);
             $this->saveFiles($files, $connection, $projectID);
             return $response->withJson($projectID);
         } else {
@@ -74,6 +76,24 @@ class SaveController
         $connection->query("DELETE FROM Nodes WHERE project_id={$projectID}");
         $connection->query("DELETE FROM Files WHERE project_id={$projectID}");
         $this->saveNodes($data, $projectID, $connection);
+    }
+
+    function getForeignData($connection)
+    {
+        $query = $connection->newQuery()->select('*')->from('Foreign_Nodes');
+        return $query->execute()->fetchAll('assoc') ?: [];
+    }
+
+    function insertForeignData($connection, $foreignData, $nodes, $projectID) {
+        foreach ($foreignData as $foreign) {
+            foreach ($nodes as $node) {
+                $attributes = $node['attributes'];
+                if ($foreign['node_id'] == $projectID . '_' . $attributes[0][1]) {
+                    $connection->insert('Foreign_Nodes', $foreign);
+                    break;
+                }
+            }
+        }
     }
 
     function saveFiles($data, $connection, $projectID)
