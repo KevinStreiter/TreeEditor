@@ -56,7 +56,7 @@ $app->get('/treeEditor/nodes', function ($request, $response, $args) {
 $app->get('/treeEditor/projectFiles', function ($request, $response, $args) {
     $id = $request->getParam('id');
     $query = $this->get(Connection::class)->newQuery();
-    $query = $query->select('*')->from('Files')->andWhere(['project_id' => $id]);;
+    $query = $query->select('*')->from('Files')->andWhere(['project_id' => $id]);
     $rows = $query->execute()->fetchAll('assoc') ?: [];
     return $response->withJson($rows);
 });
@@ -115,10 +115,24 @@ $app->post('/treeEditor/foreignNode/save', function (Request $request) {
     $connection->insert('Foreign_Nodes', $node);
 });
 
+$app->post('/treeEditor/foreignNode/update', function (Request $request) {
+    $connection = $this->get(Connection::class);
+    $data = $request->getBody();
+    $data = json_decode($data, true);
+    $foreign_id = $data["foreign_id"];
+    $node_id = $data["node_id"];
+    $project_id = $data["project_id"];
+    $x = $data["x"];
+    $y = $data["y"];
+
+    $connection->query("UPDATE Foreign_Nodes SET x = {$x}, 
+            y = {$y} WHERE project_id = '{$project_id}' AND node_id = '{$node_id}' AND foreign_id = '{$foreign_id}'");
+});
+
 $app->get('/treeEditor/foreignNodes', function ($request, $response, $args) {
     $id = $request->getParam('id');
     $connection = $this->get(Connection::class);
-    $rows = $connection->execute("SELECT F.project_id, F.node_id, F.x, F.y, N.element 
+    $rows = $connection->execute("SELECT F.foreign_id, F.project_id, F.node_id, F.x, F.y, N.element 
         FROM Foreign_Nodes AS F INNER JOIN Nodes as N ON F.node_id=N.node_id 
         WHERE F.project_id={$id}")
         ->fetchAll('assoc');

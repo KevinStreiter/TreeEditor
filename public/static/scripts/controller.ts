@@ -52,7 +52,10 @@ export function saveProject() {
         body: data
     })
         .then(response => response.json())
-        .then(data => saveProjectID(data));
+        .then(data => {
+            saveProjectID(data);
+            updateForeignNodes();
+        });
 }
 
 function saveProjectID(projectID) {
@@ -95,7 +98,7 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
 
             let foreignNode = d3.select("#nodes>g:last-child")
                 .attr("id", rectCounter)
-                .attr("class", "foreign");
+                .attr("class", "foreign" + " " + element["node_id"]);
             let foreignRect = foreignNode.select("rect")
                 .attr("x", x)
                 .attr("y", y);
@@ -113,6 +116,28 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
     initializeRectListeners();
     initializeCircleListeners();
     resetRectBorder();
+}
+
+function updateForeignNodes() {
+    let project_id = document.getElementById("projectTitle").getAttribute("class");
+    let nodes = document.getElementById("nodes");
+    let foreignNodes = nodes.querySelectorAll("g.foreign");
+    let url = '/treeEditor/foreignNode/update';
+
+    foreignNodes.forEach(function (value) {
+        let element = d3.select(value)
+        let node_id = element.attr("class");
+        node_id = node_id.split(" ")[1];
+        let x = element.select("rect").attr("x");
+        let y = element.select("rect").attr("y");
+
+        let data = JSON.stringify({node_id: node_id, project_id: project_id, x: x, y: y});
+
+        return fetch(url, {
+            method: 'POST',
+            body: data
+        })
+    });
 }
 
 function saveForeignNode(id, x, y) {
