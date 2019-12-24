@@ -124,6 +124,15 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
     resetRectBorder();
 }
 
+export function deleteForeignNode(element) {
+    let foreign_id = element.attr("class");
+    foreign_id = foreign_id.split(" ")[2];
+    let url = '/treeEditor/foreignNodes/delete?id=' + foreign_id;
+    fetch(url, {
+        method: 'POST',
+    })
+}
+
 function updateForeignNodes() {
     let nodes = document.getElementById("nodes");
     let foreignNodes = nodes.querySelectorAll("g.foreign");

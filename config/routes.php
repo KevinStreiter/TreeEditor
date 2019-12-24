@@ -7,8 +7,6 @@ use Slim\Views\PhpRenderer;
 use Slim\Http\UploadedFile;
 use Cake\Database\Connection;
 
-
-
 $app->get('/treeEditor', function ($request, $response, $args) {
     return $this->get(PhpRenderer::class)->render($response, "/home.html", $args);
 });
@@ -110,11 +108,16 @@ $app->post('/treeEditor/foreignNode/save', function (Request $request, Response 
     $project_id = $data["project_id"];
     $x = $data["x"];
     $y = $data["y"];
-
     $node = ['node_id' => $node_id, 'project_id' => $project_id, 'x' => $x, 'y' => $y];
     $connection->insert('Foreign_Nodes', $node);
     $d = $connection->execute("SELECT MAX(foreign_id) FROM Foreign_Nodes")->fetchAll('assoc');;
     return $response->withJson($d);
+});
+
+$app->post('/treeEditor/foreignNodes/delete', function ($request, $response, $args) {
+    $id = $request->getParam('id');
+    $connection = $this->get(Connection::class);
+    $connection->query("DELETE FROM Foreign_Nodes WHERE foreign_id='{$id}'");
 });
 
 $app->post('/treeEditor/foreignNode/update', function (Request $request) {
@@ -124,7 +127,6 @@ $app->post('/treeEditor/foreignNode/update', function (Request $request) {
     $foreign_id = $data["foreign_id"];
     $x = $data["x"];
     $y = $data["y"];
-
     $connection->query("UPDATE Foreign_Nodes SET x = {$x}, y = {$y} WHERE foreign_id = '{$foreign_id}'");
 });
 

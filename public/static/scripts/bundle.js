@@ -117,6 +117,15 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
     script_1.resetRectBorder();
 }
 exports.updateProjectNodes = updateProjectNodes;
+function deleteForeignNode(element) {
+    let foreign_id = element.attr("class");
+    foreign_id = foreign_id.split(" ")[2];
+    let url = '/treeEditor/foreignNodes/delete?id=' + foreign_id;
+    fetch(url, {
+        method: 'POST',
+    });
+}
+exports.deleteForeignNode = deleteForeignNode;
 function updateForeignNodes() {
     let nodes = document.getElementById("nodes");
     let foreignNodes = nodes.querySelectorAll("g.foreign");
@@ -386,6 +395,7 @@ function removeNode(node) {
             let element = d3.select(this);
             if (element.attr("id") == node.parentNode.id) {
                 element.remove();
+                controller_1.deleteForeignNode(element);
             }
             if (element.attr("id") != "grid" && element.attr("id") != null) {
                 element.selectAll("path").each(function () {

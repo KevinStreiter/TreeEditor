@@ -1,5 +1,5 @@
 import * as d3 from "./modules/d3";
-import {getNode, saveProject} from "./controller";
+import {getNode, saveProject, deleteForeignNode} from "./controller";
 
 let target, event;
 document.addEventListener('contextmenu', onContextMenu, false);
@@ -90,10 +90,12 @@ function onClick(e){
 function removeNode(node) {
 
     if (node.nodeName == "rect") {
+
         d3.selectAll("g").each(function () {
             let element = d3.select(this);
             if (element.attr("id") == node.parentNode.id) {
                 element.remove()
+                deleteForeignNode(element);
             }
             if (element.attr("id") != "grid" && element.attr("id") != null) {
                 element.selectAll("path").each(function () {
