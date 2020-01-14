@@ -36,12 +36,11 @@ CREATE TABLE Files (
 )ENGINE=INNODB;
 
 CREATE TABLE Foreign_Nodes (
-    foreign_id INT NOT NULL AUTO_INCREMENT,
+    foreign_id INT NOT NULL,
     project_id INT NOT NULL,
     node_id VARCHAR(128) NOT NULL,
     x FLOAT,
     y FLOAT,
-    PRIMARY KEY (foreign_id),
     FOREIGN KEY (project_id)
         REFERENCES Projects(project_id)
         ON DELETE CASCADE,

@@ -68,7 +68,7 @@ function showSavePopup() {
         popup.style.opacity = '0';
     }, 2000);
 }
-function updateProjectNodes(data, fromDifferentProject = false, x = null, y = null, foreign_id = null) {
+function updateProjectNodes(data, fromDifferentProject = false, x = null, y = null, initialLoad = false) {
     let newCoordinates = false;
     let nodes = document.getElementById("nodes");
     for (let element of data) {
@@ -76,19 +76,18 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
         nodes.appendChild(document.importNode(new DOMParser()
             .parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + node.outerHTML + '</svg>', 'application/xml').documentElement.firstChild, true));
         if (fromDifferentProject) {
-            if (foreign_id != null) {
-                foreign_id = Object.values(foreign_id[0])[0];
+            let rectCounter = 1;
+            if (initialLoad) {
+                rectCounter = element["foreign_id"];
             }
             else {
-                foreign_id = element["foreign_id"];
+                d3.select("#nodes").selectAll("rect").each(function () {
+                    let id = +d3.select(this.parentNode).attr("id");
+                    if (id >= rectCounter) {
+                        rectCounter = id + 1;
+                    }
+                });
             }
-            let rectCounter = 1;
-            d3.select("#nodes").selectAll("rect").each(function () {
-                let id = +d3.select(this.parentNode).attr("id");
-                if (id >= rectCounter) {
-                    rectCounter = id + 1;
-                }
-            });
             if (x == null && y == null || newCoordinates) {
                 x = element["x"];
                 y = element["y"];
@@ -96,7 +95,7 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
             }
             let foreignNode = d3.select("#nodes>g:last-child")
                 .attr("id", rectCounter)
-                .attr("class", "foreign" + " " + element["node_id"] + " " + foreign_id);
+                .attr("class", "foreign" + " " + element["node_id"]);
             let foreignRect = foreignNode.select("rect")
                 .attr("x", x)
                 .attr("y", y);
@@ -108,7 +107,6 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
             });
             script_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
             foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
-            foreign_id = null;
         }
     }
     script_1.initializeRectListeners();
@@ -117,9 +115,9 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
 }
 exports.updateProjectNodes = updateProjectNodes;
 function deleteForeignNode(element) {
-    let foreign_id = element.attr("class");
-    foreign_id = foreign_id.split(" ")[2];
-    let url = '/treeEditor/foreignNodes/delete?id=' + foreign_id;
+    let foreign_id = element.attr("id");
+    let project_id = document.getElementById("projectTitle").getAttribute("class");
+    let url = '/treeEditor/foreignNodes/delete?foreign_id=' + foreign_id + '&project_id=' + project_id;
     fetch(url, {
         method: 'POST',
     });
@@ -127,15 +125,15 @@ function deleteForeignNode(element) {
 exports.deleteForeignNode = deleteForeignNode;
 function updateForeignNodes() {
     let nodes = document.getElementById("nodes");
+    let project_id = document.getElementById("projectTitle").getAttribute("class");
     let foreignNodes = nodes.querySelectorAll("g.foreign");
     let url = '/treeEditor/foreignNode/update';
     foreignNodes.forEach(function (value) {
         let element = d3.select(value);
-        let foreign_id = element.attr("class");
-        foreign_id = foreign_id.split(" ")[2];
+        let foreign_id = element.attr("id");
         let x = element.select("rect").attr("x");
         let y = element.select("rect").attr("y");
-        let data = JSON.stringify({ foreign_id: foreign_id, x: x, y: y });
+        let data = JSON.stringify({ foreign_id: foreign_id, project_id: project_id, x: x, y: y });
         return fetch(url, {
             method: 'POST',
             body: data
@@ -145,15 +143,23 @@ function updateForeignNodes() {
 function saveForeignNode(data, fromDifferentProject, x, y) {
     let id = data[0]["node_id"];
     let project_id = document.getElementById("projectTitle").getAttribute("class");
+    updateProjectNodes(data, fromDifferentProject, x, y);
+    getProjectFiles(data[0]["node_id"]);
+    let newest_foreign_id = 0;
+    let nodes = document.getElementById("nodes");
+    let foreignNodes = nodes.querySelectorAll("g.foreign");
+    foreignNodes.forEach(function (value) {
+        let element = d3.select(value);
+        let foreign_id = element.attr("id");
+        if (foreign_id > newest_foreign_id) {
+            newest_foreign_id = foreign_id;
+        }
+    });
     let url = '/treeEditor/foreignNode/save';
-    let data_json = JSON.stringify({ node_id: id, project_id: project_id, x: x, y: y });
+    let data_json = JSON.stringify({ foreign_id: newest_foreign_id, node_id: id, project_id: project_id, x: x, y: y });
     fetch(url, {
         method: 'POST',
         body: data_json
-    }).then(response => response.json())
-        .then(foreign_id => {
-        updateProjectNodes(data, fromDifferentProject, x, y, foreign_id);
-        getProjectFiles(data[0]["node_id"]);
     });
 }
 function getNode(id, fromDifferentProject, x, y) {
@@ -175,7 +181,7 @@ function getForeignNodes(id) {
         method: 'GET',
     })
         .then(response => response.json())
-        .then(data => updateProjectNodes(data, true));
+        .then(data => updateProjectNodes(data, true, null, null, true));
 }
 function getProjectNodes(id) {
     let url = '/treeEditor/nodes?id=' + id;

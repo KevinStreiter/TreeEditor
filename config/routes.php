@@ -104,20 +104,20 @@ $app->post('/treeEditor/foreignNode/save', function (Request $request, Response 
     $connection = $this->get(Connection::class);
     $data = $request->getBody();
     $data = json_decode($data, true);
+    $foreign_id = $data["foreign_id"];
     $node_id = $data["node_id"];
     $project_id = $data["project_id"];
     $x = $data["x"];
     $y = $data["y"];
-    $node = ['node_id' => $node_id, 'project_id' => $project_id, 'x' => $x, 'y' => $y];
+    $node = ['foreign_id' => $foreign_id, 'node_id' => $node_id, 'project_id' => $project_id, 'x' => $x, 'y' => $y];
     $connection->insert('Foreign_Nodes', $node);
-    $d = $connection->execute("SELECT MAX(foreign_id) FROM Foreign_Nodes")->fetchAll('assoc');;
-    return $response->withJson($d);
 });
 
 $app->post('/treeEditor/foreignNodes/delete', function ($request, $response, $args) {
-    $id = $request->getParam('id');
+    $foreign_id = $request->getParam('foreign_id');
+    $project_id = $request->getParam('project_id');
     $connection = $this->get(Connection::class);
-    $connection->query("DELETE FROM Foreign_Nodes WHERE foreign_id='{$id}'");
+    $connection->query("DELETE FROM Foreign_Nodes WHERE foreign_id ='{$foreign_id}' AND project_id='{$project_id}'");
 });
 
 $app->post('/treeEditor/foreignNode/update', function (Request $request) {
@@ -125,9 +125,10 @@ $app->post('/treeEditor/foreignNode/update', function (Request $request) {
     $data = $request->getBody();
     $data = json_decode($data, true);
     $foreign_id = $data["foreign_id"];
+    $project_id = $data["project_id"];
     $x = $data["x"];
     $y = $data["y"];
-    $connection->query("UPDATE Foreign_Nodes SET x = {$x}, y = {$y} WHERE foreign_id = '{$foreign_id}'");
+    $connection->query("UPDATE Foreign_Nodes SET x = {$x}, y = {$y} WHERE foreign_id = '{$foreign_id}' AND project_id = '{$project_id}'");
 });
 
 $app->get('/treeEditor/foreignNodes', function ($request, $response, $args) {
