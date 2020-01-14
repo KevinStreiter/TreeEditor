@@ -39,6 +39,7 @@ function saveProject() {
     let projectID = project.className;
     let url = '/treeEditor/save?projectName=' + projectName + '&projectID=' + projectID;
     let nodes = filterNodes();
+    console.log(nodes);
     let nodes_json = toJSON(nodes);
     let files = document.getElementById("fileList");
     let files_json = toJSON(files);
@@ -108,6 +109,19 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
             });
             script_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
             foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
+            foreignNode = document.getElementById(rectCounter.toString());
+            if (initialLoad && element["connectors"] != "null") {
+                let connectors = toDOM(element["connectors"]);
+                foreignNode.appendChild(document.importNode(new DOMParser()
+                    .parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + connectors.outerHTML + '</svg>', 'application/xml').documentElement.firstChild, true));
+                let g = document.getElementById("connectors");
+                if (g.hasChildNodes()) {
+                    while (g.childNodes.length > 0) {
+                        foreignNode.appendChild(g.childNodes[0]);
+                    }
+                }
+                g.remove();
+            }
         }
     }
     script_1.initializeRectListeners();
@@ -134,7 +148,21 @@ function updateForeignNodes() {
         let foreign_id = element.attr("id");
         let x = element.select("rect").attr("x");
         let y = element.select("rect").attr("y");
-        let data = JSON.stringify({ foreign_id: foreign_id, project_id: project_id, x: x, y: y });
+        let connectors = document.createElement('g');
+        connectors.setAttribute("id", "connectors");
+        element.selectAll("path").each(function () {
+            connectors.appendChild(this.cloneNode(true));
+        });
+        element.selectAll(".lineCircle").each(function () {
+            connectors.appendChild(this.cloneNode(true));
+        });
+        if (connectors.hasChildNodes()) {
+            connectors = toJSON(connectors);
+        }
+        else {
+            connectors = null;
+        }
+        let data = JSON.stringify({ foreign_id: foreign_id, project_id: project_id, x: x, y: y, connectors: connectors });
         return fetch(url, {
             method: 'POST',
             body: data

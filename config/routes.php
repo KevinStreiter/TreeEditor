@@ -128,13 +128,14 @@ $app->post('/treeEditor/foreignNode/update', function (Request $request) {
     $project_id = $data["project_id"];
     $x = $data["x"];
     $y = $data["y"];
-    $connection->query("UPDATE Foreign_Nodes SET x = {$x}, y = {$y} WHERE foreign_id = '{$foreign_id}' AND project_id = '{$project_id}'");
+    $connectors = json_encode($data["connectors"]);
+    $connection->query("UPDATE Foreign_Nodes SET x = {$x}, y = {$y}, connectors = '{$connectors}' WHERE foreign_id = '{$foreign_id}' AND project_id = '{$project_id}'");
 });
 
 $app->get('/treeEditor/foreignNodes', function ($request, $response, $args) {
     $id = $request->getParam('id');
     $connection = $this->get(Connection::class);
-    $rows = $connection->execute("SELECT F.foreign_id, F.project_id, F.node_id, F.x, F.y, N.element 
+    $rows = $connection->execute("SELECT F.foreign_id, F.project_id, F.node_id, F.x, F.y, F.connectors, N.element 
         FROM Foreign_Nodes AS F INNER JOIN Nodes as N ON F.node_id=N.node_id 
         WHERE F.project_id={$id}")
         ->fetchAll('assoc');
