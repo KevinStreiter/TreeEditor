@@ -94,7 +94,7 @@ function removeNode(node) {
         d3.selectAll("g").each(function () {
             let element = d3.select(this);
             if (element.attr("id") == node.parentNode.id) {
-                element.remove()
+                element.remove();
                 deleteForeignNode(element);
             }
             if (element.attr("id") != "grid" && element.attr("id") != null) {

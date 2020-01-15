@@ -110,7 +110,11 @@ $app->post('/treeEditor/foreignNode/save', function (Request $request, Response 
     $x = $data["x"];
     $y = $data["y"];
     $node = ['foreign_id' => $foreign_id, 'node_id' => $node_id, 'project_id' => $project_id, 'x' => $x, 'y' => $y];
-    $connection->insert('Foreign_Nodes', $node);
+    try {
+        $connection->insert('Foreign_Nodes', $node);
+    } catch (PDOException $e) {
+        return $response->withStatus(403);
+    }
 });
 
 $app->post('/treeEditor/foreignNodes/delete', function ($request, $response, $args) {

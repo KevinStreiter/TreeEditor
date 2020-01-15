@@ -47,5 +47,6 @@ CREATE TABLE Foreign_Nodes (
         ON DELETE CASCADE,
     FOREIGN KEY (node_id)
         REFERENCES Nodes(node_id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+    UNIQUE(project_id,node_id)
 )ENGINE=INNODB;

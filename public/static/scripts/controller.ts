@@ -40,7 +40,6 @@ export function saveProject() {
     let projectID = project.className;
     let url = '/treeEditor/save?projectName=' + projectName + '&projectID=' + projectID;
     let nodes = filterNodes();
-    console.log(nodes)
     let nodes_json = toJSON(nodes);
     let files = document.getElementById("fileList");
     let files_json = toJSON(files);
@@ -189,8 +188,7 @@ function saveForeignNode(data, fromDifferentProject, x, y) {
     let id = data[0]["node_id"];
     let project_id = document.getElementById("projectTitle").getAttribute("class");
 
-    updateProjectNodes(data, fromDifferentProject, x, y);
-    getProjectFiles(data[0]["node_id"]);
+
 
     let newest_foreign_id = 0;
     let nodes = document.getElementById("nodes");
@@ -209,6 +207,14 @@ function saveForeignNode(data, fromDifferentProject, x, y) {
     fetch(url, {
         method: 'POST',
         body: data_json
+    })
+        .then(handleErrors)
+        .then(response => {
+            updateProjectNodes(data, fromDifferentProject, x, y);
+            getProjectFiles(data[0]["node_id"]);
+            })
+        .catch((error) => {
+            //do nothing
     });
 }
 
@@ -223,6 +229,11 @@ export function getNode(id, fromDifferentProject: Boolean, x, y) {
                 saveForeignNode(data, fromDifferentProject, x, y)
             }
         });
+}
+
+function handleErrors(response) {
+    if (!response.ok) throw Error(response.statusText);
+    return response;
 }
 
 function getForeignNodes(id) {
@@ -300,24 +311,19 @@ export function uploadFile() {
     let file_input = <HTMLInputElement>document.querySelector('[type=file]');
     let files = file_input.files;
     let name = files[0].name;
-    if (name.substr(name.length - 3) == "pdf") {
-        let formData = new FormData();
-        formData.append('file', files[0]);
-        let rectInfo = document.getElementById('rectInfo').innerHTML;
-        let url = '/treeEditor/files/upload?rectInfo=' + rectInfo;
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-        })
-            .then(response => response.text())
-            .then(function (data) {
-                updateFileList(data);
-                saveProject();
-            });
-    }
-    else {
-        alert("Only .pdf attachments are allowed")
-    }
+    let formData = new FormData();
+    formData.append('file', files[0]);
+    let rectInfo = document.getElementById('rectInfo').innerHTML;
+    let url = '/treeEditor/files/upload?rectInfo=' + rectInfo;
+    fetch(url, {
+        method: 'POST',
+        body: formData,
+    })
+        .then(response => response.text())
+        .then(function (data) {
+            updateFileList(data);
+            saveProject();
+        });
 }
 
 function updateFileList(filename) {
