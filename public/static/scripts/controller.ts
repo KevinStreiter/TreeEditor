@@ -73,7 +73,8 @@ function showSavePopup() {
     },2000);
 }
 
-export function updateProjectNodes(data, fromDifferentProject: Boolean = false, x = null, y = null, initialLoad: Boolean = false) {
+export function updateProjectNodes(data, fromDifferentProject: Boolean = false, x = null, y = null,
+                                   initialLoad: Boolean = false, foreign_id = null) {
     let newCoordinates = false;
     let nodes = document.getElementById("nodes");
     for (let element of data) {
@@ -83,17 +84,11 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
                 'application/xml').documentElement.firstChild, true));
 
         if (fromDifferentProject) {
-            let rectCounter = 1;
+            let rectCounter = null;
             if (initialLoad) {
                 rectCounter = element["foreign_id"];
-            }
-            else {
-                d3.select("#nodes").selectAll("rect").each(function () {
-                    let id = +d3.select(this.parentNode).attr("id");
-                    if (id >= rectCounter) {
-                        rectCounter = id + 1;
-                    }
-                });
+            } else {
+                rectCounter = foreign_id;
             }
             if (x == null && y == null || newCoordinates) {
                 x = element["x"];
@@ -118,8 +113,8 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
             foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
             foreignNode = document.getElementById(rectCounter.toString());
 
-            if (initialLoad && element["connectors"] != "null") {
-
+            if (initialLoad && element["connectors"] != null) {
+                console.log(typeof element["connectors"]);
                 let connectors = toDOM(element["connectors"]);
                 foreignNode.appendChild(document.importNode(new DOMParser()
                     .parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + connectors.outerHTML + '</svg>',
@@ -187,20 +182,18 @@ function updateForeignNodes() {
 function saveForeignNode(data, fromDifferentProject, x, y) {
     let id = data[0]["node_id"];
     let project_id = document.getElementById("projectTitle").getAttribute("class");
-
-
-
-    let newest_foreign_id = 0;
+    let  newest_foreign_id = 1;
     let nodes = document.getElementById("nodes");
-    let foreignNodes = nodes.querySelectorAll("g.foreign");
-    foreignNodes.forEach(function (value) {
+    let g = nodes.querySelectorAll("g");
+    let idList = [];
+    g.forEach(function (value) {
         let element = d3.select(value);
-        let foreign_id = element.attr("id");
-        if (foreign_id > newest_foreign_id) {
-            newest_foreign_id = foreign_id;
-        }
+        let id = element.attr("id");
+        idList.push(id);
     });
-
+    if (idList.length != 0) {
+        newest_foreign_id = Math.max.apply(Math, idList.map(function(o) { return o; })) + 1;
+    }
     let url = '/treeEditor/foreignNode/save';
     let data_json = JSON.stringify({foreign_id: newest_foreign_id, node_id: id, project_id: project_id, x: x, y: y});
 
@@ -210,7 +203,7 @@ function saveForeignNode(data, fromDifferentProject, x, y) {
     })
         .then(handleErrors)
         .then(response => {
-            updateProjectNodes(data, fromDifferentProject, x, y);
+            updateProjectNodes(data, fromDifferentProject, x, y, false, newest_foreign_id);
             getProjectFiles(data[0]["node_id"]);
             })
         .catch((error) => {

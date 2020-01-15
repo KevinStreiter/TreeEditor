@@ -41,7 +41,7 @@ CREATE TABLE Foreign_Nodes (
     node_id VARCHAR(128) NOT NULL,
     x FLOAT,
     y FLOAT,
-    connectors JSON,
+    connectors JSON DEFAULT NULL,
     FOREIGN KEY (project_id)
         REFERENCES Projects(project_id)
         ON DELETE CASCADE,

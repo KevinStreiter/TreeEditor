@@ -97,9 +97,7 @@ function onClick(e){
 }
 
 function removeNode(node) {
-
     if (node.nodeName == "rect") {
-
         d3.selectAll("g").each(function () {
             let element = d3.select(this);
             if (element.attr("id") == node.parentNode.id) {

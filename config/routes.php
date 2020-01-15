@@ -132,8 +132,14 @@ $app->post('/treeEditor/foreignNode/update', function (Request $request) {
     $project_id = $data["project_id"];
     $x = $data["x"];
     $y = $data["y"];
-    $connectors = json_encode($data["connectors"]);
-    $connection->query("UPDATE Foreign_Nodes SET x = {$x}, y = {$y}, connectors = '{$connectors}' WHERE foreign_id = '{$foreign_id}' AND project_id = '{$project_id}'");
+    if ($data["connectors"] != null) {
+        $connectors = json_encode($data["connectors"]);
+        $connection->query("UPDATE Foreign_Nodes SET x = {$x}, y = {$y}, connectors = '{$connectors}' WHERE foreign_id = '{$foreign_id}' AND project_id = '{$project_id}'");
+    }
+    else {
+        $connection->query("UPDATE Foreign_Nodes SET x = {$x}, y = {$y} WHERE foreign_id = '{$foreign_id}' AND project_id = '{$project_id}'");
+    }
+
 });
 
 $app->get('/treeEditor/foreignNodes', function ($request, $response, $args) {
