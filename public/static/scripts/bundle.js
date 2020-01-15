@@ -103,19 +103,18 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
             });
             script_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
             foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
-            foreignNode = document.getElementById(rectCounter.toString());
+            let foreignNodeDOM = document.getElementById(rectCounter.toString());
             if (initialLoad && element["connectors"] != null) {
-                console.log(typeof element["connectors"]);
                 let connectors = toDOM(element["connectors"]);
-                foreignNode.appendChild(document.importNode(new DOMParser()
+                foreignNodeDOM.appendChild(document.importNode(new DOMParser()
                     .parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + connectors.outerHTML + '</svg>', 'application/xml').documentElement.firstChild, true));
                 let g = document.getElementById("connectors");
                 if (g.hasChildNodes()) {
                     while (g.childNodes.length > 0) {
-                        foreignNode.appendChild(g.childNodes[0]);
+                        foreignNodeDOM.appendChild(g.childNodes[0]);
                     }
                 }
-                g.remove();
+                script_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
             }
         }
     }
@@ -397,10 +396,12 @@ function updateProjectMenu(data) {
         }
         else if (tempId != null) {
             let submenu = document.getElementById(`${item["project_id"]}`);
-            let submenuEntry = submenu.querySelector('.menu');
-            submenuEntry.insertAdjacentHTML('beforeend', `<li class="menu-item" id="${item["node_id"]}">\n` +
-                `<button type="button" class="menu-btn" "${item["node_id"]}"><i class="fa fa-link"></i>` +
-                `<span class="menu-text">${nodeText}</span></button>\n</li>`);
+            if (submenu != null) {
+                let submenuEntry = submenu.querySelector('.menu');
+                submenuEntry.insertAdjacentHTML('beforeend', `<li class="menu-item" id="${item["node_id"]}">\n` +
+                    `<button type="button" class="menu-btn" "${item["node_id"]}"><i class="fa fa-link"></i>` +
+                    `<span class="menu-text">${nodeText}</span></button>\n</li>`);
+            }
         }
     }
     if (tempId == null) {

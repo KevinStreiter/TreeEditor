@@ -111,22 +111,21 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
             });
             updateRectSize(x,  y, rectCounter, foreignNode, foreignRect, false);
             foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
-            foreignNode = document.getElementById(rectCounter.toString());
+            let foreignNodeDOM = document.getElementById(rectCounter.toString());
 
             if (initialLoad && element["connectors"] != null) {
-                console.log(typeof element["connectors"]);
                 let connectors = toDOM(element["connectors"]);
-                foreignNode.appendChild(document.importNode(new DOMParser()
+                foreignNodeDOM.appendChild(document.importNode(new DOMParser()
                     .parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + connectors.outerHTML + '</svg>',
                         'application/xml').documentElement.firstChild, true));
                 let g = document.getElementById("connectors");
 
                 if (g.hasChildNodes()) {
                     while (g.childNodes.length > 0) {
-                        foreignNode.appendChild(g.childNodes[0]);
+                        foreignNodeDOM.appendChild(g.childNodes[0]);
                     }
                 }
-                g.remove();
+                updateRectSize(x,  y, rectCounter, foreignNode, foreignRect, false);
             }
         }
     }

@@ -61,10 +61,12 @@ function updateProjectMenu(data) {
         }
         else if (tempId != null) {
             let submenu = document.getElementById(`${item["project_id"]}`);
-            let submenuEntry = submenu.querySelector('.menu');
-            submenuEntry.insertAdjacentHTML('beforeend', `<li class="menu-item" id="${item["node_id"]}">\n` +
-                `<button type="button" class="menu-btn" "${item["node_id"]}"><i class="fa fa-link"></i>` +
-                `<span class="menu-text">${nodeText}</span></button>\n</li>`);
+            if (submenu != null) {
+                let submenuEntry = submenu.querySelector('.menu');
+                submenuEntry.insertAdjacentHTML('beforeend', `<li class="menu-item" id="${item["node_id"]}">\n` +
+                    `<button type="button" class="menu-btn" "${item["node_id"]}"><i class="fa fa-link"></i>` +
+                    `<span class="menu-text">${nodeText}</span></button>\n</li>`);
+            }
         }
     }
     if (tempId == null) {
