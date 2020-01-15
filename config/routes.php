@@ -31,7 +31,14 @@ $app->get('/treeEditor/projectsAndNodes', function ($request, $response, $args) 
 
 $app->post('/treeEditor/projects/delete', function (Request $request) {
     $id = $request->getParam('id');
+    $directory = $this->get('upload_directory');
     $connection = $this->get(Connection::class);
+    $query = $connection->newQuery()->select('*')->from('Files')->andWhere(['project_id' => $id]);
+    $rows = $query->execute()->fetchAll('assoc') ?: [];
+    foreach ($rows as $row) {
+        $fileName = json_decode($row["element"])->attributes[0][1];
+        unlink($directory . DIRECTORY_SEPARATOR . $fileName);
+    }
     $connection->query("DELETE FROM Projects WHERE project_id={$id}");
 });
 
@@ -153,5 +160,3 @@ $app->get('/treeEditor/foreignNodes', function ($request, $response, $args) {
 });
 
 $app->post('/treeEditor/save', \App\Controllers\SaveController::class);
-
-
