@@ -349,6 +349,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
 const controller_1 = require("./controller");
+let toDOM = require("./modules/toDOM.js");
 let target, event;
 document.addEventListener('contextmenu', onContextMenu, false);
 function showMenu(x, y) {
@@ -366,7 +367,7 @@ function showMenu(x, y) {
         getProjects();
     }
     else {
-        menu.classList.remove('show-menu');
+        hideMenu();
     }
 }
 function getProjects() {
@@ -379,24 +380,33 @@ function getProjects() {
 }
 function updateProjectMenu(data) {
     let menu = document.querySelector('.menu');
+    let project_id = document.getElementById("projectTitle").getAttribute("class");
     let tempId = null;
     for (let item of data) {
-        if (tempId != item["project_id"]) {
+        let node = toDOM(item["element"]);
+        let nodeText = node.getElementsByClassName("titleText")[0].innerHTML;
+        if (nodeText == "") {
+            nodeText = item["node_id"];
+        }
+        if (tempId != item["project_id"] && project_id != item["project_id"]) {
             menu.insertAdjacentHTML('beforeend', `<li class="menu-item submenu" id="${item["project_id"]}">\n` +
                 `<button type="button" class="menu-btn"> <i class="fa fa-folder-open"></i>` +
                 `<span class="menu-text">${item["name"]}</span> </button>\n` +
                 `<menu class="menu"><li class="menu-item" id="${item["node_id"]}">\n` +
                 `<button type="button" class="menu-btn"><i class="fa fa-link"></i>` +
-                `<span class="menu-text">${item["node_id"]}</span></button>\n</li></menu>`);
+                `<span class="menu-text">${nodeText}</span></button>\n</li></menu>`);
             tempId = item["project_id"];
         }
-        else {
+        else if (tempId != null) {
             let submenu = document.getElementById(`${item["project_id"]}`);
             let submenuEntry = submenu.querySelector('.menu');
             submenuEntry.insertAdjacentHTML('beforeend', `<li class="menu-item" id="${item["node_id"]}">\n` +
-                `<button type="button" class="menu-btn"><i class="fa fa-link"></i>` +
-                `<span class="menu-text">${item["node_id"]}</span></button>\n</li>`);
+                `<button type="button" class="menu-btn" "${item["node_id"]}"><i class="fa fa-link"></i>` +
+                `<span class="menu-text">${nodeText}</span></button>\n</li>`);
         }
+    }
+    if (tempId == null) {
+        hideMenu();
     }
 }
 function hideMenu() {
@@ -418,9 +428,9 @@ function onClick(e) {
         removeNode(target);
     }
     else {
-        let nodeId = e.target.innerText;
+        let nodeId = e.target.parentNode.id;
         if (nodeId == "") {
-            nodeId = e.target.parentNode.innerText;
+            nodeId = e.target.parentNode.parentNode.id;
         }
         let graph = document.getElementById('GraphContainer').getBoundingClientRect();
         controller_1.getNode(nodeId, true, event.pageX, event.pageY - graph.top);
@@ -460,7 +470,7 @@ function removeNode(node) {
     }
 }
 
-},{"./controller":1,"./modules/d3":3}],3:[function(require,module,exports){
+},{"./controller":1,"./modules/d3":3,"./modules/toDOM.js":4}],3:[function(require,module,exports){
 // https://d3js.org v5.12.0 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -19135,6 +19145,18 @@ function mousedown() {
             .attr("fill", "#aaa9ad")
             .attr("class", "rect");
         initializeRectListeners();
+        g.append("text")
+            .attr("x", +rect.attr("x") + 10)
+            .attr("y", +rect.attr("y") + 20)
+            .attr("font-weight", 20)
+            .attr("class", "titleText")
+            .style('font-size', 22)
+            .text();
+        g.append("text")
+            .attr("x", +rect.attr("x") + 10)
+            .attr("y", +rect.attr("y") + 40)
+            .attr("class", "contentText")
+            .text();
         g.append("circle")
             .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
             .attr("cy", +rect.attr("y"))
@@ -19429,18 +19451,6 @@ function mouseUp() {
         if (surface < 2000) {
             parent.remove();
         }
-        g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 20)
-            .attr("font-weight", 20)
-            .attr("class", "titleText")
-            .style('font-size', 22)
-            .text();
-        g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 40)
-            .attr("class", "contentText")
-            .text();
     }
 }
 function drawLine() {

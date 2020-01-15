@@ -115,6 +115,18 @@ function mousedown() {
             .attr("fill", "#aaa9ad")
             .attr("class", "rect");
         initializeRectListeners();
+        g.append("text")
+            .attr("x", +rect.attr("x") + 10)
+            .attr("y", +rect.attr("y") + 20)
+            .attr("font-weight", 20)
+            .attr("class", "titleText")
+            .style('font-size', 22)
+            .text();
+        g.append("text")
+            .attr("x", +rect.attr("x") + 10)
+            .attr("y", +rect.attr("y") + 40)
+            .attr("class", "contentText")
+            .text();
         g.append("circle")
             .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
             .attr("cy", +rect.attr("y"))
@@ -409,18 +421,6 @@ function mouseUp() {
         if (surface < 2000) {
             parent.remove();
         }
-        g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 20)
-            .attr("font-weight", 20)
-            .attr("class", "titleText")
-            .style('font-size', 22)
-            .text();
-        g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 40)
-            .attr("class", "contentText")
-            .text();
     }
 }
 function drawLine() {

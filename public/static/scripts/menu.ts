@@ -1,5 +1,6 @@
 import * as d3 from "./modules/d3";
 import {getNode, saveProject, deleteForeignNode} from "./controller";
+let toDOM = require("./modules/toDOM.js");
 
 let target, event;
 document.addEventListener('contextmenu', onContextMenu, false);
@@ -20,7 +21,7 @@ function showMenu(x, y){
         getProjects();
     }
     else {
-        menu.classList.remove('show-menu');
+        hideMenu();
     }
 }
 
@@ -35,25 +36,33 @@ function getProjects() {
 
 function updateProjectMenu(data) {
     let menu = <HTMLInputElement> document.querySelector('.menu');
+    let project_id = document.getElementById("projectTitle").getAttribute("class");
     let tempId = null;
     for (let item of data) {
-        if (tempId != item["project_id"]) {
+        let node = toDOM(item["element"]);
+        let nodeText = node.getElementsByClassName("titleText")[0].innerHTML;
+        if (nodeText == "") {
+            nodeText = item["node_id"];
+        }
+        if (tempId != item["project_id"] && project_id != item["project_id"]) {
             menu.insertAdjacentHTML('beforeend', `<li class="menu-item submenu" id="${item["project_id"]}">\n` +
                 `<button type="button" class="menu-btn"> <i class="fa fa-folder-open"></i>` +
                 `<span class="menu-text">${item["name"]}</span> </button>\n` +
                 `<menu class="menu"><li class="menu-item" id="${item["node_id"]}">\n`+
                 `<button type="button" class="menu-btn"><i class="fa fa-link"></i>`+
-                `<span class="menu-text">${item["node_id"]}</span></button>\n</li></menu>`);
+                `<span class="menu-text">${nodeText}</span></button>\n</li></menu>`);
             tempId = item["project_id"]
         }
-        else
-            {
+        else if (tempId != null) {
                 let submenu = document.getElementById(`${item["project_id"]}`);
                 let submenuEntry = <HTMLInputElement> submenu.querySelector('.menu');
                 submenuEntry.insertAdjacentHTML('beforeend', `<li class="menu-item" id="${item["node_id"]}">\n` +
-                    `<button type="button" class="menu-btn"><i class="fa fa-link"></i>`+
-                    `<span class="menu-text">${item["node_id"]}</span></button>\n</li>`)
-            }
+                    `<button type="button" class="menu-btn" "${item["node_id"]}"><i class="fa fa-link"></i>`+
+                    `<span class="menu-text">${nodeText}</span></button>\n</li>`)
+        }
+    }
+    if (tempId == null) {
+        hideMenu();
     }
 }
 
@@ -76,9 +85,9 @@ function onClick(e){
         removeNode(target);
     }
     else {
-        let nodeId = e.target.innerText;
+        let nodeId = e.target.parentNode.id;
         if (nodeId == "") {
-            nodeId = e.target.parentNode.innerText;
+            nodeId = e.target.parentNode.parentNode.id;
         }
         let graph = document.getElementById('GraphContainer').getBoundingClientRect();
         getNode(nodeId, true, event.pageX, event.pageY - graph.top);
