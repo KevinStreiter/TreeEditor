@@ -125,6 +125,7 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
                         foreignNodeDOM.appendChild(g.childNodes[0]);
                     }
                 }
+                g.remove();
                 updateRectSize(x,  y, rectCounter, foreignNode, foreignRect, false);
             }
         }

@@ -113,6 +113,7 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
                         foreignNodeDOM.appendChild(g.childNodes[0]);
                     }
                 }
+                g.remove();
                 script_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
             }
         }
