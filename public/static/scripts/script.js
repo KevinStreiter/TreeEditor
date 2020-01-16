@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 const navbar_1 = require("./navbar");
 const controller_1 = require("./controller");
-let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, xTickDistance, yTickDistance;
+let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, xTickDistance, yTickDistance, rectDrawn = false;
 window.onload = () => {
     initializePage();
     controller_1.loadProject();
@@ -44,7 +44,6 @@ function initializePage() {
     });
     d3.select("#colorPickerBtn").on("click", function () {
         document.getElementById("colorPicker").click();
-        document.getElementById("colorPicker").blur();
     });
     d3.select("#colorPicker").on("input", function () {
         updateRectColor(this);
@@ -112,11 +111,11 @@ function mousedown() {
         rect = g.append("rect")
             .attr("x", event[0] + 5)
             .attr("y", event[1] + 5)
-            .attr("rx", 5)
-            .attr("ry", 5)
+            .attr("rx", 2)
+            .attr("ry", 2)
             .attr('height', 0)
             .attr('width', 0)
-            .attr("fill", "#aaa9ad")
+            .attr("fill", "#f8f8f8")
             .attr("class", "rect");
         initializeRectListeners();
         g.append("text")
@@ -155,14 +154,7 @@ function mousedown() {
             .attr("r", 5)
             .attr("id", "circleRight" + rectCounter)
             .attr("class", "circle");
-        g.append("circle")
-            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height"))))
-            .attr("r", 4)
-            .attr("id", "circleBottomRight" + rectCounter)
-            .attr("class", "circle")
-            .attr("fill", "#7b9eb4");
-        initializeCircleListeners();
+        rectDrawn = true;
         svg.on("mousemove", mouseMove);
     }
 }
@@ -425,6 +417,16 @@ function mouseUp() {
         if (surface < 2000) {
             parent.remove();
         }
+        if (rectDrawn) {
+            g.append("circle")
+                .attr("cx", (+rect.attr("x") + +rect.attr("width")))
+                .attr("cy", (+rect.attr("y") + (+rect.attr("height"))))
+                .attr("r", 4)
+                .attr("id", "circleBottomRight" + parent.attr("id"))
+                .attr("class", "circle");
+            initializeCircleListeners();
+            rectDrawn = false;
+        }
     }
 }
 function drawLine() {
@@ -436,8 +438,8 @@ function drawLine() {
     line = parent.append("path");
     line
         .attr("d", lineFunction(lineData))
-        .attr("stroke", "grey")
-        .attr("stroke-width", 3)
+        .attr("stroke", "#b3b2b4")
+        .attr("stroke-width", 2)
         .attr("class", current.attr("id"))
         .attr("marker-end", "url(#arrow)")
         .attr("fill", "none");
@@ -546,7 +548,7 @@ function updateRectColor(object) {
 }
 function resetRectBorder() {
     svg.selectAll("rect")
-        .style("stroke", "#7b9eb4");
+        .style("stroke", "#b3b2b4");
 }
 exports.resetRectBorder = resetRectBorder;
 function checkBoundaries(element) {
