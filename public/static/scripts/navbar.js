@@ -12,6 +12,7 @@ function openNav() {
     let titleText = document.getElementById("titleText");
     let contentText = document.getElementById("contentText");
     let colorPicker = document.getElementById("colorPicker");
+    d3.select("#colorPickerBtn").style("background", current.attr("fill"));
     titleText.value = parent.select("text.titleText").text();
     contentText.value = parent.select("text.contentText").text();
     colorPicker.value = current.attr("fill");

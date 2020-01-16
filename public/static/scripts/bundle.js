@@ -18991,6 +18991,7 @@ function openNav() {
     let titleText = document.getElementById("titleText");
     let contentText = document.getElementById("contentText");
     let colorPicker = document.getElementById("colorPicker");
+    d3.select("#colorPickerBtn").style("background", current.attr("fill"));
     titleText.value = parent.select("text.titleText").text();
     contentText.value = parent.select("text.contentText").text();
     colorPicker.value = current.attr("fill");
@@ -19071,6 +19072,10 @@ function initializePage() {
     });
     d3.select("#contentText").on("input", function () {
         updateRectText(this);
+    });
+    d3.select("#colorPickerBtn").on("click", function () {
+        document.getElementById("colorPicker").click();
+        document.getElementById("colorPicker").blur();
     });
     d3.select("#colorPicker").on("input", function () {
         updateRectColor(this);
@@ -19561,6 +19566,7 @@ function updateRectText(object) {
     });
 }
 function updateRectColor(object) {
+    d3.select("#colorPickerBtn").style("background", object.value);
     let id = document.getElementById('rectInfo').innerHTML;
     svg.selectAll("g").each(function () {
         let element = d3.select(this);

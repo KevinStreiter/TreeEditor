@@ -11,9 +11,11 @@ export function openNav() {
     let titleText = <HTMLInputElement>document.getElementById("titleText");
     let contentText = <HTMLInputElement>document.getElementById("contentText");
     let colorPicker = <HTMLInputElement>document.getElementById("colorPicker");
+    d3.select("#colorPickerBtn").style("background", current.attr("fill"));
     titleText.value = parent.select("text.titleText").text();
     contentText.value = parent.select("text.contentText").text();
     colorPicker.value = current.attr("fill");
+
 
     listFiles(id);
 
@@ -51,3 +53,4 @@ function listFiles(id) {
         }
     });
 }
+

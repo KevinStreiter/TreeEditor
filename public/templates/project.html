@@ -18,7 +18,9 @@
 </menu>
 
 <div class="header">
-    <img src="../images/logo.svg" alt="logo" id="appLogo"/>
+    <a href="/treeEditor">
+        <img src="../images/logo.svg" alt="logo" id="appLogo"/>
+    </a>
     <h1 id="projectTitle" contenteditable="true">Project Title</h1>
     <div id="controls">
         <a id="saveButton" class="Button"><i class="fa fa-save"></i></a>
@@ -37,7 +39,8 @@
             <h4>Content</h4>
             <input id="contentText" type="text" name="Content" value=""><br><br>
             <h4>Color</h4>
-            <input id="colorPicker" type="color" name="favcolor" value="#ff0000"><br><br>
+            <a id="colorPickerBtn" class="Button"><i class="fa fa-paint-brush"></i></a>
+            <input id="colorPicker" type="color" name="favcolor" style="display: none;"><br><br>
             <h4>Files</h4>
             <a id="fileChooserBtn" class="Button"><i class="fa fa-upload"></i></a>
             <input id="fileChooser" type="file" name="file" style="display: none;">
@@ -67,6 +70,8 @@
 </div>
 </body>
 <footer>
-    <img src="../images/uzh_logo_d_pos.svg" alt="logo" id="uzhLogo"/>
+    <a href="https://www.ius.uzh.ch/de/studies/e-learning.html">
+        <img src="../images/uzh_logo_d_pos.svg" alt="logo" id="uzhLogo"/>
+    </a>
 </footer>
 </html>
