@@ -18986,7 +18986,7 @@ function openNav() {
     let parent = d3.select(this.parentNode);
     let id = parent.attr("id");
     script_1.resetListeners();
-    document.getElementById("mySidebar").style.width = "250px";
+    document.getElementById("mySidebar").style.width = "335px";
     document.getElementById('rectInfo').innerHTML = id;
     let titleText = document.getElementById("titleText");
     let contentText = document.getElementById("contentText");

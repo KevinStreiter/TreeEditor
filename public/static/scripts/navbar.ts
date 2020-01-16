@@ -6,7 +6,7 @@ export function openNav() {
     let parent = d3.select(this.parentNode);
     let id = parent.attr("id");
     resetListeners();
-    document.getElementById("mySidebar").style.width = "250px";
+    document.getElementById("mySidebar").style.width = "335px";
     document.getElementById('rectInfo').innerHTML = id;
     let titleText = <HTMLInputElement>document.getElementById("titleText");
     let contentText = <HTMLInputElement>document.getElementById("contentText");

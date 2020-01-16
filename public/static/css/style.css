@@ -10,7 +10,8 @@ body {
     height: 100%;
     width: 100%;
     margin:0;
-    padding:0
+    padding:0;
+    min-width:1000px;
 }
 
 .header {
@@ -29,12 +30,16 @@ body {
 }
 
 .closebtn {
-    color: #f6f6f6;
+    color: #b3b2b4;
     position: absolute;
     top: 0;
     right: 25px;
-    font-size: 36px;
-    margin:0 -20px;
+    margin: 0 -20px;
+    padding: 8px 8px 8px 8px;
+    text-decoration: none;
+    font-size: 25px;
+    display: block;
+    transition: 0.3s;
 }
 
 .closebtn:hover {
@@ -47,24 +52,14 @@ body {
     z-index: 1;
     top: 0;
     left: 0;
-    background-color: #aaa9ad;
+    background-color: #ffffff;
     overflow-x: hidden;
     transition: 0.5s;
-    padding-top: 120px;
+    padding-top: 80px;
 }
-
-.sidebar a {
-    padding: 8px 8px 8px 8px;
-    text-decoration: none;
-    font-size: 25px;
-    display: block;
-    transition: 0.3s;
-}
-
 
 input[type="text"], textarea {
-
-    background-color : #aaa9ad;
+    background-color : #ffffff;
     width: 100%;
 }
 
@@ -95,7 +90,8 @@ h4 {
 #mySidebar {
     height: 100%;
     margin-top: 150px;
-    border-radius: 5px;
+    border:1px solid rgba(179, 178, 180, 0.5);
+    opacity: 0.8;
 }
 
 * {
@@ -110,14 +106,14 @@ ul {
 
 ul li {
     border: 1px solid #ddd;
-    margin-top: -1px; /* Prevent double borders */
+    margin-top: 5px;
     background-color: #f6f6f6;
     padding: 12px;
     text-decoration: none;
     font-size: 18px;
-    color: black;
     display: block;
     position: relative;
+    border-radius:6px;
 }
 
 ul li:hover {
@@ -135,29 +131,6 @@ ul li:hover {
 }
 
 .close:hover {background: #bbb;}
-
-#fileChooserBtn {
-    display:inline-block;
-    padding:0.2em 1.45em;
-    margin:0.1em;
-    border:0.15em solid #CCCCCC;
-    box-sizing: border-box;
-    text-decoration:none;
-    font-family: Arial, Helvetica, FreeSans, sans-serif;
-    font-weight:400;
-    color:#000000;
-    background-color:#CCCCCC;
-    text-align:center;
-    position:relative;
-}
-
-#fileChooserBtn:hover{
-    border-color:#7a7a7a;
-}
-
-#fileChooserBtn:active{
-    background-color:#999999;
-}
 
 .Button {
     box-shadow:inset 0 1px 0 0 #ffffff;
