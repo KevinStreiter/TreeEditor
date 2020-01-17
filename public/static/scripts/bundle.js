@@ -19027,6 +19027,28 @@ function listFiles(id) {
         }
     });
 }
+function processLinkItem() {
+    let name = document.getElementById("linkName");
+    let value = document.getElementById("linkVal");
+    if (validURL(value.value)) {
+        console.log("yep");
+    }
+    else {
+        console.log("no");
+    }
+}
+exports.processLinkItem = processLinkItem;
+function validURL(str) {
+    let pattern = new RegExp('^(https?:\\/\\/)?' +
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' +
+        '((\\d{1,3}\\.){3}\\d{1,3}))' +
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' +
+        '(\\?[;&a-z\\d%_.~+=-]*)?' +
+        '(\\#[-a-z\\d_]*)?$', 'i');
+    return !!pattern.test(str);
+}
+function updateLinkItems() {
+}
 
 },{"./modules/d3":3,"./script":7}],7:[function(require,module,exports){
 "use strict";
@@ -19072,6 +19094,9 @@ function initializePage() {
     });
     d3.select("#contentText").on("input", function () {
         updateRectText(this);
+    });
+    d3.select("#linkSaveBtn").on("click", function () {
+        navbar_1.processLinkItem();
     });
     d3.select("#colorPickerBtn").on("click", function () {
         document.getElementById("colorPicker").click();

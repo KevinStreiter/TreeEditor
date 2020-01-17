@@ -42,6 +42,9 @@ function initializePage() {
     d3.select("#contentText").on("input", function () {
         updateRectText(this);
     });
+    d3.select("#linkSaveBtn").on("click", function () {
+        navbar_1.processLinkItem();
+    });
     d3.select("#colorPickerBtn").on("click", function () {
         document.getElementById("colorPicker").click();
     });

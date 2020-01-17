@@ -1,7 +1,7 @@
 import * as d3 from "./modules/d3";
 import {resetListeners, resetRectBorder} from "./script";
 
-export function openNav() {
+    export function openNav() {
     let current = d3.select(this);
     let parent = d3.select(this.parentNode);
     let id = parent.attr("id");
@@ -54,3 +54,27 @@ function listFiles(id) {
     });
 }
 
+export function processLinkItem() {
+    let name = <HTMLInputElement> document.getElementById("linkName");
+    let value = <HTMLInputElement> document.getElementById("linkVal");
+    if (validURL(value.value)) {
+        console.log("yep")
+    }
+    else {
+        console.log("no");
+    }
+}
+
+function validURL(str) {
+    let pattern = new RegExp('^(https?:\\/\\/)?'+
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+
+        '((\\d{1,3}\\.){3}\\d{1,3}))'+
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+
+        '(\\?[;&a-z\\d%_.~+=-]*)?'+
+        '(\\#[-a-z\\d_]*)?$','i');
+    return !!pattern.test(str);
+}
+
+function appendLinkItem() {
+
+}

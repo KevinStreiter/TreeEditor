@@ -35,12 +35,16 @@
             <h2>Properties</h2>
             <p id="rectInfo" style="display: none;"></p>
             <h4>Title</h4>
-            <input id="titleText" type="text" name="Title" value=""><br><br>
-            <h4>Content</h4>
-            <input id="contentText" type="text" name="Content" value=""><br><br>
+            <textarea id="titleText" name="Title" rows="2" maxlength="40"></textarea>
+            <h4>Description</h4>
+            <textarea id="contentText" name="Content" rows="4" maxlength="140"></textarea>
+            <h4>Links</h4>
+            <input name="linkName" type="text" id="linkName" class="linkTxt" placeholder="Name"/>
+            <input type="text" id="linkVal" class="linkTxt" placeholder="Link"/>
+            <a id="linkSaveBtn" class="Button"><i class="fa fa-save"></i></a>
             <h4>Color</h4>
             <a id="colorPickerBtn" class="Button"><i class="fa fa-paint-brush"></i></a>
-            <input id="colorPicker" type="color" name="favcolor" style="display: none;"><br><br>
+            <input id="colorPicker" type="color" name="favcolor" style="display: none;"><br>
             <h4>Files</h4>
             <a id="fileChooserBtn" class="Button"><i class="fa fa-upload"></i></a>
             <input id="fileChooser" type="file" name="file" style="display: none;">
@@ -62,7 +66,7 @@
                         refX="11"
                         refY="0"
                         orient="auto">
-                    <path d="M0,-5L10,0L0,5" style="fill: #848387;"></path>
+                    <path d="M0,-5L10,0L0,5" style="fill: #b3b2b4;"></path>
                 </marker>
             </defs>
         </svg>

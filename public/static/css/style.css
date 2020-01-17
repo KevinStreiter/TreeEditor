@@ -220,6 +220,10 @@ h1 {
     white-space: nowrap;
 }
 
+h5 {
+    margin: 5px;
+}
+
 .foreign {
     opacity: 70%;
     stroke-dasharray: 5px;
@@ -245,4 +249,9 @@ h1 {
 
 #controls {
     margin-left: 180px;
+}
+
+.linkTxt {
+    margin: 2px;
+    padding: 7px;
 }

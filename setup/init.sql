@@ -35,6 +35,14 @@ CREATE TABLE Files (
         ON DELETE CASCADE
 )ENGINE=INNODB;
 
+CREATE TABLE Links (
+   project_id INT NOT NULL,
+   element JSON NOT NULL,
+   FOREIGN KEY (project_id)
+       REFERENCES Projects(project_id)
+       ON DELETE CASCADE
+)ENGINE=INNODB;
+
 CREATE TABLE Foreign_Nodes (
     foreign_id INT NOT NULL,
     project_id INT NOT NULL,
