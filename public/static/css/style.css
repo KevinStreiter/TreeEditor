@@ -52,10 +52,15 @@ body {
     z-index: 1;
     top: 0;
     left: 0;
+    bottom: 0;
     background-color: #ffffff;
     overflow-x: hidden;
     transition: 0.5s;
     padding-top: 80px;
+    overflow-y: scroll;
+    margin-top: 150px;
+    border:1px solid rgba(179, 178, 180, 0.5);
+    opacity: 0.8;
 }
 
 input[type="text"], textarea {
@@ -89,14 +94,6 @@ h4 {
     height: 300px;
     padding: 16px;
 }
-
-#mySidebar {
-    height: 100%;
-    margin-top: 150px;
-    border:1px solid rgba(179, 178, 180, 0.5);
-    opacity: 0.8;
-}
-
 * {
     box-sizing: border-box;
 }
