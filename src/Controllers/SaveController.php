@@ -20,6 +20,7 @@ class SaveController
         $data = json_decode($nodes, true);
         $nodes = $data["nodes"]["childNodes"];
         $files = $data["files"]["childNodes"];
+        $links = $data["links"]["childNodes"];
         $size = $data["size"];
         $projectName = $request->getParam('projectName');
         $projectID = $request->getParam('projectID');
@@ -29,12 +30,14 @@ class SaveController
             $this->updateNodes($nodes, $connection, $projectID);
             $this->insertForeignData($connection, $foreignData, $nodes, $projectID);
             $this->saveFiles($files, $connection, $projectID);
+            $this->saveLinks($links, $connection, $projectID);
             return $response->withJson($projectID);
         } else {
             $this->saveProject($connection, $projectName, $size);
             $projectID = $this->getRecentProjectID($connection);
-            $this->saveNodes($nodes, $projectID, $connection);
-            $this->saveFiles($nodes, $projectID, $connection);
+            $this->saveNodes($nodes, $connection, $projectID);
+            $this->saveFiles($files, $connection, $projectID);
+            $this->saveLinks($links, $connection, $projectID);
             return $response->withJson($projectID);
         }
     }
@@ -59,7 +62,7 @@ class SaveController
         return $row['MAX(project_id)'];
     }
 
-    function saveNodes($data, $projectID, $connection)
+    function saveNodes($data, $connection, $projectID)
     {
         foreach ($data as $node) {
             if ((int)$node['nodeType'] == 1) {
@@ -75,7 +78,8 @@ class SaveController
     {
         $connection->query("DELETE FROM Nodes WHERE project_id={$projectID}");
         $connection->query("DELETE FROM Files WHERE project_id={$projectID}");
-        $this->saveNodes($data, $projectID, $connection);
+        $connection->query("DELETE FROM Links WHERE project_id={$projectID}");
+        $this->saveNodes($data, $connection, $projectID);
     }
 
     function getForeignData($connection)
@@ -96,13 +100,22 @@ class SaveController
         }
     }
 
-    function saveFiles($data, $connection, $projectID)
-    {
+    function saveFiles($data, $connection, $projectID) {
         foreach ($data as $file) {
             if ($file['tagName'] == "li") {
                 $element_data = ['project_id' => $projectID];
                 $element_data['element'] = json_encode($file);
                 $connection->insert('Files', $element_data);
+            }
+        }
+    }
+
+    function saveLinks($data, $connection, $projectID) {
+        foreach ($data as $file) {
+            if ($file['tagName'] == "li") {
+                $element_data = ['project_id' => $projectID];
+                $element_data['element'] = json_encode($file);
+                $connection->insert('Links', $element_data);
             }
         }
     }

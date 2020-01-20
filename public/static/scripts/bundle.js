@@ -39,18 +39,22 @@ function saveProject() {
     let projectID = project.className;
     let url = '/treeEditor/save?projectName=' + projectName + '&projectID=' + projectID;
     let nodes = filterNodes();
-    let nodes_json = toJSON(nodes);
+    nodes = toJSON(nodes);
     let files = document.getElementById("fileList");
-    let files_json = toJSON(files);
+    files = toJSON(files);
+    let links = document.getElementById("linkList");
+    links = toJSON(links);
+    console.log(links);
     let graph = d3.select('#graph');
     let size = [graph.attr("width"), graph.attr("height")];
-    let data = JSON.stringify({ nodes: nodes_json, files: files_json, size: size });
+    let data = JSON.stringify({ nodes: nodes, files: files, links: links, size: size });
     return fetch(url, {
         method: 'POST',
         body: data
     })
         .then(response => response.json())
         .then(data => {
+        console.log(data);
         saveProjectID(data);
         updateForeignNodes();
     });
@@ -18982,12 +18986,13 @@ module.exports = function toJSON(node) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
 const script_1 = require("./script");
+const controller_1 = require("./controller");
 function openNav() {
     let current = d3.select(this);
     let parent = d3.select(this.parentNode);
     let id = parent.attr("id");
     script_1.resetListeners();
-    document.getElementById("mySidebar").style.width = "335px";
+    document.getElementById("sidebar").style.width = "335px";
     document.getElementById('rectInfo').innerHTML = id;
     let titleText = document.getElementById("titleText");
     let contentText = document.getElementById("contentText");
@@ -19007,7 +19012,7 @@ function openNav() {
 }
 exports.openNav = openNav;
 function closeNav() {
-    document.getElementById("mySidebar").style.width = "0";
+    document.getElementById("sidebar").style.width = "0";
     document.getElementById('rectInfo').innerHTML = "";
     let titleText = document.getElementById("titleText");
     let contentText = document.getElementById("contentText");
@@ -19033,11 +19038,12 @@ function processLinkItem() {
     let url = document.getElementById("linkVal");
     if (validURL(url.value)) {
         updateLinkList(name.value, url.value);
+        controller_1.saveProject();
     }
 }
 exports.processLinkItem = processLinkItem;
 function validURL(str) {
-    let pattern = /http(s?):\/\/www\.[A-Za-z0-9.-]{3,}\.[A-Za-z]{3}/;
+    let pattern = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;
     return pattern.test(str);
 }
 function updateLinkList(name, url) {
@@ -19046,8 +19052,7 @@ function updateLinkList(name, url) {
     let entries = d3.select("#linkList").selectAll("li");
     let isDuplicate = false;
     entries.each(function () {
-        let str = this.textContent.slice(0, -1);
-        if (str == name) {
+        if (this.textContent == name) {
             isDuplicate = true;
         }
     });
@@ -19063,7 +19068,7 @@ function updateLinkList(name, url) {
 function appendLinkItem() {
 }
 
-},{"./modules/d3":3,"./script":7}],7:[function(require,module,exports){
+},{"./controller":1,"./modules/d3":3,"./script":7}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");

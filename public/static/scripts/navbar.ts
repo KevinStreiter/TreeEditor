@@ -1,12 +1,13 @@
 import * as d3 from "./modules/d3";
 import {resetListeners, resetRectBorder} from "./script";
+import {saveProject} from "./controller";
 
 export function openNav() {
     let current = d3.select(this);
     let parent = d3.select(this.parentNode);
     let id = parent.attr("id");
     resetListeners();
-    document.getElementById("mySidebar").style.width = "335px";
+    document.getElementById("sidebar").style.width = "335px";
     document.getElementById('rectInfo').innerHTML = id;
     let titleText = <HTMLInputElement>document.getElementById("titleText");
     let contentText = <HTMLInputElement>document.getElementById("contentText");
@@ -30,7 +31,7 @@ export function openNav() {
 }
 
 function closeNav() {
-    document.getElementById("mySidebar").style.width = "0";
+    document.getElementById("sidebar").style.width = "0";
     document.getElementById('rectInfo').innerHTML = "";
     let titleText = <HTMLInputElement>document.getElementById("titleText");
     let contentText = <HTMLInputElement>document.getElementById("contentText");
@@ -59,11 +60,12 @@ export function processLinkItem() {
     let url = <HTMLInputElement> document.getElementById("linkVal");
     if (validURL(url.value)) {
         updateLinkList(name.value, url.value)
+        saveProject();
     }
 }
 
 function validURL(str) {
-    let pattern = /http(s?):\/\/www\.[A-Za-z0-9.-]{3,}\.[A-Za-z]{3}/;
+    let pattern = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;
     return pattern.test(str);
 }
 
@@ -73,8 +75,7 @@ function updateLinkList(name, url) {
     let entries = d3.select("#linkList").selectAll("li");
     let isDuplicate: boolean = false;
     entries.each(function () {
-        let str = this.textContent.slice(0, -1);
-        if (str == name) {
+        if (this.textContent == name) {
             isDuplicate = true;
         }
     });
