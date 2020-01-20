@@ -44,7 +44,6 @@ function saveProject() {
     files = toJSON(files);
     let links = document.getElementById("linkList");
     links = toJSON(links);
-    console.log(links);
     let graph = d3.select('#graph');
     let size = [graph.attr("width"), graph.attr("height")];
     let data = JSON.stringify({ nodes: nodes, files: files, links: links, size: size });
@@ -54,7 +53,6 @@ function saveProject() {
     })
         .then(response => response.json())
         .then(data => {
-        console.log(data);
         saveProjectID(data);
         updateForeignNodes();
     });
@@ -18994,6 +18992,7 @@ function openNav() {
     script_1.resetListeners();
     document.getElementById("sidebar").style.width = "335px";
     document.getElementById('rectInfo').innerHTML = id;
+    document.getElementById('linkInfo').innerHTML = "";
     let titleText = document.getElementById("titleText");
     let contentText = document.getElementById("contentText");
     let colorPicker = document.getElementById("colorPicker");
@@ -19002,6 +19001,7 @@ function openNav() {
     contentText.value = parent.select("text.contentText").text();
     colorPicker.value = current.attr("fill");
     listFiles(id);
+    resetLinkBorderColor();
     script_1.resetRectBorder();
     d3.select(this)
         .style("stroke", "red")
@@ -19014,10 +19014,12 @@ exports.openNav = openNav;
 function closeNav() {
     document.getElementById("sidebar").style.width = "0";
     document.getElementById('rectInfo').innerHTML = "";
+    document.getElementById('linkInfo').innerHTML = "";
     let titleText = document.getElementById("titleText");
     let contentText = document.getElementById("contentText");
     titleText.value = "";
     contentText.value = "";
+    resetLinkBorderColor();
     script_1.resetRectBorder();
     script_1.resetListeners();
 }
@@ -19051,21 +19053,42 @@ function updateLinkList(name, url) {
     let ul = document.getElementById("linkList");
     let entries = d3.select("#linkList").selectAll("li");
     let isDuplicate = false;
+    let counter = 0;
     entries.each(function () {
+        if (+d3.select(this).attr("id") >= counter) {
+            counter = +d3.select(this).attr("id");
+        }
         if (this.textContent == name) {
             isDuplicate = true;
         }
     });
+    counter += 1;
     if (!isDuplicate) {
         let li = document.createElement("li");
         li.appendChild(document.createTextNode(name));
         li.setAttribute("class", id);
+        li.setAttribute("id", counter.toString());
         li.insertAdjacentHTML('beforeend', `<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
         li.insertAdjacentHTML('beforeend', `<a href=${url} target="_blank" class="linkBtn"><i class="fa fa-external-link"></i></a>`);
         ul.appendChild(li);
+        li.addEventListener("click", updateLinkDisplay);
     }
 }
-function appendLinkItem() {
+function resetLinkBorderColor() {
+    d3.select("#linkList").selectAll("li").each(function () {
+        let element = d3.select(this);
+        element.style("border", "1px solid #ddd");
+    });
+}
+function updateLinkDisplay(event) {
+    resetLinkBorderColor();
+    let element = event.target;
+    let name = document.getElementById("linkName");
+    let link = document.getElementById("linkVal");
+    name.value = element.innerText;
+    link.value = element.querySelector(".linkBtn").href;
+    document.getElementById('linkInfo').innerHTML = element.id;
+    document.getElementById(element.id).style.borderColor = "red";
 }
 
 },{"./controller":1,"./modules/d3":3,"./script":7}],7:[function(require,module,exports){

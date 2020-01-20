@@ -9,6 +9,7 @@ export function openNav() {
     resetListeners();
     document.getElementById("sidebar").style.width = "335px";
     document.getElementById('rectInfo').innerHTML = id;
+    document.getElementById('linkInfo').innerHTML = "";
     let titleText = <HTMLInputElement>document.getElementById("titleText");
     let contentText = <HTMLInputElement>document.getElementById("contentText");
     let colorPicker = <HTMLInputElement>document.getElementById("colorPicker");
@@ -17,9 +18,8 @@ export function openNav() {
     contentText.value = parent.select("text.contentText").text();
     colorPicker.value = current.attr("fill");
 
-
     listFiles(id);
-
+    resetLinkBorderColor();
     resetRectBorder();
     d3.select(this)
         .style("stroke", "red")
@@ -33,11 +33,13 @@ export function openNav() {
 function closeNav() {
     document.getElementById("sidebar").style.width = "0";
     document.getElementById('rectInfo').innerHTML = "";
+    document.getElementById('linkInfo').innerHTML = "";
     let titleText = <HTMLInputElement>document.getElementById("titleText");
     let contentText = <HTMLInputElement>document.getElementById("contentText");
     titleText.value = "";
     contentText.value = "";
 
+    resetLinkBorderColor();
     resetRectBorder();
     resetListeners();
 }
@@ -59,7 +61,7 @@ export function processLinkItem() {
     let name = <HTMLInputElement> document.getElementById("linkName");
     let url = <HTMLInputElement> document.getElementById("linkVal");
     if (validURL(url.value)) {
-        updateLinkList(name.value, url.value)
+        updateLinkList(name.value, url.value);
         saveProject();
     }
 }
@@ -74,21 +76,42 @@ function updateLinkList(name, url) {
     let ul = document.getElementById("linkList");
     let entries = d3.select("#linkList").selectAll("li");
     let isDuplicate: boolean = false;
+    let counter = 0;
     entries.each(function () {
+        if (+d3.select(this).attr("id") >= counter) {
+            counter = +d3.select(this).attr("id")
+        }
         if (this.textContent == name) {
             isDuplicate = true;
         }
     });
+    counter += 1;
     if (!isDuplicate) {
         let li = document.createElement("li");
         li.appendChild(document.createTextNode(name));
         li.setAttribute("class", id);
+        li.setAttribute("id", counter.toString());
         li.insertAdjacentHTML('beforeend',`<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
         li.insertAdjacentHTML('beforeend',`<a href=${url} target="_blank" class="linkBtn"><i class="fa fa-external-link"></i></a>`);
         ul.appendChild(li);
+        li.addEventListener("click", updateLinkDisplay);
     }
 }
 
-function appendLinkItem() {
+function resetLinkBorderColor() {
+    d3.select("#linkList").selectAll("li").each(function () {
+        let element = d3.select(this);
+        element.style("border", "1px solid #ddd");
+    })
+}
 
+function updateLinkDisplay(event) {
+    resetLinkBorderColor();
+    let element = event.target;
+    let name = <HTMLInputElement> document.getElementById("linkName");
+    let link = <HTMLInputElement> document.getElementById("linkVal");
+    name.value = element.innerText;
+    link.value = element.querySelector(".linkBtn").href;
+    document.getElementById('linkInfo').innerHTML = element.id;
+    document.getElementById(element.id).style.borderColor = "red"
 }

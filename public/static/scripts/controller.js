@@ -43,7 +43,6 @@ function saveProject() {
     files = toJSON(files);
     let links = document.getElementById("linkList");
     links = toJSON(links);
-    console.log(links);
     let graph = d3.select('#graph');
     let size = [graph.attr("width"), graph.attr("height")];
     let data = JSON.stringify({ nodes: nodes, files: files, links: links, size: size });
@@ -53,7 +52,6 @@ function saveProject() {
     })
         .then(response => response.json())
         .then(data => {
-        console.log(data);
         saveProjectID(data);
         updateForeignNodes();
     });
