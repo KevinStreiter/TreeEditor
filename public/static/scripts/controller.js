@@ -239,7 +239,9 @@ function updateProjectFiles(data) {
             getUploadedFile(items[i].getAttribute("id"));
         });
     }
-    initializeDeleteFileListListener();
+    document.querySelectorAll(".fileBtn").forEach(item => {
+        item.addEventListener('click', initializeDeleteFileListListener);
+    });
 }
 function getProjectFiles(id) {
     let url = '/treeEditor/projectFiles?id=' + id;
@@ -306,27 +308,27 @@ function updateFileList(filename) {
     });
     if (!isDuplicate) {
         let li = document.createElement("li");
-        let span = document.createElement("span");
         li.appendChild(document.createTextNode(file.files[0].name));
         li.setAttribute("id", filename);
-        span.insertAdjacentHTML('beforeend', `<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
-        li.appendChild(span);
+        li.insertAdjacentHTML('beforeend', `<a class="deleteBtn fileBtn"><i class="fa fa-times"></i></a>`);
         ul.appendChild(li);
-        initializeDeleteFileListListener();
         li.addEventListener("click", function () {
             getUploadedFile(filename);
         });
     }
+    document.querySelectorAll(".fileBtn").forEach(item => {
+        item.addEventListener('click', initializeDeleteFileListListener);
+    });
 }
-function initializeDeleteFileListListener() {
-    let btnList = document.getElementsByClassName("close");
-    for (let i = 0; i < btnList.length; i++) {
-        btnList[i].addEventListener("click", function (e) {
-            let filename = this.parentElement.getAttribute("id");
-            deleteFile(filename);
-            this.parentElement.remove();
-            saveProject();
-            e.stopPropagation();
-        });
+function initializeDeleteFileListListener(event) {
+    let parent = event.target.parentNode;
+    let id = parent.id;
+    if (id == "") {
+        parent = parent.parentNode;
+        id = parent.id;
     }
+    deleteFile(id);
+    parent.remove();
+    event.stopPropagation();
+    saveProject();
 }

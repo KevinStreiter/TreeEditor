@@ -240,7 +240,9 @@ function updateProjectFiles(data) {
             getUploadedFile(items[i].getAttribute("id"));
         });
     }
-    initializeDeleteFileListListener();
+    document.querySelectorAll(".fileBtn").forEach(item => {
+        item.addEventListener('click', initializeDeleteFileListListener);
+    });
 }
 function getProjectFiles(id) {
     let url = '/treeEditor/projectFiles?id=' + id;
@@ -307,29 +309,29 @@ function updateFileList(filename) {
     });
     if (!isDuplicate) {
         let li = document.createElement("li");
-        let span = document.createElement("span");
         li.appendChild(document.createTextNode(file.files[0].name));
         li.setAttribute("id", filename);
-        span.insertAdjacentHTML('beforeend', `<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
-        li.appendChild(span);
+        li.insertAdjacentHTML('beforeend', `<a class="deleteBtn fileBtn"><i class="fa fa-times"></i></a>`);
         ul.appendChild(li);
-        initializeDeleteFileListListener();
         li.addEventListener("click", function () {
             getUploadedFile(filename);
         });
     }
+    document.querySelectorAll(".fileBtn").forEach(item => {
+        item.addEventListener('click', initializeDeleteFileListListener);
+    });
 }
-function initializeDeleteFileListListener() {
-    let btnList = document.getElementsByClassName("close");
-    for (let i = 0; i < btnList.length; i++) {
-        btnList[i].addEventListener("click", function (e) {
-            let filename = this.parentElement.getAttribute("id");
-            deleteFile(filename);
-            this.parentElement.remove();
-            saveProject();
-            e.stopPropagation();
-        });
+function initializeDeleteFileListListener(event) {
+    let parent = event.target.parentNode;
+    let id = parent.id;
+    if (id == "") {
+        parent = parent.parentNode;
+        id = parent.id;
     }
+    deleteFile(id);
+    parent.remove();
+    event.stopPropagation();
+    saveProject();
 }
 
 },{"./modules/d3":3,"./modules/toDOM.js":4,"./modules/toJSON.js":5,"./script":7}],2:[function(require,module,exports){
@@ -19035,13 +19037,8 @@ function processLinkItem() {
 }
 exports.processLinkItem = processLinkItem;
 function validURL(str) {
-    let pattern = new RegExp('^(https?:\\/\\/)?' +
-        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' +
-        '((\\d{1,3}\\.){3}\\d{1,3}))' +
-        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' +
-        '(\\?[;&a-z\\d%_.~+=-]*)?' +
-        '(\\#[-a-z\\d_]*)?$', 'i');
-    return !!pattern.test(str);
+    let pattern = /http(s?):\/\/www\.[A-Za-z0-9.-]{3,}\.[A-Za-z]{3}/;
+    return pattern.test(str);
 }
 function updateLinkList(name, url) {
     let id = document.getElementById('rectInfo').innerHTML;
@@ -19056,12 +19053,10 @@ function updateLinkList(name, url) {
     });
     if (!isDuplicate) {
         let li = document.createElement("li");
-        let span = document.createElement("span");
         li.appendChild(document.createTextNode(name));
         li.setAttribute("class", id);
-        span.insertAdjacentHTML('beforeend', `<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
-        span.insertAdjacentHTML('beforeend', `<a href=${url} class="linkBtn"><i class="fa fa-external-link"></i></a>`);
-        li.appendChild(span);
+        li.insertAdjacentHTML('beforeend', `<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
+        li.insertAdjacentHTML('beforeend', `<a href=${url} target="_blank" class="linkBtn"><i class="fa fa-external-link"></i></a>`);
         ul.appendChild(li);
     }
 }

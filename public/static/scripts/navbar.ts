@@ -63,13 +63,8 @@ export function processLinkItem() {
 }
 
 function validURL(str) {
-    let pattern = new RegExp('^(https?:\\/\\/)?'+
-        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+
-        '((\\d{1,3}\\.){3}\\d{1,3}))'+
-        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+
-        '(\\?[;&a-z\\d%_.~+=-]*)?'+
-        '(\\#[-a-z\\d_]*)?$','i');
-    return !!pattern.test(str);
+    let pattern = /http(s?):\/\/www\.[A-Za-z0-9.-]{3,}\.[A-Za-z]{3}/;
+    return pattern.test(str);
 }
 
 function updateLinkList(name, url) {
@@ -85,13 +80,10 @@ function updateLinkList(name, url) {
     });
     if (!isDuplicate) {
         let li = document.createElement("li");
-        let span = document.createElement("span");
         li.appendChild(document.createTextNode(name));
         li.setAttribute("class", id);
-        span.insertAdjacentHTML('beforeend',`<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
-        span.insertAdjacentHTML('beforeend',`<a href=${url} class="linkBtn"><i class="fa fa-external-link"></i></a>`);
-
-        li.appendChild(span);
+        li.insertAdjacentHTML('beforeend',`<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
+        li.insertAdjacentHTML('beforeend',`<a href=${url} target="_blank" class="linkBtn"><i class="fa fa-external-link"></i></a>`);
         ul.appendChild(li);
     }
 }
