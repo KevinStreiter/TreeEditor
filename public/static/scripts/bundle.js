@@ -19049,8 +19049,17 @@ function validURL(str) {
     return pattern.test(str);
 }
 function updateLinkList(name, url) {
-    let id = document.getElementById('rectInfo').innerHTML;
+    let linkId = document.getElementById("linkInfo").innerHTML;
+    if (linkId == "") {
+        insertNewLinkItem(name, url);
+    }
+    else {
+        updateLinkItem(name, url, linkId);
+    }
+}
+function insertNewLinkItem(name, url) {
     let ul = document.getElementById("linkList");
+    let id = document.getElementById('rectInfo').innerHTML;
     let entries = d3.select("#linkList").selectAll("li");
     let isDuplicate = false;
     let counter = 0;
@@ -19078,6 +19087,25 @@ function resetLinkBorderColor() {
     d3.select("#linkList").selectAll("li").each(function () {
         let element = d3.select(this);
         element.style("border", "1px solid #ddd");
+    });
+}
+function updateLinkItem(name, url, linkId) {
+    let element = document.getElementById(linkId);
+    d3.select("#linkList").selectAll("li").each(function () {
+        let element = d3.select(this);
+        if (linkId == +element.attr("id")) {
+            let children = [];
+            element.selectAll("a").each(function () {
+                let child = d3.select(this);
+                if (child.attr("class") == "linkBtn") {
+                    child.attr("href", url);
+                }
+                children.push(child.node().cloneNode(true));
+            });
+            element.text(name);
+            element.node().insertAdjacentElement('beforeend', children[0]);
+            element.node().insertAdjacentElement('beforeend', children[1]);
+        }
     });
 }
 function updateLinkDisplay(event) {
