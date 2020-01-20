@@ -242,7 +242,7 @@ function updateProjectFiles(data) {
         });
     }
     document.querySelectorAll(".fileBtn").forEach(item => {
-        item.addEventListener('click', initializeDeleteFileListListener);
+        item.addEventListener('click', executeDeleteFileListListener);
     });
 }
 function getProjectFiles(id) {
@@ -319,18 +319,23 @@ function updateFileList(filename) {
         });
     }
     document.querySelectorAll(".fileBtn").forEach(item => {
-        item.addEventListener('click', initializeDeleteFileListListener);
+        item.addEventListener('click', executeDeleteFileListListener);
     });
 }
-function initializeDeleteFileListListener(event) {
+function executeDeleteFileListListener(event) {
+    let id = deleteItemList(event);
+    deleteFile(id);
+}
+function deleteItemList(event) {
     let parent = event.target.parentNode;
     let id = parent.id;
     if (id == "") {
         parent = parent.parentNode;
         id = parent.id;
     }
-    deleteFile(id);
     parent.remove();
     event.stopPropagation();
     saveProject();
+    return id;
 }
+exports.deleteItemList = deleteItemList;

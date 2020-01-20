@@ -251,3 +251,7 @@ h5 {
 .linkBtn {
     margin-right: 3px;
 }
+
+#linkClearBtn {
+    margin-left: -1px;
+}

@@ -10,7 +10,6 @@ function openNav() {
     script_1.resetListeners();
     document.getElementById("sidebar").style.width = "335px";
     document.getElementById('rectInfo').innerHTML = id;
-    document.getElementById('linkInfo').innerHTML = "";
     let titleText = document.getElementById("titleText");
     let contentText = document.getElementById("contentText");
     let colorPicker = document.getElementById("colorPicker");
@@ -18,7 +17,9 @@ function openNav() {
     titleText.value = parent.select("text.titleText").text();
     contentText.value = parent.select("text.contentText").text();
     colorPicker.value = current.attr("fill");
+    clearLinkInputFields();
     listFiles(id);
+    listLinks(id);
     resetLinkBorderColor();
     script_1.resetRectBorder();
     d3.select(this)
@@ -32,11 +33,11 @@ exports.openNav = openNav;
 function closeNav() {
     document.getElementById("sidebar").style.width = "0";
     document.getElementById('rectInfo').innerHTML = "";
-    document.getElementById('linkInfo').innerHTML = "";
     let titleText = document.getElementById("titleText");
     let contentText = document.getElementById("contentText");
     titleText.value = "";
     contentText.value = "";
+    clearLinkInputFields();
     resetLinkBorderColor();
     script_1.resetRectBorder();
     script_1.resetListeners();
@@ -46,6 +47,18 @@ function listFiles(id) {
     entries.each(function () {
         let li = d3.select(this);
         if (li.attr("id").slice(0, 1) == id) {
+            li.style("display", 'inherit');
+        }
+        else {
+            li.style("display", 'none');
+        }
+    });
+}
+function listLinks(id) {
+    let entries = d3.select("#linkList").selectAll("li");
+    entries.each(function () {
+        let li = d3.select(this);
+        if (li.attr("class") == id) {
             li.style("display", 'inherit');
         }
         else {
@@ -100,6 +113,12 @@ function insertNewLinkItem(name, url) {
         ul.appendChild(li);
         li.addEventListener("click", updateLinkDisplay);
     }
+    document.querySelectorAll(".deleteBtn").forEach(item => {
+        item.addEventListener('click', executeDeleteLinkListListener);
+    });
+}
+function executeDeleteLinkListListener(event) {
+    controller_1.deleteItemList(event);
 }
 function resetLinkBorderColor() {
     d3.select("#linkList").selectAll("li").each(function () {
@@ -127,12 +146,23 @@ function updateLinkItem(name, url, linkId) {
     });
 }
 function updateLinkDisplay(event) {
-    resetLinkBorderColor();
-    let element = event.target;
-    let name = document.getElementById("linkName");
-    let link = document.getElementById("linkVal");
-    name.value = element.innerText;
-    link.value = element.querySelector(".linkBtn").href;
-    document.getElementById('linkInfo').innerHTML = element.id;
-    document.getElementById(element.id).style.borderColor = "red";
+    if (event.target.nodeName == "LI") {
+        resetLinkBorderColor();
+        let element = event.target;
+        let name = document.getElementById("linkName");
+        let link = document.getElementById("linkVal");
+        name.value = element.innerText;
+        link.value = element.querySelector(".linkBtn").href;
+        document.getElementById('linkInfo').innerHTML = element.id;
+        document.getElementById(element.id).style.borderColor = "red";
+    }
 }
+function clearLinkInputFields() {
+    resetLinkBorderColor();
+    document.getElementById('linkInfo').innerHTML = "";
+    let linkName = document.getElementById('linkName');
+    let linkVal = document.getElementById('linkVal');
+    linkName.value = "";
+    linkVal.value = "";
+}
+exports.clearLinkInputFields = clearLinkInputFields;

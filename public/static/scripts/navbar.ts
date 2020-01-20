@@ -1,6 +1,6 @@
 import * as d3 from "./modules/d3";
 import {resetListeners, resetRectBorder} from "./script";
-import {saveProject} from "./controller";
+import {deleteItemList, saveProject} from "./controller";
 
 export function openNav() {
     let current = d3.select(this);
@@ -9,7 +9,6 @@ export function openNav() {
     resetListeners();
     document.getElementById("sidebar").style.width = "335px";
     document.getElementById('rectInfo').innerHTML = id;
-    document.getElementById('linkInfo').innerHTML = "";
     let titleText = <HTMLInputElement>document.getElementById("titleText");
     let contentText = <HTMLInputElement>document.getElementById("contentText");
     let colorPicker = <HTMLInputElement>document.getElementById("colorPicker");
@@ -17,8 +16,9 @@ export function openNav() {
     titleText.value = parent.select("text.titleText").text();
     contentText.value = parent.select("text.contentText").text();
     colorPicker.value = current.attr("fill");
-
+    clearLinkInputFields();
     listFiles(id);
+    listLinks(id);
     resetLinkBorderColor();
     resetRectBorder();
     d3.select(this)
@@ -33,12 +33,11 @@ export function openNav() {
 function closeNav() {
     document.getElementById("sidebar").style.width = "0";
     document.getElementById('rectInfo').innerHTML = "";
-    document.getElementById('linkInfo').innerHTML = "";
     let titleText = <HTMLInputElement>document.getElementById("titleText");
     let contentText = <HTMLInputElement>document.getElementById("contentText");
     titleText.value = "";
     contentText.value = "";
-
+    clearLinkInputFields();
     resetLinkBorderColor();
     resetRectBorder();
     resetListeners();
@@ -49,6 +48,19 @@ function listFiles(id) {
     entries.each(function () {
         let li = d3.select(this);
         if (li.attr("id").slice(0,1) == id) {
+            li.style("display",'inherit');
+        }
+        else {
+            li.style("display",'none');
+        }
+    });
+}
+
+function listLinks(id) {
+    let entries = d3.select("#linkList").selectAll("li");
+    entries.each(function () {
+        let li = d3.select(this);
+        if (li.attr("class") == id) {
             li.style("display",'inherit');
         }
         else {
@@ -105,6 +117,13 @@ function insertNewLinkItem(name, url) {
         ul.appendChild(li);
         li.addEventListener("click", updateLinkDisplay);
     }
+    document.querySelectorAll(".deleteBtn").forEach(item => {
+        item.addEventListener('click', executeDeleteLinkListListener);
+    });
+}
+
+function executeDeleteLinkListListener(event) {
+    deleteItemList(event);
 }
 
 function resetLinkBorderColor() {
@@ -137,12 +156,23 @@ function updateLinkItem(name, url, linkId) {
 }
 
 function updateLinkDisplay(event) {
+    if (event.target.nodeName == "LI") {
+        resetLinkBorderColor();
+        let element = event.target;
+        let name = <HTMLInputElement>document.getElementById("linkName");
+        let link = <HTMLInputElement>document.getElementById("linkVal");
+        name.value = element.innerText;
+        link.value = element.querySelector(".linkBtn").href;
+        document.getElementById('linkInfo').innerHTML = element.id;
+        document.getElementById(element.id).style.borderColor = "red"
+    }
+}
+
+export function clearLinkInputFields() {
     resetLinkBorderColor();
-    let element = event.target;
-    let name = <HTMLInputElement> document.getElementById("linkName");
-    let link = <HTMLInputElement> document.getElementById("linkVal");
-    name.value = element.innerText;
-    link.value = element.querySelector(".linkBtn").href;
-    document.getElementById('linkInfo').innerHTML = element.id;
-    document.getElementById(element.id).style.borderColor = "red"
+    document.getElementById('linkInfo').innerHTML = "";
+    let linkName = <HTMLInputElement> document.getElementById('linkName');
+    let linkVal = <HTMLInputElement> document.getElementById('linkVal');
+    linkName.value = "";
+    linkVal.value = "";
 }
