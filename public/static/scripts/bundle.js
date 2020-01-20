@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const script_1 = require("./script");
 const d3 = require("./modules/d3");
+const navbar_1 = require("./navbar");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
 function getUploadedFile(filename) {
@@ -191,6 +192,7 @@ function saveForeignNode(data, fromDifferentProject, x, y) {
         .then(response => {
         updateProjectNodes(data, fromDifferentProject, x, y, false, newest_foreign_id);
         getProjectFiles(data[0]["node_id"]);
+        getProjectLinks(data[0]["node_id"]);
     })
         .catch((error) => {
         //do nothing
@@ -246,6 +248,20 @@ function updateProjectFiles(data) {
         item.addEventListener('click', executeDeleteFileListListener);
     });
 }
+function updateProjectLinks(data) {
+    let nav = document.getElementById("linkList");
+    for (let element of data) {
+        let node = toDOM(element["element"]);
+        nav.appendChild(document.importNode(node, true));
+    }
+    let items = nav.getElementsByTagName("li");
+    for (let i = items.length; i--;) {
+        items[i].addEventListener("click", navbar_1.updateLinkDisplay);
+    }
+    document.querySelectorAll(".deleteBtn").forEach(item => {
+        item.addEventListener('click', navbar_1.executeDeleteLinkListListener);
+    });
+}
 function getProjectFiles(id) {
     let url = '/treeEditor/projectFiles?id=' + id;
     fetch(url, {
@@ -253,6 +269,14 @@ function getProjectFiles(id) {
     })
         .then(response => response.json())
         .then(data => updateProjectFiles(data));
+}
+function getProjectLinks(id) {
+    let url = '/treeEditor/projectLinks?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectLinks(data));
 }
 function loadProject() {
     let urlParams = new URLSearchParams(window.location.search);
@@ -264,6 +288,7 @@ function loadProject() {
         updateProjectSize(width, height);
         updateProjectName(name, id);
         getProjectFiles(id);
+        getProjectLinks(id);
         getProjectNodes(id);
         getForeignNodes(id);
     }
@@ -341,7 +366,7 @@ function deleteItemList(event) {
 }
 exports.deleteItemList = deleteItemList;
 
-},{"./modules/d3":3,"./modules/toDOM.js":4,"./modules/toJSON.js":5,"./script":7}],2:[function(require,module,exports){
+},{"./modules/d3":3,"./modules/toDOM.js":4,"./modules/toJSON.js":5,"./navbar":6,"./script":7}],2:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -19107,6 +19132,7 @@ function insertNewLinkItem(name, url) {
 function executeDeleteLinkListListener(event) {
     controller_1.deleteItemList(event);
 }
+exports.executeDeleteLinkListListener = executeDeleteLinkListListener;
 function resetLinkBorderColor() {
     d3.select("#linkList").selectAll("li").each(function () {
         let element = d3.select(this);
@@ -19144,6 +19170,7 @@ function updateLinkDisplay(event) {
         document.getElementById(element.id).style.borderColor = "red";
     }
 }
+exports.updateLinkDisplay = updateLinkDisplay;
 function clearLinkInputFields() {
     resetLinkBorderColor();
     document.getElementById('linkInfo').innerHTML = "";

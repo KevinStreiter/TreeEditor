@@ -106,6 +106,13 @@ $app->post('/treeEditor/files/delete', function (Request $request) {
     unlink($directory . DIRECTORY_SEPARATOR . $filename);
 });
 
+$app->get('/treeEditor/projectLinks', function ($request, $response, $args) {
+    $id = $request->getParam('id');
+    $query = $this->get(Connection::class)->newQuery();
+    $query = $query->select('*')->from('Links')->andWhere(['project_id' => $id]);
+    $rows = $query->execute()->fetchAll('assoc') ?: [];
+    return $response->withJson($rows);
+});
 
 $app->post('/treeEditor/foreignNode/save', function (Request $request, Response $response) {
     $connection = $this->get(Connection::class);

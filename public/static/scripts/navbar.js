@@ -120,6 +120,7 @@ function insertNewLinkItem(name, url) {
 function executeDeleteLinkListListener(event) {
     controller_1.deleteItemList(event);
 }
+exports.executeDeleteLinkListListener = executeDeleteLinkListListener;
 function resetLinkBorderColor() {
     d3.select("#linkList").selectAll("li").each(function () {
         let element = d3.select(this);
@@ -157,6 +158,7 @@ function updateLinkDisplay(event) {
         document.getElementById(element.id).style.borderColor = "red";
     }
 }
+exports.updateLinkDisplay = updateLinkDisplay;
 function clearLinkInputFields() {
     resetLinkBorderColor();
     document.getElementById('linkInfo').innerHTML = "";

@@ -1,5 +1,6 @@
 import {resetRectBorder, initializeRectListeners, initializeCircleListeners, updateRectSize} from "./script";
 import * as d3 from "./modules/d3";
+import {executeDeleteLinkListListener, updateLinkDisplay} from "./navbar";
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
 
@@ -207,6 +208,7 @@ function saveForeignNode(data, fromDifferentProject, x, y) {
         .then(response => {
             updateProjectNodes(data, fromDifferentProject, x, y, false, newest_foreign_id);
             getProjectFiles(data[0]["node_id"]);
+            getProjectLinks(data[0]["node_id"]);
             })
         .catch((error) => {
             //do nothing
@@ -267,6 +269,22 @@ function updateProjectFiles(data) {
     });
 }
 
+function updateProjectLinks(data) {
+    let nav = document.getElementById("linkList");
+    for (let element of data) {
+        let node = toDOM(element["element"]);
+        nav.appendChild(document.importNode(node, true));
+    }
+
+    let items = nav.getElementsByTagName("li");
+    for (let i = items.length; i--;) {
+        items[i].addEventListener("click", updateLinkDisplay);
+    }
+    document.querySelectorAll(".deleteBtn").forEach(item => {
+        item.addEventListener('click', executeDeleteLinkListListener);
+    });
+}
+
 function getProjectFiles(id) {
     let url = '/treeEditor/projectFiles?id=' + id;
     fetch(url, {
@@ -274,6 +292,15 @@ function getProjectFiles(id) {
     })
         .then(response => response.json())
         .then(data => updateProjectFiles(data));
+}
+
+function getProjectLinks(id) {
+    let url = '/treeEditor/projectLinks?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectLinks(data));
 }
 
 export function loadProject() {
@@ -286,6 +313,7 @@ export function loadProject() {
         updateProjectSize(width, height);
         updateProjectName(name, id);
         getProjectFiles(id);
+        getProjectLinks(id);
         getProjectNodes(id);
         getForeignNodes(id);
     }

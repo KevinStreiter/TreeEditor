@@ -122,7 +122,7 @@ function insertNewLinkItem(name, url) {
     });
 }
 
-function executeDeleteLinkListListener(event) {
+export function executeDeleteLinkListListener(event) {
     deleteItemList(event);
 }
 
@@ -155,7 +155,7 @@ function updateLinkItem(name, url, linkId) {
     })
 }
 
-function updateLinkDisplay(event) {
+export function updateLinkDisplay(event) {
     if (event.target.nodeName == "LI") {
         resetLinkBorderColor();
         let element = event.target;
