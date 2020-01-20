@@ -335,8 +335,7 @@ function updateFileList(filename) {
         let span = document.createElement("span");
         li.appendChild(document.createTextNode(file.files[0].name));
         li.setAttribute("id", filename);
-        span.setAttribute("class", "close");
-        span.appendChild(document.createTextNode("x"));
+        span.insertAdjacentHTML('beforeend',`<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
         li.appendChild(span);
         ul.appendChild(li);
 

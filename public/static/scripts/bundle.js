@@ -310,8 +310,7 @@ function updateFileList(filename) {
         let span = document.createElement("span");
         li.appendChild(document.createTextNode(file.files[0].name));
         li.setAttribute("id", filename);
-        span.setAttribute("class", "close");
-        span.appendChild(document.createTextNode("x"));
+        span.insertAdjacentHTML('beforeend', `<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
         li.appendChild(span);
         ul.appendChild(li);
         initializeDeleteFileListListener();
@@ -19057,15 +19056,12 @@ function updateLinkList(name, url) {
     });
     if (!isDuplicate) {
         let li = document.createElement("li");
-        let spanX = document.createElement("span");
-        let spanLink = document.createElement("span");
+        let span = document.createElement("span");
         li.appendChild(document.createTextNode(name));
         li.setAttribute("class", id);
-        spanLink.insertAdjacentHTML('beforeend', `<a href=${url} class="Button"><i class="fa fa-external-link"></i></a>`);
-        spanX.setAttribute("class", "close");
-        spanX.appendChild(document.createTextNode("x"));
-        li.appendChild(spanLink);
-        li.appendChild(spanX);
+        span.insertAdjacentHTML('beforeend', `<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
+        span.insertAdjacentHTML('beforeend', `<a href=${url} class="linkBtn"><i class="fa fa-external-link"></i></a>`);
+        li.appendChild(span);
         ul.appendChild(li);
     }
 }
@@ -19679,4 +19675,4 @@ function clone(selector) {
     return d3.select(node.parentNode.insertBefore(node.cloneNode(true), node.nextSibling));
 }
 
-},{"./controller":1,"./modules/d3.js":3,"./navbar":6}]},{},[2,7,1,6]);
+},{"./controller":1,"./modules/d3.js":3,"./navbar":6}]},{},[7,2,6,1]);

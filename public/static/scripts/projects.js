@@ -19,26 +19,28 @@ function listProjects(data) {
     let ul = document.getElementById("projects");
     for (let project of data) {
         let li = document.createElement("li");
-        let span = document.createElement("span");
-        span.setAttribute("class", "close");
-        span.appendChild(document.createTextNode("x"));
         li.appendChild(document.createTextNode(project["name"]));
+        li.insertAdjacentHTML('beforeend', `<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
         li.setAttribute("id", project["project_id"]);
-        li.appendChild(span);
         ul.appendChild(li);
         li.addEventListener("click", function () {
             openProject(project["project_id"], project["name"], project["width"], project["height"]);
         });
-        let btnList = document.getElementsByClassName("close");
-        for (let i = 0; i < btnList.length; i++) {
-            btnList[i].addEventListener("click", function (e) {
-                let id = this.parentElement.getAttribute("id");
-                deleteProject(id);
-                this.parentElement.remove();
-                e.stopPropagation();
-            });
-        }
     }
+    document.querySelectorAll(".deleteBtn").forEach(item => {
+        item.addEventListener('click', initDeleteProject);
+    });
+}
+function initDeleteProject(event) {
+    let parent = event.target.parentNode;
+    let id = parent.id;
+    if (id == "") {
+        parent = parent.parentNode;
+        id = parent.id;
+    }
+    deleteProject(id);
+    parent.remove();
+    event.stopPropagation();
 }
 function openProject(id, name, width, height) {
     window.location.href = "/treeEditor/project?id=" + id + "&name=" + name + "&width=" + width + "&height=" + height;

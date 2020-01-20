@@ -85,15 +85,13 @@ function updateLinkList(name, url) {
     });
     if (!isDuplicate) {
         let li = document.createElement("li");
-        let spanX = document.createElement("span");
-        let spanLink = document.createElement("span");
+        let span = document.createElement("span");
         li.appendChild(document.createTextNode(name));
         li.setAttribute("class", id);
-        spanLink.insertAdjacentHTML('beforeend',`<a href=${url} class="Button"><i class="fa fa-external-link"></i></a>`);
-        spanX.setAttribute("class", "close");
-        spanX.appendChild(document.createTextNode("x"));
-        li.appendChild(spanLink);
-        li.appendChild(spanX);
+        span.insertAdjacentHTML('beforeend',`<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
+        span.insertAdjacentHTML('beforeend',`<a href=${url} class="linkBtn"><i class="fa fa-external-link"></i></a>`);
+
+        li.appendChild(span);
         ul.appendChild(li);
     }
 }
