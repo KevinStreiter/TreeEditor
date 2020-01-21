@@ -2,21 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 const navbar_1 = require("./navbar");
-const controller_1 = require("./controller");
-const files_1 = require("./files");
-const links_1 = require("./links");
-let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, xTickDistance, yTickDistance, rectDrawn = false;
-window.onload = () => {
-    initializePage();
-    controller_1.loadProject();
-    defineGrid();
-};
-function initializePage() {
-    margin = { top: 3, right: 2, bottom: 2, left: 2 };
-    graph = document.getElementById('GraphContainer');
-    boundaries = graph.getBoundingClientRect();
-    width = boundaries.width - margin.left - margin.right;
-    height = boundaries.height - margin.top - margin.bottom;
+const grid_1 = require("./grid");
+let svg, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, rectDrawn = false;
+function initializeGraph(margin) {
+    let graph = document.getElementById('GraphContainer'), boundaries = graph.getBoundingClientRect(), width = boundaries.width - margin.left - margin.right, height = boundaries.height - margin.top - margin.bottom;
     svg = d3.select("#graph")
         .attr("width", width)
         .attr("height", height)
@@ -38,71 +27,8 @@ function initializePage() {
     dragLine = d3.drag()
         .on("start", dragStartLine)
         .on("drag", dragMoveLine);
-    d3.select("#titleText").on("input", function () {
-        updateRectText(this);
-    });
-    d3.select("#contentText").on("input", function () {
-        updateRectText(this);
-    });
-    d3.select("#linkSaveBtn").on("click", function () {
-        links_1.processLinkItem();
-    });
-    d3.select("#linkClearBtn").on("click", function () {
-        links_1.clearLinkInputFields();
-    });
-    d3.select("#colorPickerBtn").on("click", function () {
-        document.getElementById("colorPicker").click();
-    });
-    d3.select("#colorPicker").on("input", function () {
-        updateRectColor(this);
-    });
-    d3.select("#fileChooserBtn").on("click", function () {
-        document.getElementById("fileChooser").click();
-    });
-    d3.select("#fileChooser").on("input", function () {
-        files_1.uploadFile();
-    });
-    d3.select("#saveButton").on("click", function () {
-        controller_1.saveProject();
-    });
 }
-function defineGrid() {
-    graph = document.getElementById('graph');
-    boundaries = graph.getBoundingClientRect();
-    width = boundaries.width - margin.left - margin.right;
-    height = boundaries.height - margin.top - margin.bottom;
-    let gridSize = 20;
-    let tickAmountX = (width - margin.right) / gridSize;
-    let tickAmountY = (height - margin.top) / gridSize;
-    let grid = svg.append("g")
-        .attr("id", "grid")
-        .attr("pointer-events", "none");
-    let xScale = d3.scaleLinear()
-        .range([0, width - margin.right]);
-    let xGridLines = d3.axisBottom()
-        .tickFormat("")
-        .ticks(tickAmountX)
-        .tickSize(height - margin.top)
-        .scale(xScale);
-    grid.append("g")
-        .attr("class", "xGridLines")
-        .call(xGridLines);
-    let yScale = d3.scaleLinear()
-        .range([0, height - margin.top]);
-    let yGridLines = d3.axisRight()
-        .tickFormat("")
-        .ticks(tickAmountY)
-        .tickSize(width - margin.right)
-        .scale(yScale);
-    grid.append("g")
-        .attr("class", "yGridLines")
-        .call(yGridLines);
-    d3.selectAll("path.domain").remove();
-    let tickArr = yScale.ticks(tickAmountY);
-    yTickDistance = yScale(tickArr[tickArr.length - 1]) - yScale(tickArr[tickArr.length - 2]);
-    tickArr = xScale.ticks(tickAmountX);
-    xTickDistance = xScale(tickArr[tickArr.length - 1]) - xScale(tickArr[tickArr.length - 2]);
-}
+exports.initializeGraph = initializeGraph;
 function mousedown() {
     if (d3.event.button != 2) {
         let event = d3.mouse(this);
@@ -178,7 +104,7 @@ function initializeRectListeners() {
     })
         .on("dblclick", navbar_1.openNav)
         .call(dragRect);
-    let foreign = d3.selectAll(".foreign").select("rect")
+    d3.selectAll(".foreign").select("rect")
         .on("dblclick", null);
 }
 exports.initializeRectListeners = initializeRectListeners;
@@ -304,42 +230,8 @@ function dragMoveLine() {
     let data = [start, middle, end];
     path.attr("d", lineFunction(data));
 }
-function getGridLinePos(selector) {
-    let coordinate = selector.attr("transform");
-    return coordinate.substring(coordinate.indexOf("(") + 1, coordinate.indexOf(")")).split(",");
-}
 function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current, borderMove) {
-    checkBoundaries(current);
-    if (borderMove) {
-        current
-            .attr("width", newXCoordinate)
-            .attr("height", newYCoordinate);
-    }
-    else {
-        let gridXCoordinate = newXCoordinate;
-        let gridYCoordinate = newYCoordinate;
-        let coordDifference = 1000;
-        d3.select('g.xGridLines').selectAll(".tick").each(function () {
-            let coordinate = getGridLinePos(d3.select(this));
-            let tempCoordDifference = Math.abs(newXCoordinate - coordinate[0]);
-            if (tempCoordDifference < coordDifference && (+current.attr("width") + +coordinate[0]) <= (width + margin.left)) {
-                coordDifference = tempCoordDifference;
-                gridXCoordinate = coordinate[0];
-            }
-        });
-        coordDifference = 1000;
-        d3.select('g.yGridLines').selectAll(".tick").each(function () {
-            let coordinate = getGridLinePos(d3.select(this));
-            let tempCoordDifference = Math.abs(newYCoordinate - coordinate[1]);
-            if (tempCoordDifference < coordDifference && (+current.attr("height") + +coordinate[1]) <= (height + margin.top)) {
-                coordDifference = tempCoordDifference;
-                gridYCoordinate = coordinate[1];
-            }
-        });
-        current
-            .attr("x", gridXCoordinate)
-            .attr("y", gridYCoordinate);
-    }
+    grid_1.alignRectWithGrid(current, newXCoordinate, newYCoordinate, borderMove);
     d3.select("#circleTop" + counter)
         .attr("cx", (+current.attr("x")) + (+current.attr("width") / 2))
         .attr("cy", +current.attr("y"));
@@ -544,6 +436,7 @@ function updateRectText(object) {
         }
     });
 }
+exports.updateRectText = updateRectText;
 function updateRectColor(object) {
     d3.select("#colorPickerBtn").style("background", object.value);
     let id = document.getElementById('rectInfo').innerHTML;
@@ -554,57 +447,9 @@ function updateRectColor(object) {
         }
     });
 }
+exports.updateRectColor = updateRectColor;
 function resetRectBorder() {
     svg.selectAll("rect")
         .style("stroke", "#b3b2b4");
 }
 exports.resetRectBorder = resetRectBorder;
-function checkBoundaries(element) {
-    if (elementIsNearBottomBoundary(element)) {
-        svg.attr("height", +svg.attr("height") + yTickDistance);
-        height += yTickDistance;
-        appendYGridLine();
-    }
-    if (elementIsNearRightBoundary(element)) {
-        svg.attr("width", +svg.attr("width") + xTickDistance);
-        width += xTickDistance;
-        appendXGridLine();
-    }
-}
-function elementIsNearBottomBoundary(element) {
-    return Math.abs(svg.attr("height") - (+element.attr("y") + +element.attr("height"))) <= yTickDistance;
-}
-function elementIsNearRightBoundary(element) {
-    return Math.abs(svg.attr("width") - (+element.attr("x") + +element.attr("width"))) <= xTickDistance;
-}
-function appendXGridLine() {
-    let newChild = getLastGridLineAndPos('g.xGridLines');
-    newChild[0].attr("transform", "translate(" + (+newChild[1][0] + xTickDistance) + "," + 0 + ")");
-    d3.select('g.xGridLines').node().append(newChild[0].node());
-    d3.select("g.yGridLines").selectAll("line").each(function () {
-        let line = d3.select(this);
-        line.attr("x2", +line.attr("x2") + xTickDistance);
-    });
-}
-function appendYGridLine() {
-    let newChild = getLastGridLineAndPos('g.yGridLines');
-    newChild[0].attr("transform", "translate(" + 0 + "," + (+newChild[1][1] + yTickDistance) + ")");
-    d3.select('g.yGridLines').node().append(newChild[0].node());
-    d3.select("g.xGridLines").selectAll("line").each(function () {
-        let line = d3.select(this);
-        line.attr("y2", +line.attr("y2") + yTickDistance);
-    });
-}
-function getLastGridLineAndPos(selector) {
-    let child = null;
-    d3.select(selector).each(function () {
-        child = this.lastChild;
-    });
-    let newChild = clone(child);
-    let position = newChild.attr("transform");
-    return [newChild, position.substring(position.indexOf("(") + 1, position.indexOf(")")).split(",")];
-}
-function clone(selector) {
-    let node = d3.select(selector).node();
-    return d3.select(node.parentNode.insertBefore(node.cloneNode(true), node.nextSibling));
-}

@@ -233,8 +233,6 @@ function getProjectNodes(id) {
         .then(data => updateProjectNodes(data));
 }
 
-
-
 export function loadProject() {
     let urlParams = new URLSearchParams(window.location.search);
     let id = urlParams.get('id');
