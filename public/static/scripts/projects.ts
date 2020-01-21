@@ -23,7 +23,7 @@ function listProjects(data) {
     for (let project of data) {
         let li = document.createElement("li");
         li.appendChild(document.createTextNode(project["name"]));
-        li.insertAdjacentHTML('beforeend',`<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
+        li.insertAdjacentHTML('beforeend',`<a class="deleteProjectBtn"><i class="fa fa-times"></i></a>`);
         li.setAttribute("id", project["project_id"]);
         ul.appendChild(li);
 
@@ -31,7 +31,7 @@ function listProjects(data) {
             openProject(project["project_id"], project["name"], project["width"], project["height"])
         });
     }
-    document.querySelectorAll(".deleteBtn").forEach(item => {
+    document.querySelectorAll(".deleteProjectBtn").forEach(item => {
         item.addEventListener('click', initDeleteProject);
     });
 }

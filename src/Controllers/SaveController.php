@@ -102,20 +102,24 @@ class SaveController
 
     function saveFiles($data, $connection, $projectID) {
         foreach ($data as $file) {
-            if ($file['tagName'] == "li") {
-                $element_data = ['project_id' => $projectID];
-                $element_data['element'] = json_encode($file);
-                $connection->insert('Files', $element_data);
+            if (isset($file['tagName'])) {
+                if ($file['tagName'] == "li") {
+                    $element_data = ['project_id' => $projectID];
+                    $element_data['element'] = json_encode($file);
+                    $connection->insert('Files', $element_data);
+                }
             }
         }
     }
 
     function saveLinks($data, $connection, $projectID) {
         foreach ($data as $file) {
-            if ($file['tagName'] == "li") {
-                $element_data = ['project_id' => $projectID];
-                $element_data['element'] = json_encode($file);
-                $connection->insert('Links', $element_data);
+            if (isset($file['tagName'])) {
+                if ($file['tagName'] == "li") {
+                    $element_data = ['project_id' => $projectID];
+                    $element_data['element'] = json_encode($file);
+                    $connection->insert('Links', $element_data);
+                }
             }
         }
     }

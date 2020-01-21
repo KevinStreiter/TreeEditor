@@ -41,6 +41,7 @@ function saveProject() {
     let nodes = filterNodes();
     nodes = toJSON(nodes);
     let files = document.getElementById("fileList");
+    console.log(files);
     files = toJSON(files);
     let links = document.getElementById("linkList");
     links = toJSON(links);
@@ -243,7 +244,7 @@ function updateProjectFiles(data) {
             getUploadedFile(items[i].getAttribute("id"));
         });
     }
-    document.querySelectorAll(".fileBtn").forEach(item => {
+    document.querySelectorAll(".deleteFileBtn").forEach(item => {
         item.addEventListener('click', executeDeleteFileListListener);
     });
 }
@@ -257,7 +258,7 @@ function updateProjectLinks(data) {
     for (let i = items.length; i--;) {
         items[i].addEventListener("click", navbar_1.updateLinkDisplay);
     }
-    document.querySelectorAll(".deleteBtn").forEach(item => {
+    document.querySelectorAll(".linkBtn").forEach(item => {
         item.addEventListener('click', navbar_1.executeDeleteLinkListListener);
     });
 }
@@ -337,13 +338,13 @@ function updateFileList(filename) {
         let li = document.createElement("li");
         li.appendChild(document.createTextNode(file.files[0].name));
         li.setAttribute("id", filename);
-        li.insertAdjacentHTML('beforeend', `<a class="deleteBtn fileBtn"><i class="fa fa-times"></i></a>`);
+        li.insertAdjacentHTML('beforeend', `<a class="deleteFileBtn"><i class="fa fa-times"></i></a>`);
         ul.appendChild(li);
         li.addEventListener("click", function () {
             getUploadedFile(filename);
         });
     }
-    document.querySelectorAll(".fileBtn").forEach(item => {
+    document.querySelectorAll(".deleteFileBtn").forEach(item => {
         item.addEventListener('click', executeDeleteFileListListener);
     });
 }

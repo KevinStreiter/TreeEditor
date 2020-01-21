@@ -113,7 +113,7 @@ function insertNewLinkItem(name, url) {
         li.appendChild(document.createTextNode(name));
         li.setAttribute("class", id);
         li.setAttribute("id", "Link_" + counter.toString());
-        li.insertAdjacentHTML('beforeend',`<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
+        li.insertAdjacentHTML('beforeend',`<a class="deleteLinkBtn"><i class="fa fa-times"></i></a>`);
         li.insertAdjacentHTML('beforeend',`<a href=${url} target="_blank" class="linkBtn"><i class="fa fa-external-link"></i></a>`);
         ul.appendChild(li);
         li.addEventListener("click", updateLinkDisplay);
@@ -122,7 +122,7 @@ function insertNewLinkItem(name, url) {
 }
 
 function initializeDeleteLinkItemListener() {
-    document.querySelectorAll(".deleteBtn").forEach(item => {
+    document.querySelectorAll(".deleteLinkBtn").forEach(item => {
         item.addEventListener('click', executeDeleteLinkListListener);
     });
 }
