@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const script_1 = require("./script");
 const d3 = require("./modules/d3");
-const navbar_1 = require("./navbar");
 const files_1 = require("./files");
+const links_1 = require("./links");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
 function filterNodes() {
@@ -174,7 +174,7 @@ function saveForeignNode(data, fromDifferentProject, x, y) {
         .then(response => {
         updateProjectNodes(data, fromDifferentProject, x, y, false, newest_foreign_id);
         files_1.getProjectFiles(data[0]["node_id"]);
-        getProjectLinks(data[0]["node_id"]);
+        links_1.getProjectLinks(data[0]["node_id"]);
     })
         .catch((error) => {
         //do nothing
@@ -214,28 +214,6 @@ function getProjectNodes(id) {
         .then(response => response.json())
         .then(data => updateProjectNodes(data));
 }
-function updateProjectLinks(data) {
-    let nav = document.getElementById("linkList");
-    for (let element of data) {
-        let node = toDOM(element["element"]);
-        nav.appendChild(document.importNode(node, true));
-    }
-    let items = nav.getElementsByTagName("li");
-    for (let i = items.length; i--;) {
-        items[i].addEventListener("click", navbar_1.updateLinkDisplay);
-    }
-    document.querySelectorAll(".deleteLinkBtn").forEach(item => {
-        item.addEventListener('click', navbar_1.executeDeleteLinkListListener);
-    });
-}
-function getProjectLinks(id) {
-    let url = '/treeEditor/projectLinks?id=' + id;
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => updateProjectLinks(data));
-}
 function loadProject() {
     let urlParams = new URLSearchParams(window.location.search);
     let id = urlParams.get('id');
@@ -246,7 +224,7 @@ function loadProject() {
         updateProjectSize(width, height);
         updateProjectName(name, id);
         files_1.getProjectFiles(id);
-        getProjectLinks(id);
+        links_1.getProjectLinks(id);
         getProjectNodes(id);
         getForeignNodes(id);
     }

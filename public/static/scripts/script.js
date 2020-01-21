@@ -4,6 +4,7 @@ const d3 = require("./modules/d3.js");
 const navbar_1 = require("./navbar");
 const controller_1 = require("./controller");
 const files_1 = require("./files");
+const links_1 = require("./links");
 let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, xTickDistance, yTickDistance, rectDrawn = false;
 window.onload = () => {
     initializePage();
@@ -44,10 +45,10 @@ function initializePage() {
         updateRectText(this);
     });
     d3.select("#linkSaveBtn").on("click", function () {
-        navbar_1.processLinkItem();
+        links_1.processLinkItem();
     });
     d3.select("#linkClearBtn").on("click", function () {
-        navbar_1.clearLinkInputFields();
+        links_1.clearLinkInputFields();
     });
     d3.select("#colorPickerBtn").on("click", function () {
         document.getElementById("colorPicker").click();

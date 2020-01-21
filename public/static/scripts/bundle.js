@@ -3,8 +3,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const script_1 = require("./script");
 const d3 = require("./modules/d3");
-const navbar_1 = require("./navbar");
 const files_1 = require("./files");
+const links_1 = require("./links");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
 function filterNodes() {
@@ -175,7 +175,7 @@ function saveForeignNode(data, fromDifferentProject, x, y) {
         .then(response => {
         updateProjectNodes(data, fromDifferentProject, x, y, false, newest_foreign_id);
         files_1.getProjectFiles(data[0]["node_id"]);
-        getProjectLinks(data[0]["node_id"]);
+        links_1.getProjectLinks(data[0]["node_id"]);
     })
         .catch((error) => {
         //do nothing
@@ -215,28 +215,6 @@ function getProjectNodes(id) {
         .then(response => response.json())
         .then(data => updateProjectNodes(data));
 }
-function updateProjectLinks(data) {
-    let nav = document.getElementById("linkList");
-    for (let element of data) {
-        let node = toDOM(element["element"]);
-        nav.appendChild(document.importNode(node, true));
-    }
-    let items = nav.getElementsByTagName("li");
-    for (let i = items.length; i--;) {
-        items[i].addEventListener("click", navbar_1.updateLinkDisplay);
-    }
-    document.querySelectorAll(".deleteLinkBtn").forEach(item => {
-        item.addEventListener('click', navbar_1.executeDeleteLinkListListener);
-    });
-}
-function getProjectLinks(id) {
-    let url = '/treeEditor/projectLinks?id=' + id;
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => updateProjectLinks(data));
-}
 function loadProject() {
     let urlParams = new URLSearchParams(window.location.search);
     let id = urlParams.get('id');
@@ -247,7 +225,7 @@ function loadProject() {
         updateProjectSize(width, height);
         updateProjectName(name, id);
         files_1.getProjectFiles(id);
-        getProjectLinks(id);
+        links_1.getProjectLinks(id);
         getProjectNodes(id);
         getForeignNodes(id);
     }
@@ -264,7 +242,7 @@ function updateProjectName(name, id) {
     projectTitle.setAttribute("class", id);
 }
 
-},{"./files":2,"./modules/d3":4,"./modules/toDOM.js":5,"./modules/toJSON.js":6,"./navbar":7,"./script":8}],2:[function(require,module,exports){
+},{"./files":2,"./links":3,"./modules/d3":5,"./modules/toDOM.js":6,"./modules/toJSON.js":7,"./script":9}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const controller_1 = require("./controller");
@@ -363,7 +341,150 @@ function executeDeleteFileListListener(event) {
     deleteFile(id);
 }
 
-},{"./controller":1,"./modules/d3":4,"./modules/toDOM.js":5,"./navbar":7}],3:[function(require,module,exports){
+},{"./controller":1,"./modules/d3":5,"./modules/toDOM.js":6,"./navbar":8}],3:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const controller_1 = require("./controller");
+const navbar_1 = require("./navbar");
+const d3 = require("./modules/d3");
+let toDOM = require("./modules/toDOM.js");
+function processLinkItem() {
+    let name = document.getElementById("linkName");
+    let url = document.getElementById("linkVal");
+    if (validURL(url.value)) {
+        updateLinkList(name.value, url.value);
+        controller_1.saveProject();
+    }
+}
+exports.processLinkItem = processLinkItem;
+function validURL(str) {
+    let pattern = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;
+    return pattern.test(str);
+}
+function updateLinkList(name, url) {
+    let linkId = document.getElementById("linkInfo").innerHTML;
+    if (linkId == "") {
+        insertNewLinkItem(name, url);
+    }
+    else {
+        updateLinkItem(name, url, linkId);
+    }
+}
+function insertNewLinkItem(name, url) {
+    let ul = document.getElementById("linkList");
+    let id = document.getElementById('rectInfo').innerHTML;
+    let entries = d3.select("#linkList").selectAll("li");
+    let isDuplicate = false;
+    let counter = 0;
+    entries.each(function () {
+        let linkID = d3.select(this).attr("id").split("_", 2)[1];
+        if (+linkID >= counter) {
+            counter = +linkID;
+        }
+        if (this.textContent == name) {
+            isDuplicate = true;
+        }
+    });
+    counter += 1;
+    if (!isDuplicate) {
+        let li = document.createElement("li");
+        li.appendChild(document.createTextNode(name));
+        li.setAttribute("class", id);
+        li.setAttribute("id", "Link_" + counter.toString());
+        li.insertAdjacentHTML('beforeend', `<a class="deleteLinkBtn"><i class="fa fa-times"></i></a>`);
+        li.insertAdjacentHTML('beforeend', `<a href=${url} target="_blank" class="linkBtn"><i class="fa fa-external-link"></i></a>`);
+        ul.appendChild(li);
+        li.addEventListener("click", updateLinkDisplay);
+    }
+    initializeDeleteLinkItemListener();
+}
+function initializeDeleteLinkItemListener() {
+    document.querySelectorAll(".deleteLinkBtn").forEach(item => {
+        item.addEventListener('click', executeDeleteLinkListListener);
+    });
+}
+function executeDeleteLinkListListener(event) {
+    let id = navbar_1.deleteItemList(event);
+    let linkInfo = document.getElementById('linkInfo');
+    if (id == linkInfo.innerHTML) {
+        linkInfo.innerHTML = "";
+    }
+}
+exports.executeDeleteLinkListListener = executeDeleteLinkListListener;
+function resetLinkBorderColor() {
+    d3.select("#linkList").selectAll("li").each(function () {
+        let element = d3.select(this);
+        element.style("border", "1px solid #ddd");
+    });
+}
+exports.resetLinkBorderColor = resetLinkBorderColor;
+function updateLinkItem(name, url, linkId) {
+    let element = document.getElementById(linkId);
+    d3.select("#linkList").selectAll("li").each(function () {
+        let element = d3.select(this);
+        if (linkId == element.attr("id")) {
+            let children = [];
+            element.selectAll("a").each(function () {
+                let child = d3.select(this);
+                if (child.attr("class") == "linkBtn") {
+                    child.attr("href", url);
+                }
+                children.push(child.node().cloneNode(true));
+            });
+            element.text(name);
+            element.node().insertAdjacentElement('beforeend', children[0]);
+            element.node().insertAdjacentElement('beforeend', children[1]);
+        }
+    });
+    initializeDeleteLinkItemListener();
+}
+function updateLinkDisplay(event) {
+    if (event.target.nodeName == "LI") {
+        resetLinkBorderColor();
+        let element = event.target;
+        let name = document.getElementById("linkName");
+        let link = document.getElementById("linkVal");
+        name.value = element.innerText;
+        link.value = element.querySelector(".linkBtn").href;
+        document.getElementById('linkInfo').innerHTML = element.id;
+        document.getElementById(element.id).style.borderColor = "red";
+    }
+}
+exports.updateLinkDisplay = updateLinkDisplay;
+function clearLinkInputFields() {
+    resetLinkBorderColor();
+    document.getElementById('linkInfo').innerHTML = "";
+    let linkName = document.getElementById('linkName');
+    let linkVal = document.getElementById('linkVal');
+    linkName.value = "";
+    linkVal.value = "";
+}
+exports.clearLinkInputFields = clearLinkInputFields;
+function updateProjectLinks(data) {
+    let nav = document.getElementById("linkList");
+    for (let element of data) {
+        let node = toDOM(element["element"]);
+        nav.appendChild(document.importNode(node, true));
+    }
+    let items = nav.getElementsByTagName("li");
+    for (let i = items.length; i--;) {
+        items[i].addEventListener("click", updateLinkDisplay);
+    }
+    document.querySelectorAll(".deleteLinkBtn").forEach(item => {
+        item.addEventListener('click', executeDeleteLinkListListener);
+    });
+}
+function getProjectLinks(id) {
+    let url = '/treeEditor/projectLinks?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectLinks(data));
+}
+exports.getProjectLinks = getProjectLinks;
+
+},{"./controller":1,"./modules/d3":5,"./modules/toDOM.js":6,"./navbar":8}],4:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -500,7 +621,7 @@ function removeNode(node) {
     }
 }
 
-},{"./controller":1,"./modules/d3":4,"./modules/toDOM.js":5}],4:[function(require,module,exports){
+},{"./controller":1,"./modules/d3":5,"./modules/toDOM.js":6}],5:[function(require,module,exports){
 // https://d3js.org v5.12.0 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -18930,7 +19051,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 module.exports = function toDOM(obj) {
     if (typeof obj == 'string') {
         obj = JSON.parse(obj);
@@ -18971,7 +19092,7 @@ module.exports = function toDOM(obj) {
     }
     return node;
 };
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = function toJSON(node) {
     node = node || this;
     var obj = {
@@ -19006,12 +19127,13 @@ module.exports = function toJSON(node) {
 };
 
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
 const script_1 = require("./script");
 const controller_1 = require("./controller");
+const links_1 = require("./links");
 function openNav() {
     let current = d3.select(this);
     let parent = d3.select(this.parentNode);
@@ -19026,10 +19148,10 @@ function openNav() {
     titleText.value = parent.select("text.titleText").text();
     contentText.value = parent.select("text.contentText").text();
     colorPicker.value = current.attr("fill");
-    clearLinkInputFields();
+    links_1.clearLinkInputFields();
     listFiles(id);
     listLinks(id);
-    resetLinkBorderColor();
+    links_1.resetLinkBorderColor();
     script_1.resetRectBorder();
     d3.select(this)
         .style("stroke", "red")
@@ -19046,8 +19168,8 @@ function closeNav() {
     let contentText = document.getElementById("contentText");
     titleText.value = "";
     contentText.value = "";
-    clearLinkInputFields();
-    resetLinkBorderColor();
+    links_1.clearLinkInputFields();
+    links_1.resetLinkBorderColor();
     script_1.resetRectBorder();
     script_1.resetListeners();
 }
@@ -19075,117 +19197,6 @@ function listLinks(id) {
         }
     });
 }
-function processLinkItem() {
-    let name = document.getElementById("linkName");
-    let url = document.getElementById("linkVal");
-    if (validURL(url.value)) {
-        updateLinkList(name.value, url.value);
-        controller_1.saveProject();
-    }
-}
-exports.processLinkItem = processLinkItem;
-function validURL(str) {
-    let pattern = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;
-    return pattern.test(str);
-}
-function updateLinkList(name, url) {
-    let linkId = document.getElementById("linkInfo").innerHTML;
-    if (linkId == "") {
-        insertNewLinkItem(name, url);
-    }
-    else {
-        updateLinkItem(name, url, linkId);
-    }
-}
-function insertNewLinkItem(name, url) {
-    let ul = document.getElementById("linkList");
-    let id = document.getElementById('rectInfo').innerHTML;
-    let entries = d3.select("#linkList").selectAll("li");
-    let isDuplicate = false;
-    let counter = 0;
-    entries.each(function () {
-        let linkID = d3.select(this).attr("id").split("_", 2)[1];
-        if (+linkID >= counter) {
-            counter = +linkID;
-        }
-        if (this.textContent == name) {
-            isDuplicate = true;
-        }
-    });
-    counter += 1;
-    if (!isDuplicate) {
-        let li = document.createElement("li");
-        li.appendChild(document.createTextNode(name));
-        li.setAttribute("class", id);
-        li.setAttribute("id", "Link_" + counter.toString());
-        li.insertAdjacentHTML('beforeend', `<a class="deleteLinkBtn"><i class="fa fa-times"></i></a>`);
-        li.insertAdjacentHTML('beforeend', `<a href=${url} target="_blank" class="linkBtn"><i class="fa fa-external-link"></i></a>`);
-        ul.appendChild(li);
-        li.addEventListener("click", updateLinkDisplay);
-    }
-    initializeDeleteLinkItemListener();
-}
-function initializeDeleteLinkItemListener() {
-    document.querySelectorAll(".deleteLinkBtn").forEach(item => {
-        item.addEventListener('click', executeDeleteLinkListListener);
-    });
-}
-function executeDeleteLinkListListener(event) {
-    let id = deleteItemList(event);
-    let linkInfo = document.getElementById('linkInfo');
-    if (id == linkInfo.innerHTML) {
-        linkInfo.innerHTML = "";
-    }
-}
-exports.executeDeleteLinkListListener = executeDeleteLinkListListener;
-function resetLinkBorderColor() {
-    d3.select("#linkList").selectAll("li").each(function () {
-        let element = d3.select(this);
-        element.style("border", "1px solid #ddd");
-    });
-}
-function updateLinkItem(name, url, linkId) {
-    let element = document.getElementById(linkId);
-    d3.select("#linkList").selectAll("li").each(function () {
-        let element = d3.select(this);
-        if (linkId == element.attr("id")) {
-            let children = [];
-            element.selectAll("a").each(function () {
-                let child = d3.select(this);
-                if (child.attr("class") == "linkBtn") {
-                    child.attr("href", url);
-                }
-                children.push(child.node().cloneNode(true));
-            });
-            element.text(name);
-            element.node().insertAdjacentElement('beforeend', children[0]);
-            element.node().insertAdjacentElement('beforeend', children[1]);
-        }
-    });
-    initializeDeleteLinkItemListener();
-}
-function updateLinkDisplay(event) {
-    if (event.target.nodeName == "LI") {
-        resetLinkBorderColor();
-        let element = event.target;
-        let name = document.getElementById("linkName");
-        let link = document.getElementById("linkVal");
-        name.value = element.innerText;
-        link.value = element.querySelector(".linkBtn").href;
-        document.getElementById('linkInfo').innerHTML = element.id;
-        document.getElementById(element.id).style.borderColor = "red";
-    }
-}
-exports.updateLinkDisplay = updateLinkDisplay;
-function clearLinkInputFields() {
-    resetLinkBorderColor();
-    document.getElementById('linkInfo').innerHTML = "";
-    let linkName = document.getElementById('linkName');
-    let linkVal = document.getElementById('linkVal');
-    linkName.value = "";
-    linkVal.value = "";
-}
-exports.clearLinkInputFields = clearLinkInputFields;
 function deleteItemList(event) {
     let parent = event.target.parentNode;
     let id = parent.id;
@@ -19200,13 +19211,14 @@ function deleteItemList(event) {
 }
 exports.deleteItemList = deleteItemList;
 
-},{"./controller":1,"./modules/d3":4,"./script":8}],8:[function(require,module,exports){
+},{"./controller":1,"./links":3,"./modules/d3":5,"./script":9}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 const navbar_1 = require("./navbar");
 const controller_1 = require("./controller");
 const files_1 = require("./files");
+const links_1 = require("./links");
 let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, xTickDistance, yTickDistance, rectDrawn = false;
 window.onload = () => {
     initializePage();
@@ -19247,10 +19259,10 @@ function initializePage() {
         updateRectText(this);
     });
     d3.select("#linkSaveBtn").on("click", function () {
-        navbar_1.processLinkItem();
+        links_1.processLinkItem();
     });
     d3.select("#linkClearBtn").on("click", function () {
-        navbar_1.clearLinkInputFields();
+        links_1.clearLinkInputFields();
     });
     d3.select("#colorPickerBtn").on("click", function () {
         document.getElementById("colorPicker").click();
@@ -19811,4 +19823,4 @@ function clone(selector) {
     return d3.select(node.parentNode.insertBefore(node.cloneNode(true), node.nextSibling));
 }
 
-},{"./controller":1,"./files":2,"./modules/d3.js":4,"./navbar":7}]},{},[8,3,7,1,2]);
+},{"./controller":1,"./files":2,"./links":3,"./modules/d3.js":5,"./navbar":8}]},{},[9,4,8,1,2,3]);
