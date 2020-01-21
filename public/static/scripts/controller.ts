@@ -1,20 +1,9 @@
-import {resetRectBorder, initializeRectListeners, initializeCircleListeners, updateRectSize} from "./script";
-import * as d3 from "./modules/d3";
+import {resetRectBorder, initializeRectListeners, initializeCircleListeners, updateRectSize} from "./graph";
 import {getProjectFiles} from "./files";
 import {getProjectLinks} from "./links";
+import * as d3 from "./modules/d3";
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
-
-function filterNodes() {
-    let nodes = document.getElementById("nodes");
-    let cloned_nodes = nodes.cloneNode(false);
-    let children = nodes.querySelectorAll("g:not(.foreign)");
-    children.forEach.call(children, function(item) {
-        let cloned_item = item.cloneNode(true);
-        cloned_nodes.appendChild(cloned_item);
-    });
-    return cloned_nodes
-}
 
 export function saveProject() {
     let project = document.getElementById("projectTitle");
@@ -48,13 +37,58 @@ function saveProjectID(projectID) {
     showSavePopup();
 }
 
+function filterNodes() {
+    let nodes = document.getElementById("nodes");
+    let cloned_nodes = nodes.cloneNode(false);
+    let children = nodes.querySelectorAll("g:not(.foreign)");
+    children.forEach.call(children, function(item) {
+        let cloned_item = item.cloneNode(true);
+        cloned_nodes.appendChild(cloned_item);
+    });
+    return cloned_nodes
+}
+
 function showSavePopup() {
     let popup = document.getElementById("popup");
     popup.style.opacity = '50%';
     popup.style.display = "block";
     setTimeout(function() {
         popup.style.opacity = '0';
-    },2000);
+    },1500);
+}
+
+export function loadProject() {
+    let urlParams = new URLSearchParams(window.location.search);
+    let id = urlParams.get('id');
+    let name = urlParams.get('name');
+    let width = urlParams.get('width');
+    let height = urlParams.get('height');
+    if (id != null && name != null) {
+        updateProjectSize(width, height);
+        updateProjectName(name, id);
+        getProjectFiles(id);
+        getProjectLinks(id);
+        getProjectNodes(id);
+        getForeignNodes(id);
+    }
+}
+
+function getForeignNodes(id) {
+    let url = '/treeEditor/foreignNodes?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectNodes(data, true, null, null, true));
+}
+
+function getProjectNodes(id) {
+    let url = '/treeEditor/nodes?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectNodes(data));
 }
 
 export function updateProjectNodes(data, fromDifferentProject: Boolean = false, x = null, y = null,
@@ -215,40 +249,6 @@ function handleErrors(response) {
     return response;
 }
 
-function getForeignNodes(id) {
-    let url = '/treeEditor/foreignNodes?id=' + id;
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => updateProjectNodes(data, true, null, null, true));
-}
-
-function getProjectNodes(id) {
-    let url = '/treeEditor/nodes?id=' + id;
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => updateProjectNodes(data));
-}
-
-export function loadProject() {
-    let urlParams = new URLSearchParams(window.location.search);
-    let id = urlParams.get('id');
-    let name = urlParams.get('name');
-    let width = urlParams.get('width');
-    let height = urlParams.get('height');
-    if (id != null && name != null) {
-        updateProjectSize(width, height);
-        updateProjectName(name, id);
-        getProjectFiles(id);
-        getProjectLinks(id);
-        getProjectNodes(id);
-        getForeignNodes(id);
-    }
-}
-
 function updateProjectSize(width, height) {
     d3.select("#graph")
         .attr("width", width)
@@ -259,4 +259,17 @@ function updateProjectName(name, id) {
     let projectTitle = document.getElementById("projectTitle");
     projectTitle.innerText = name;
     projectTitle.setAttribute("class", id);
+}
+
+export function deleteItemList (event) {
+    let parent = event.target.parentNode;
+    let id = parent.id;
+    if (id == "") {
+        parent = parent.parentNode;
+        id = parent.id;
+    }
+    parent.remove();
+    event.stopPropagation();
+    saveProject();
+    return id;
 }

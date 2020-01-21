@@ -193,7 +193,7 @@ ul li:hover {
 
 .circle {
     z-index: 10;
-    fill: white;
+    fill: #b3b2b4;
     stroke: grey;
     opacity: 0.3;
 }
@@ -213,8 +213,6 @@ h5 {
 .foreign {
     opacity: 70%;
     stroke-dasharray: 5px;
-    stroke: #aaa9ad;
-    fill: #aaa9ad;
 }
 
 #appLogo {

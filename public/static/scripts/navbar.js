@@ -1,14 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
-const script_1 = require("./script");
-const controller_1 = require("./controller");
+const graph_1 = require("./graph");
 const links_1 = require("./links");
 function openNav() {
     let current = d3.select(this);
     let parent = d3.select(this.parentNode);
     let id = parent.attr("id");
-    script_1.resetListeners();
     document.getElementById("sidebar").style.width = "335px";
     document.getElementById('rectInfo').innerHTML = id;
     let titleText = document.getElementById("titleText");
@@ -22,7 +20,8 @@ function openNav() {
     listFiles(id);
     listLinks(id);
     links_1.resetLinkBorderColor();
-    script_1.resetRectBorder();
+    graph_1.resetRectBorder();
+    graph_1.resetListeners();
     d3.select(this)
         .style("stroke", "red")
         .on("dblclick", closeNav);
@@ -40,8 +39,8 @@ function closeNav() {
     contentText.value = "";
     links_1.clearLinkInputFields();
     links_1.resetLinkBorderColor();
-    script_1.resetRectBorder();
-    script_1.resetListeners();
+    graph_1.resetRectBorder();
+    graph_1.resetListeners();
 }
 function listFiles(id) {
     let entries = d3.select("#fileList").selectAll("li");
@@ -67,16 +66,3 @@ function listLinks(id) {
         }
     });
 }
-function deleteItemList(event) {
-    let parent = event.target.parentNode;
-    let id = parent.id;
-    if (id == "") {
-        parent = parent.parentNode;
-        id = parent.id;
-    }
-    parent.remove();
-    event.stopPropagation();
-    controller_1.saveProject();
-    return id;
-}
-exports.deleteItemList = deleteItemList;

@@ -1,5 +1,4 @@
-import {saveProject} from "./controller";
-import {deleteItemList} from "./navbar";
+import {deleteItemList, saveProject} from "./controller";
 let toDOM = require("./modules/toDOM.js");
 import * as d3 from "./modules/d3";
 
@@ -72,18 +71,22 @@ export function uploadFile() {
 
 function updateFileList(filename) {
     let file = <HTMLInputElement>document.getElementById("fileChooser");
+    let name = file.files[0].name;
     let ul = document.getElementById("fileList");
     let entries = d3.select("#fileList").selectAll("li");
     let isDuplicate: boolean = false;
     entries.each(function () {
         let str = this.textContent.slice(0, -1);
-        if (str == file.files[0].name) {
+        if (str == name) {
             isDuplicate = true;
         }
     });
     if (!isDuplicate) {
+        if (name.length > 20) {
+            name = name.substring(0, 20) + '...';
+        }
         let li = document.createElement("li");
-        li.appendChild(document.createTextNode(file.files[0].name));
+        li.appendChild(document.createTextNode(name));
         li.setAttribute("id", filename);
         li.insertAdjacentHTML('beforeend',`<a class="deleteFileBtn"><i class="fa fa-times"></i></a>`);
         ul.appendChild(li);

@@ -1,13 +1,11 @@
 import * as d3 from "./modules/d3";
-import {resetListeners, resetRectBorder} from "./script";
-import {saveProject} from "./controller";
+import {resetListeners, resetRectBorder} from "./graph";
 import {clearLinkInputFields, resetLinkBorderColor} from "./links";
 
 export function openNav() {
     let current = d3.select(this);
     let parent = d3.select(this.parentNode);
     let id = parent.attr("id");
-    resetListeners();
     document.getElementById("sidebar").style.width = "335px";
     document.getElementById('rectInfo').innerHTML = id;
     let titleText = <HTMLInputElement>document.getElementById("titleText");
@@ -22,6 +20,8 @@ export function openNav() {
     listLinks(id);
     resetLinkBorderColor();
     resetRectBorder();
+    resetListeners();
+
     d3.select(this)
         .style("stroke", "red")
         .on("dblclick", closeNav);
@@ -68,17 +68,4 @@ function listLinks(id) {
             li.style("display",'none');
         }
     });
-}
-
-export function deleteItemList (event) {
-    let parent = event.target.parentNode;
-    let id = parent.id;
-    if (id == "") {
-        parent = parent.parentNode;
-        id = parent.id;
-    }
-    parent.remove();
-    event.stopPropagation();
-    saveProject();
-    return id;
 }

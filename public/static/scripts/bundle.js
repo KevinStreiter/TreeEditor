@@ -1,22 +1,12 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const script_1 = require("./script");
-const d3 = require("./modules/d3");
+const graph_1 = require("./graph");
 const files_1 = require("./files");
 const links_1 = require("./links");
+const d3 = require("./modules/d3");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
-function filterNodes() {
-    let nodes = document.getElementById("nodes");
-    let cloned_nodes = nodes.cloneNode(false);
-    let children = nodes.querySelectorAll("g:not(.foreign)");
-    children.forEach.call(children, function (item) {
-        let cloned_item = item.cloneNode(true);
-        cloned_nodes.appendChild(cloned_item);
-    });
-    return cloned_nodes;
-}
 function saveProject() {
     let project = document.getElementById("projectTitle");
     let projectName = project.innerHTML;
@@ -47,13 +37,55 @@ function saveProjectID(projectID) {
     projectTitle.setAttribute("class", projectID);
     showSavePopup();
 }
+function filterNodes() {
+    let nodes = document.getElementById("nodes");
+    let cloned_nodes = nodes.cloneNode(false);
+    let children = nodes.querySelectorAll("g:not(.foreign)");
+    children.forEach.call(children, function (item) {
+        let cloned_item = item.cloneNode(true);
+        cloned_nodes.appendChild(cloned_item);
+    });
+    return cloned_nodes;
+}
 function showSavePopup() {
     let popup = document.getElementById("popup");
     popup.style.opacity = '50%';
     popup.style.display = "block";
     setTimeout(function () {
         popup.style.opacity = '0';
-    }, 2000);
+    }, 1500);
+}
+function loadProject() {
+    let urlParams = new URLSearchParams(window.location.search);
+    let id = urlParams.get('id');
+    let name = urlParams.get('name');
+    let width = urlParams.get('width');
+    let height = urlParams.get('height');
+    if (id != null && name != null) {
+        updateProjectSize(width, height);
+        updateProjectName(name, id);
+        files_1.getProjectFiles(id);
+        links_1.getProjectLinks(id);
+        getProjectNodes(id);
+        getForeignNodes(id);
+    }
+}
+exports.loadProject = loadProject;
+function getForeignNodes(id) {
+    let url = '/treeEditor/foreignNodes?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectNodes(data, true, null, null, true));
+}
+function getProjectNodes(id) {
+    let url = '/treeEditor/nodes?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectNodes(data));
 }
 function updateProjectNodes(data, fromDifferentProject = false, x = null, y = null, initialLoad = false, foreign_id = null) {
     let newCoordinates = false;
@@ -87,7 +119,7 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
                 let element = d3.select(this);
                 element.attr("id", element.attr("id").slice(0, -1).concat(rectCounter));
             });
-            script_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
+            graph_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
             foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
             let foreignNodeDOM = document.getElementById(rectCounter.toString());
             if (initialLoad && element["connectors"] != null) {
@@ -101,13 +133,13 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
                     }
                 }
                 g.remove();
-                script_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
+                graph_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
             }
         }
     }
-    script_1.initializeRectListeners();
-    script_1.initializeCircleListeners();
-    script_1.resetRectBorder();
+    graph_1.initializeRectListeners();
+    graph_1.initializeCircleListeners();
+    graph_1.resetRectBorder();
 }
 exports.updateProjectNodes = updateProjectNodes;
 function deleteForeignNode(element) {
@@ -199,38 +231,6 @@ function handleErrors(response) {
         throw Error(response.statusText);
     return response;
 }
-function getForeignNodes(id) {
-    let url = '/treeEditor/foreignNodes?id=' + id;
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => updateProjectNodes(data, true, null, null, true));
-}
-function getProjectNodes(id) {
-    let url = '/treeEditor/nodes?id=' + id;
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => updateProjectNodes(data));
-}
-function loadProject() {
-    let urlParams = new URLSearchParams(window.location.search);
-    let id = urlParams.get('id');
-    let name = urlParams.get('name');
-    let width = urlParams.get('width');
-    let height = urlParams.get('height');
-    if (id != null && name != null) {
-        updateProjectSize(width, height);
-        updateProjectName(name, id);
-        files_1.getProjectFiles(id);
-        links_1.getProjectLinks(id);
-        getProjectNodes(id);
-        getForeignNodes(id);
-    }
-}
-exports.loadProject = loadProject;
 function updateProjectSize(width, height) {
     d3.select("#graph")
         .attr("width", width)
@@ -241,12 +241,24 @@ function updateProjectName(name, id) {
     projectTitle.innerText = name;
     projectTitle.setAttribute("class", id);
 }
+function deleteItemList(event) {
+    let parent = event.target.parentNode;
+    let id = parent.id;
+    if (id == "") {
+        parent = parent.parentNode;
+        id = parent.id;
+    }
+    parent.remove();
+    event.stopPropagation();
+    saveProject();
+    return id;
+}
+exports.deleteItemList = deleteItemList;
 
-},{"./files":2,"./links":5,"./modules/d3":7,"./modules/toDOM.js":8,"./modules/toJSON.js":9,"./script":11}],2:[function(require,module,exports){
+},{"./files":2,"./graph":3,"./links":6,"./modules/d3":8,"./modules/toDOM.js":9,"./modules/toJSON.js":10}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const controller_1 = require("./controller");
-const navbar_1 = require("./navbar");
 let toDOM = require("./modules/toDOM.js");
 const d3 = require("./modules/d3");
 function getUploadedFile(filename) {
@@ -313,18 +325,22 @@ function uploadFile() {
 exports.uploadFile = uploadFile;
 function updateFileList(filename) {
     let file = document.getElementById("fileChooser");
+    let name = file.files[0].name;
     let ul = document.getElementById("fileList");
     let entries = d3.select("#fileList").selectAll("li");
     let isDuplicate = false;
     entries.each(function () {
         let str = this.textContent.slice(0, -1);
-        if (str == file.files[0].name) {
+        if (str == name) {
             isDuplicate = true;
         }
     });
     if (!isDuplicate) {
+        if (name.length > 20) {
+            name = name.substring(0, 20) + '...';
+        }
         let li = document.createElement("li");
-        li.appendChild(document.createTextNode(file.files[0].name));
+        li.appendChild(document.createTextNode(name));
         li.setAttribute("id", filename);
         li.insertAdjacentHTML('beforeend', `<a class="deleteFileBtn"><i class="fa fa-times"></i></a>`);
         ul.appendChild(li);
@@ -337,11 +353,472 @@ function updateFileList(filename) {
     });
 }
 function executeDeleteFileListListener(event) {
-    let id = navbar_1.deleteItemList(event);
+    let id = controller_1.deleteItemList(event);
     deleteFile(id);
 }
 
-},{"./controller":1,"./modules/d3":7,"./modules/toDOM.js":8,"./navbar":10}],3:[function(require,module,exports){
+},{"./controller":1,"./modules/d3":8,"./modules/toDOM.js":9}],3:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const d3 = require("./modules/d3.js");
+const navbar_1 = require("./navbar");
+const grid_1 = require("./grid");
+let svg, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, rectDrawn = false;
+function initializeGraph(margin) {
+    let graph = document.getElementById('GraphContainer'), boundaries = graph.getBoundingClientRect(), width = boundaries.width - margin.left - margin.right, height = boundaries.height - margin.top - margin.bottom;
+    svg = d3.select("#graph")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .on("mousedown", mousedown)
+        .on("mouseup", mouseUp)
+        .on("mouseleave", mouseUp);
+    nodes = svg.append("g").attr("id", "nodes");
+    dragRect = d3.drag()
+        .on("start", dragStart)
+        .on("drag", dragMove);
+    dragBorder = d3.drag()
+        .on("start", dragStartBorder)
+        .on("drag", dragMoveBorder);
+    lineFunction = d3.line()
+        .x(function (d) {
+        return d.x;
+    })
+        .y(function (d) {
+        return d.y;
+    })
+        .curve(d3.curveCardinal);
+    dragLine = d3.drag()
+        .on("start", dragStartLine)
+        .on("drag", dragMoveLine);
+}
+exports.initializeGraph = initializeGraph;
+function mousedown() {
+    if (d3.event.button != 2) {
+        let event = d3.mouse(this);
+        let rectCounter = 1;
+        svg.selectAll("rect").each(function () {
+            let id = +d3.select(this.parentNode).attr("id");
+            if (id >= rectCounter) {
+                rectCounter = id + 1;
+            }
+        });
+        g = nodes.append("g")
+            .attr("id", rectCounter)
+            .call(dragRect);
+        rect = g.append("rect")
+            .attr("x", event[0] + 5)
+            .attr("y", event[1] + 5)
+            .attr("rx", 2)
+            .attr("ry", 2)
+            .attr('height', 0)
+            .attr('width', 0)
+            .attr("fill", "#f8f8f8")
+            .attr("class", "rect");
+        initializeRectListeners();
+        g.append("text")
+            .attr("x", +rect.attr("x") + 10)
+            .attr("y", +rect.attr("y") + 20)
+            .attr("font-weight", 20)
+            .attr("class", "titleText")
+            .style('font-size', 22)
+            .text();
+        g.append("text")
+            .attr("x", +rect.attr("x") + 10)
+            .attr("y", +rect.attr("y") + 40)
+            .attr("class", "contentText")
+            .text();
+        g.append("circle")
+            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
+            .attr("cy", +rect.attr("y"))
+            .attr("r", 5)
+            .attr("id", "circleTop" + rectCounter)
+            .attr("class", "circle");
+        g.append("circle")
+            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
+            .attr("cy", (+rect.attr("y") + +rect.attr("height")))
+            .attr("r", 5)
+            .attr("id", "circleBottom" + rectCounter)
+            .attr("class", "circle");
+        g.append("circle")
+            .attr("cx", +rect.attr("x"))
+            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
+            .attr("r", 5)
+            .attr("id", "circleLeft" + rectCounter)
+            .attr("class", "circle");
+        g.append("circle")
+            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
+            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
+            .attr("r", 5)
+            .attr("id", "circleRight" + rectCounter)
+            .attr("class", "circle");
+        rectDrawn = true;
+        svg.on("mousemove", mouseMove);
+    }
+}
+function initializeRectListeners() {
+    let rect = d3.selectAll("rect");
+    rect.on("mouseover", function () {
+        d3.select(this)
+            .style("cursor", "grabbing");
+    })
+        .on("mouseout", function () {
+        d3.select(this)
+            .style("cursor", "default");
+    })
+        .on("dblclick", navbar_1.openNav)
+        .call(dragRect);
+    d3.selectAll(".foreign").select("rect")
+        .on("dblclick", null);
+}
+exports.initializeRectListeners = initializeRectListeners;
+function initializeCircleListeners() {
+    let count = null;
+    svg.selectAll("rect").each(function () {
+        count = +d3.select(this.parentNode).attr("id");
+        d3.selectAll(".lineCircle")
+            .on("mouseover", function () {
+            d3.select(this)
+                .style("cursor", "grabbing");
+        })
+            .on("mouseout", function () {
+            d3.select(this)
+                .style("cursor", "default");
+        })
+            .call(dragLine);
+        d3.select(`#circleBottomRight${count}`)
+            .on("mouseover", function () {
+            d3.select(this)
+                .style("cursor", "se-resize");
+        })
+            .on("mouseout", function () {
+            d3.select(this)
+                .style("cursor", "default");
+        })
+            .call(dragBorder);
+        d3.selectAll(`#circleRight${count}, #circleLeft${count}, #circleTop${count}, #circleBottom${count}`)
+            .on('mouseover', function () {
+            d3.select(this)
+                .attr("r", 10)
+                .style("cursor", "crosshair");
+        })
+            .on('mouseout', function () {
+            d3.select(this)
+                .attr("r", 5)
+                .style("cursor", "default");
+        })
+            .on("click", drawLine);
+    });
+}
+exports.initializeCircleListeners = initializeCircleListeners;
+function mouseMove() {
+    let rectCounter = 1;
+    svg.selectAll("rect").each(function () {
+        let id = +d3.select(this.parentNode).attr("id");
+        if (id >= rectCounter) {
+            rectCounter = id;
+        }
+    });
+    let event = d3.mouse(this), newXCoordinate = Math.max(0, event[0] - +rect.attr("x")), newYCoordinate = Math.max(0, event[1] - +rect.attr("y"));
+    updateRectSize(newXCoordinate, newYCoordinate, rectCounter, null, rect, true);
+}
+function dragStart() {
+    let current = d3.select(this);
+    let tagName = current.node().tagName;
+    if (tagName === "rect") {
+        deltaX = current.attr("x") - d3.event.x;
+        deltaY = current.attr("y") - d3.event.y;
+    }
+}
+function dragMove() {
+    let current = d3.select(this);
+    let parent = d3.select(this.parentNode);
+    let counter = parent.attr("id");
+    let tagName = current.node().tagName;
+    if (tagName === "rect") {
+        let newXCoordinate = d3.event.x + deltaX;
+        let newYCoordinate = d3.event.y + deltaY;
+        updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current, false);
+    }
+}
+function dragStartBorder() {
+    let parent = d3.select(this.parentNode);
+    let current = parent.select("rect");
+    let tagName = current.node().tagName;
+    if (tagName === "rect") {
+        deltaXBorder = d3.event.x;
+        deltaYBorder = d3.event.y;
+        deltaX = current.attr("x") - d3.event.x;
+        deltaY = current.attr("y") - d3.event.y;
+        rectWidth = +current.attr("width");
+        rectHeight = +current.attr("height");
+    }
+}
+function dragMoveBorder() {
+    let parent = d3.select(this.parentNode);
+    let counter = parent.attr("id");
+    let current = parent.select("rect");
+    let tagName = current.node().tagName;
+    let newRectWidth = rectWidth + (d3.event.x - deltaXBorder);
+    let newRectHeight = rectHeight + (d3.event.y - deltaYBorder);
+    if (tagName === "rect" && newRectWidth > 0 && newRectHeight > 0) {
+        updateRectSize(newRectWidth, newRectHeight, counter, parent, current, true);
+    }
+}
+function dragStartLine() {
+    let current = d3.select(this);
+    deltaXCircle = current.attr("cx") - d3.event.x;
+    deltaYCircle = current.attr("cy") - d3.event.y;
+    let parent = d3.select(this.parentNode);
+    let classes = current.attr("class").split(" ");
+    let path = parent.select("path." + classes[0] + "." + classes[1]);
+    let length = path.node().getTotalLength();
+    let middle = path.node().getPointAtLength(length / 2);
+    middle = { "x": middle.x, "y": middle.y };
+    deltaXLine = middle.x - d3.event.x;
+    deltaYLine = middle.y - d3.event.y;
+}
+function dragMoveLine() {
+    let current = d3.select(this);
+    current.attr("cx", d3.event.x + deltaXCircle);
+    current.attr("cy", d3.event.y + deltaYCircle);
+    let parent = d3.select(this.parentNode);
+    let classes = current.attr("class").split(" ");
+    let path = parent.select("path." + classes[0] + "." + classes[1]);
+    let length = path.node().getTotalLength();
+    let start = path.node().getPointAtLength(0);
+    start = { "x": start.x, "y": start.y };
+    let end = path.node().getPointAtLength(length);
+    end = { "x": end.x, "y": end.y };
+    let middle = { "x": d3.event.x + deltaXCircle, "y": d3.event.y + deltaYCircle };
+    let data = [start, middle, end];
+    path.attr("d", lineFunction(data));
+}
+function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current, borderMove) {
+    grid_1.alignRectWithGrid(current, newXCoordinate, newYCoordinate, borderMove);
+    d3.select("#circleTop" + counter)
+        .attr("cx", (+current.attr("x")) + (+current.attr("width") / 2))
+        .attr("cy", +current.attr("y"));
+    d3.select("#circleBottom" + counter)
+        .attr("cx", (+current.attr("x")) + (+current.attr("width") / 2))
+        .attr("cy", (+current.attr("y")) + +current.attr("height"));
+    d3.select("#circleBottomRight" + counter)
+        .attr("cx", (+current.attr("x")) + (+current.attr("width")) - 2)
+        .attr("cy", (+current.attr("y")) + +current.attr("height") - 2);
+    d3.select("#circleLeft" + counter)
+        .attr("cx", (+current.attr("x")))
+        .attr("cy", (+current.attr("y")) + (+current.attr("height") / 2));
+    d3.select("#circleRight" + counter)
+        .attr("cx", (+current.attr("x")) + +current.attr("width"))
+        .attr("cy", (+current.attr("y")) + (+current.attr("height") / 2));
+    d3.selectAll("path.circleTop" + counter).each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width") / 2, +current.attr("y"), false);
+    });
+    d3.selectAll("path.circleBottom" + counter).each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width") / 2, +current.attr("y") + +current.attr("height"), false);
+    });
+    d3.selectAll("path.circleLeft" + counter).each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x"), +current.attr("y") + +current.attr("height") / 2, false);
+    });
+    d3.selectAll("path.circleRight" + counter).each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width"), +current.attr("y") + +current.attr("height") / 2, false);
+    });
+    d3.selectAll("path.circleTop" + counter + "Connector").each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width") / 2, +current.attr("y"), true);
+    });
+    d3.selectAll("path.circleBottom" + counter + "Connector").each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width") / 2, +current.attr("y") + +current.attr("height"), true);
+    });
+    d3.selectAll("path.circleLeft" + counter + "Connector").each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x"), +current.attr("y") + +current.attr("height") / 2, true);
+    });
+    d3.selectAll("path.circleRight" + counter + "Connector").each(function () {
+        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width"), +current.attr("y") + +current.attr("height") / 2, true);
+    });
+    if (parent != null) {
+        parent.select("text.titleText")
+            .attr("x", +current.attr("x") + 10)
+            .attr("y", +current.attr("y") + 20);
+        parent.select("text.contentText")
+            .attr("x", +current.attr("x") + 10)
+            .attr("y", +current.attr("y") + 40);
+    }
+}
+exports.updateRectSize = updateRectSize;
+function updateLinePath(element, current, x, y, isConnector) {
+    let length = element.node().getTotalLength();
+    let start = null;
+    let end = null;
+    if (isConnector) {
+        start = element.node().getPointAtLength(0);
+        start = { "x": start.x, "y": start.y };
+        end = { "x": x, "y": y };
+    }
+    else {
+        start = { "x": x, "y": y };
+        end = element.node().getPointAtLength(length);
+        end = { "x": end.x, "y": end.y };
+    }
+    let middle = element.node().getPointAtLength(length / 2);
+    middle = { "x": middle.x, "y": middle.y };
+    let data = [start, middle, end];
+    element.attr("d", lineFunction(data));
+    let parent = d3.select(element.node().parentNode);
+    let classes = element.attr("class").split(" ");
+    parent.select("circle." + classes[0] + "." + classes[1])
+        .attr("cx", middle.x)
+        .attr("cy", middle.y);
+}
+function mouseUp() {
+    if (d3.event.button != 2 && rect != null) {
+        svg.on("mousemove", null);
+        let parent = rect.select(function () {
+            return this.parentNode;
+        });
+        let width = +rect.attr("width");
+        let height = +rect.attr("height");
+        let surface = width * height;
+        if (surface < 2000) {
+            parent.remove();
+        }
+        if (rectDrawn) {
+            g.append("circle")
+                .attr("cx", (+rect.attr("x") + +rect.attr("width")))
+                .attr("cy", (+rect.attr("y") + (+rect.attr("height"))))
+                .attr("r", 4)
+                .attr("id", "circleBottomRight" + parent.attr("id"))
+                .attr("class", "circle");
+            initializeCircleListeners();
+            rectDrawn = false;
+        }
+    }
+}
+function drawLine() {
+    let current = d3.select(this);
+    let parent = d3.select(this.parentNode);
+    let cx = current.attr("cx");
+    let cy = current.attr("cy");
+    lineData = [{ "x": cx, "y": cy }];
+    line = parent.append("path");
+    line
+        .attr("d", lineFunction(lineData))
+        .attr("stroke", "#b3b2b4")
+        .attr("stroke-width", 2)
+        .attr("class", current.attr("id"))
+        .attr("marker-end", "url(#arrow)")
+        .attr("fill", "none");
+    svg.on("mousemove", moveLine);
+    parent.lower();
+}
+function removeLine() {
+    line.remove();
+    resetListeners();
+}
+function resetListeners() {
+    let count = null;
+    svg
+        .on("mousemove", null)
+        .on("mousedown", mousedown)
+        .on("mouseup", mouseUp)
+        .on("mouseleave", mouseUp)
+        .on("dblclick", null);
+    d3.selectAll("circle")
+        .on("click", drawLine);
+    svg.selectAll("rect")
+        .on("dblclick", navbar_1.openNav)
+        .each(function () {
+        count = d3.select(this.parentNode).attr("id");
+        d3.select(`#circleBottomRight${count}`)
+            .on("click", null);
+    });
+    d3.selectAll(".foreign").select("rect")
+        .on("dblclick", null);
+}
+exports.resetListeners = resetListeners;
+function moveLine() {
+    let event = d3.mouse(this);
+    let newLineData = [lineData[0]];
+    newLineData.push({ "x": event[0], "y": event[1] });
+    lineData = newLineData;
+    line.attr("d", lineFunction(lineData));
+    svg
+        .on("mousedown", null)
+        .on("mouseup", null)
+        .on("mouseleave", null)
+        .on("dblclick", removeLine);
+    d3.selectAll("circle")
+        .raise()
+        .on("click", combineRect);
+}
+function combineRect() {
+    let current = d3.select(this);
+    let parent = d3.select(this.parentNode);
+    let x = lineData[0]["x"];
+    let y = lineData[0]["y"];
+    let sameRect = false;
+    parent.selectAll("circle").each(function () {
+        let cx = d3.select(this).attr("cx");
+        let cy = d3.select(this).attr("cy");
+        if (x == cx && y == cy) {
+            sameRect = true;
+        }
+    });
+    let id = d3.select(this).attr("id");
+    id = id.slice(0, -1);
+    if (!sameRect && id != "circleBottomRight") {
+        lineData[1] = { "x": +current.attr("cx"), "y": current.attr("cy") };
+        line
+            .attr("d", lineFunction(lineData))
+            .attr("class", line.attr("class") + " " + current.attr("id") + "Connector");
+        resetListeners();
+        let midpointX = (+lineData[0]["x"] + +lineData[1]["x"]) / 2;
+        let midpointY = (+lineData[0]["y"] + +lineData[1]["y"]) / 2;
+        let lineParent = d3.select(line.node().parentNode);
+        lineParent.append("circle")
+            .attr("cx", midpointX)
+            .attr("cy", midpointY)
+            .attr("r", 5)
+            .attr("fill", "rgba(179,178,180,0.39)")
+            .attr("class", line.attr("class") + " " + "lineCircle")
+            .on("mouseover", function () {
+            d3.select(this)
+                .style("cursor", "grabbing");
+        })
+            .on("mouseout", function () {
+            d3.select(this)
+                .style("cursor", "default");
+        })
+            .call(dragLine);
+    }
+}
+function updateRectText(object) {
+    let id = document.getElementById('rectInfo').innerHTML;
+    svg.selectAll("g").each(function () {
+        let element = d3.select(this);
+        if (element.attr("id") == id) {
+            element.select("text." + object.id).html(object.value);
+        }
+    });
+}
+exports.updateRectText = updateRectText;
+function updateRectColor(object) {
+    d3.select("#colorPickerBtn").style("background", object.value);
+    let id = document.getElementById('rectInfo').innerHTML;
+    svg.selectAll("g").each(function () {
+        let element = d3.select(this);
+        if (element.attr("id") == id) {
+            element.select("rect").attr("fill", object.value);
+        }
+    });
+}
+exports.updateRectColor = updateRectColor;
+function resetRectBorder() {
+    svg.selectAll("rect")
+        .style("stroke", "#b3b2b4");
+}
+exports.resetRectBorder = resetRectBorder;
+
+},{"./grid":4,"./modules/d3.js":8,"./navbar":11}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
@@ -474,17 +951,17 @@ function alignRectWithGrid(current, newXCoordinate, newYCoordinate, borderMove) 
 }
 exports.alignRectWithGrid = alignRectWithGrid;
 
-},{"./modules/d3":7}],4:[function(require,module,exports){
+},{"./modules/d3":8}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const grid_1 = require("./grid");
 const links_1 = require("./links");
 const files_1 = require("./files");
 const controller_1 = require("./controller");
-const script_1 = require("./script");
+const graph_1 = require("./graph");
 const d3 = require("./modules/d3");
 window.onload = () => {
-    script_1.initializeGraph(getMargin());
+    graph_1.initializeGraph(getMargin());
     initializePageListeners();
     controller_1.loadProject();
     grid_1.defineGrid(getMargin());
@@ -494,10 +971,10 @@ function getMargin() {
 }
 function initializePageListeners() {
     d3.select("#titleText").on("input", function () {
-        script_1.updateRectText(this);
+        graph_1.updateRectText(this);
     });
     d3.select("#contentText").on("input", function () {
-        script_1.updateRectText(this);
+        graph_1.updateRectText(this);
     });
     d3.select("#linkSaveBtn").on("click", function () {
         links_1.processLinkItem();
@@ -509,7 +986,7 @@ function initializePageListeners() {
         document.getElementById("colorPicker").click();
     });
     d3.select("#colorPicker").on("input", function () {
-        script_1.updateRectColor(this);
+        graph_1.updateRectColor(this);
     });
     d3.select("#fileChooserBtn").on("click", function () {
         document.getElementById("fileChooser").click();
@@ -522,11 +999,10 @@ function initializePageListeners() {
     });
 }
 
-},{"./controller":1,"./files":2,"./grid":3,"./links":5,"./modules/d3":7,"./script":11}],5:[function(require,module,exports){
+},{"./controller":1,"./files":2,"./graph":3,"./grid":4,"./links":6,"./modules/d3":8}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const controller_1 = require("./controller");
-const navbar_1 = require("./navbar");
 const d3 = require("./modules/d3");
 let toDOM = require("./modules/toDOM.js");
 function processLinkItem() {
@@ -585,7 +1061,7 @@ function initializeDeleteLinkItemListener() {
     });
 }
 function executeDeleteLinkListListener(event) {
-    let id = navbar_1.deleteItemList(event);
+    let id = controller_1.deleteItemList(event);
     let linkInfo = document.getElementById('linkInfo');
     if (id == linkInfo.innerHTML) {
         linkInfo.innerHTML = "";
@@ -665,7 +1141,7 @@ function getProjectLinks(id) {
 }
 exports.getProjectLinks = getProjectLinks;
 
-},{"./controller":1,"./modules/d3":7,"./modules/toDOM.js":8,"./navbar":10}],6:[function(require,module,exports){
+},{"./controller":1,"./modules/d3":8,"./modules/toDOM.js":9}],7:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -802,7 +1278,7 @@ function removeNode(node) {
     }
 }
 
-},{"./controller":1,"./modules/d3":7,"./modules/toDOM.js":8}],7:[function(require,module,exports){
+},{"./controller":1,"./modules/d3":8,"./modules/toDOM.js":9}],8:[function(require,module,exports){
 // https://d3js.org v5.12.0 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -19232,7 +19708,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports = function toDOM(obj) {
     if (typeof obj == 'string') {
         obj = JSON.parse(obj);
@@ -19273,7 +19749,7 @@ module.exports = function toDOM(obj) {
     }
     return node;
 };
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 module.exports = function toJSON(node) {
     node = node || this;
     var obj = {
@@ -19308,18 +19784,16 @@ module.exports = function toJSON(node) {
 };
 
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
-const script_1 = require("./script");
-const controller_1 = require("./controller");
+const graph_1 = require("./graph");
 const links_1 = require("./links");
 function openNav() {
     let current = d3.select(this);
     let parent = d3.select(this.parentNode);
     let id = parent.attr("id");
-    script_1.resetListeners();
     document.getElementById("sidebar").style.width = "335px";
     document.getElementById('rectInfo').innerHTML = id;
     let titleText = document.getElementById("titleText");
@@ -19333,7 +19807,8 @@ function openNav() {
     listFiles(id);
     listLinks(id);
     links_1.resetLinkBorderColor();
-    script_1.resetRectBorder();
+    graph_1.resetRectBorder();
+    graph_1.resetListeners();
     d3.select(this)
         .style("stroke", "red")
         .on("dblclick", closeNav);
@@ -19351,8 +19826,8 @@ function closeNav() {
     contentText.value = "";
     links_1.clearLinkInputFields();
     links_1.resetLinkBorderColor();
-    script_1.resetRectBorder();
-    script_1.resetListeners();
+    graph_1.resetRectBorder();
+    graph_1.resetListeners();
 }
 function listFiles(id) {
     let entries = d3.select("#fileList").selectAll("li");
@@ -19378,475 +19853,5 @@ function listLinks(id) {
         }
     });
 }
-function deleteItemList(event) {
-    let parent = event.target.parentNode;
-    let id = parent.id;
-    if (id == "") {
-        parent = parent.parentNode;
-        id = parent.id;
-    }
-    parent.remove();
-    event.stopPropagation();
-    controller_1.saveProject();
-    return id;
-}
-exports.deleteItemList = deleteItemList;
 
-},{"./controller":1,"./links":5,"./modules/d3":7,"./script":11}],11:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const d3 = require("./modules/d3.js");
-const navbar_1 = require("./navbar");
-const grid_1 = require("./grid");
-let svg, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, rectDrawn = false;
-function initializeGraph(margin) {
-    let graph = document.getElementById('GraphContainer'), boundaries = graph.getBoundingClientRect(), width = boundaries.width - margin.left - margin.right, height = boundaries.height - margin.top - margin.bottom;
-    svg = d3.select("#graph")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-        .on("mousedown", mousedown)
-        .on("mouseup", mouseUp)
-        .on("mouseleave", mouseUp);
-    nodes = svg.append("g").attr("id", "nodes");
-    dragRect = d3.drag()
-        .on("start", dragStart)
-        .on("drag", dragMove);
-    dragBorder = d3.drag()
-        .on("start", dragStartBorder)
-        .on("drag", dragMoveBorder);
-    lineFunction = d3.line()
-        .x(function (d) { return d.x; })
-        .y(function (d) { return d.y; })
-        .curve(d3.curveCardinal);
-    dragLine = d3.drag()
-        .on("start", dragStartLine)
-        .on("drag", dragMoveLine);
-}
-exports.initializeGraph = initializeGraph;
-function mousedown() {
-    if (d3.event.button != 2) {
-        let event = d3.mouse(this);
-        let rectCounter = 1;
-        svg.selectAll("rect").each(function () {
-            let id = +d3.select(this.parentNode).attr("id");
-            if (id >= rectCounter) {
-                rectCounter = id + 1;
-            }
-        });
-        g = nodes.append("g")
-            .attr("id", rectCounter)
-            .call(dragRect);
-        rect = g.append("rect")
-            .attr("x", event[0] + 5)
-            .attr("y", event[1] + 5)
-            .attr("rx", 2)
-            .attr("ry", 2)
-            .attr('height', 0)
-            .attr('width', 0)
-            .attr("fill", "#f8f8f8")
-            .attr("class", "rect");
-        initializeRectListeners();
-        g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 20)
-            .attr("font-weight", 20)
-            .attr("class", "titleText")
-            .style('font-size', 22)
-            .text();
-        g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 40)
-            .attr("class", "contentText")
-            .text();
-        g.append("circle")
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", +rect.attr("y"))
-            .attr("r", 5)
-            .attr("id", "circleTop" + rectCounter)
-            .attr("class", "circle");
-        g.append("circle")
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", (+rect.attr("y") + +rect.attr("height")))
-            .attr("r", 5)
-            .attr("id", "circleBottom" + rectCounter)
-            .attr("class", "circle");
-        g.append("circle")
-            .attr("cx", +rect.attr("x"))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
-            .attr("r", 5)
-            .attr("id", "circleLeft" + rectCounter)
-            .attr("class", "circle");
-        g.append("circle")
-            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
-            .attr("r", 5)
-            .attr("id", "circleRight" + rectCounter)
-            .attr("class", "circle");
-        rectDrawn = true;
-        svg.on("mousemove", mouseMove);
-    }
-}
-function initializeRectListeners() {
-    let rect = d3.selectAll("rect");
-    rect.on("mouseover", function () {
-        d3.select(this)
-            .style("cursor", "grabbing");
-    })
-        .on("mouseout", function () {
-        d3.select(this)
-            .style("cursor", "default");
-    })
-        .on("dblclick", navbar_1.openNav)
-        .call(dragRect);
-    d3.selectAll(".foreign").select("rect")
-        .on("dblclick", null);
-}
-exports.initializeRectListeners = initializeRectListeners;
-function initializeCircleListeners() {
-    let count = null;
-    svg.selectAll("rect").each(function () {
-        count = +d3.select(this.parentNode).attr("id");
-        d3.selectAll(".lineCircle")
-            .on("mouseover", function () {
-            d3.select(this)
-                .style("cursor", "grabbing");
-        })
-            .on("mouseout", function () {
-            d3.select(this)
-                .style("cursor", "default");
-        })
-            .call(dragLine);
-        d3.select(`#circleBottomRight${count}`)
-            .on("mouseover", function () {
-            d3.select(this)
-                .style("cursor", "se-resize");
-        })
-            .on("mouseout", function () {
-            d3.select(this)
-                .style("cursor", "default");
-        })
-            .call(dragBorder);
-        d3.selectAll(`#circleRight${count}, #circleLeft${count}, #circleTop${count}, #circleBottom${count}`)
-            .on('mouseover', function () {
-            d3.select(this)
-                .attr("r", 10)
-                .style("cursor", "crosshair");
-        })
-            .on('mouseout', function () {
-            d3.select(this)
-                .attr("r", 5)
-                .style("cursor", "default");
-        })
-            .on("click", drawLine);
-    });
-}
-exports.initializeCircleListeners = initializeCircleListeners;
-function mouseMove() {
-    let rectCounter = 1;
-    svg.selectAll("rect").each(function () {
-        let id = +d3.select(this.parentNode).attr("id");
-        if (id >= rectCounter) {
-            rectCounter = id;
-        }
-    });
-    let event = d3.mouse(this), newXCoordinate = Math.max(0, event[0] - +rect.attr("x")), newYCoordinate = Math.max(0, event[1] - +rect.attr("y"));
-    updateRectSize(newXCoordinate, newYCoordinate, rectCounter, null, rect, true);
-}
-function dragStart() {
-    let current = d3.select(this);
-    let tagName = current.node().tagName;
-    if (tagName === "rect") {
-        deltaX = current.attr("x") - d3.event.x;
-        deltaY = current.attr("y") - d3.event.y;
-    }
-}
-function dragMove() {
-    let current = d3.select(this);
-    let parent = d3.select(this.parentNode);
-    let counter = parent.attr("id");
-    let tagName = current.node().tagName;
-    if (tagName === "rect") {
-        let newXCoordinate = d3.event.x + deltaX;
-        let newYCoordinate = d3.event.y + deltaY;
-        updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current, false);
-    }
-}
-function dragStartBorder() {
-    let parent = d3.select(this.parentNode);
-    let current = parent.select("rect");
-    let tagName = current.node().tagName;
-    if (tagName === "rect") {
-        deltaXBorder = d3.event.x;
-        deltaYBorder = d3.event.y;
-        deltaX = current.attr("x") - d3.event.x;
-        deltaY = current.attr("y") - d3.event.y;
-        rectWidth = +current.attr("width");
-        rectHeight = +current.attr("height");
-    }
-}
-function dragMoveBorder() {
-    let parent = d3.select(this.parentNode);
-    let counter = parent.attr("id");
-    let current = parent.select("rect");
-    let tagName = current.node().tagName;
-    let newRectWidth = rectWidth + (d3.event.x - deltaXBorder);
-    let newRectHeight = rectHeight + (d3.event.y - deltaYBorder);
-    if (tagName === "rect" && newRectWidth > 0 && newRectHeight > 0) {
-        updateRectSize(newRectWidth, newRectHeight, counter, parent, current, true);
-    }
-}
-function dragStartLine() {
-    let current = d3.select(this);
-    deltaXCircle = current.attr("cx") - d3.event.x;
-    deltaYCircle = current.attr("cy") - d3.event.y;
-    let parent = d3.select(this.parentNode);
-    let classes = current.attr("class").split(" ");
-    let path = parent.select("path." + classes[0] + "." + classes[1]);
-    let length = path.node().getTotalLength();
-    let middle = path.node().getPointAtLength(length / 2);
-    middle = { "x": middle.x, "y": middle.y };
-    deltaXLine = middle.x - d3.event.x;
-    deltaYLine = middle.y - d3.event.y;
-}
-function dragMoveLine() {
-    let current = d3.select(this);
-    current.attr("cx", d3.event.x + deltaXCircle);
-    current.attr("cy", d3.event.y + deltaYCircle);
-    let parent = d3.select(this.parentNode);
-    let classes = current.attr("class").split(" ");
-    let path = parent.select("path." + classes[0] + "." + classes[1]);
-    let length = path.node().getTotalLength();
-    let start = path.node().getPointAtLength(0);
-    start = { "x": start.x, "y": start.y };
-    let end = path.node().getPointAtLength(length);
-    end = { "x": end.x, "y": end.y };
-    let middle = { "x": d3.event.x + deltaXCircle, "y": d3.event.y + deltaYCircle };
-    let data = [start, middle, end];
-    path.attr("d", lineFunction(data));
-}
-function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current, borderMove) {
-    grid_1.alignRectWithGrid(current, newXCoordinate, newYCoordinate, borderMove);
-    d3.select("#circleTop" + counter)
-        .attr("cx", (+current.attr("x")) + (+current.attr("width") / 2))
-        .attr("cy", +current.attr("y"));
-    d3.select("#circleBottom" + counter)
-        .attr("cx", (+current.attr("x")) + (+current.attr("width") / 2))
-        .attr("cy", (+current.attr("y")) + +current.attr("height"));
-    d3.select("#circleBottomRight" + counter)
-        .attr("cx", (+current.attr("x")) + (+current.attr("width")) - 2)
-        .attr("cy", (+current.attr("y")) + +current.attr("height") - 2);
-    d3.select("#circleLeft" + counter)
-        .attr("cx", (+current.attr("x")))
-        .attr("cy", (+current.attr("y")) + (+current.attr("height") / 2));
-    d3.select("#circleRight" + counter)
-        .attr("cx", (+current.attr("x")) + +current.attr("width"))
-        .attr("cy", (+current.attr("y")) + (+current.attr("height") / 2));
-    d3.selectAll("path.circleTop" + counter).each(function () {
-        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width") / 2, +current.attr("y"), false);
-    });
-    d3.selectAll("path.circleBottom" + counter).each(function () {
-        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width") / 2, +current.attr("y") + +current.attr("height"), false);
-    });
-    d3.selectAll("path.circleLeft" + counter).each(function () {
-        updateLinePath(d3.select(this), current, +current.attr("x"), +current.attr("y") + +current.attr("height") / 2, false);
-    });
-    d3.selectAll("path.circleRight" + counter).each(function () {
-        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width"), +current.attr("y") + +current.attr("height") / 2, false);
-    });
-    d3.selectAll("path.circleTop" + counter + "Connector").each(function () {
-        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width") / 2, +current.attr("y"), true);
-    });
-    d3.selectAll("path.circleBottom" + counter + "Connector").each(function () {
-        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width") / 2, +current.attr("y") + +current.attr("height"), true);
-    });
-    d3.selectAll("path.circleLeft" + counter + "Connector").each(function () {
-        updateLinePath(d3.select(this), current, +current.attr("x"), +current.attr("y") + +current.attr("height") / 2, true);
-    });
-    d3.selectAll("path.circleRight" + counter + "Connector").each(function () {
-        updateLinePath(d3.select(this), current, +current.attr("x") + +current.attr("width"), +current.attr("y") + +current.attr("height") / 2, true);
-    });
-    if (parent != null) {
-        parent.select("text.titleText")
-            .attr("x", +current.attr("x") + 10)
-            .attr("y", +current.attr("y") + 20);
-        parent.select("text.contentText")
-            .attr("x", +current.attr("x") + 10)
-            .attr("y", +current.attr("y") + 40);
-    }
-}
-exports.updateRectSize = updateRectSize;
-function updateLinePath(element, current, x, y, isConnector) {
-    let length = element.node().getTotalLength();
-    let start = null;
-    let end = null;
-    if (isConnector) {
-        start = element.node().getPointAtLength(0);
-        start = { "x": start.x, "y": start.y };
-        end = { "x": x, "y": y };
-    }
-    else {
-        start = { "x": x, "y": y };
-        end = element.node().getPointAtLength(length);
-        end = { "x": end.x, "y": end.y };
-    }
-    let middle = element.node().getPointAtLength(length / 2);
-    middle = { "x": middle.x, "y": middle.y };
-    let data = [start, middle, end];
-    element.attr("d", lineFunction(data));
-    let parent = d3.select(element.node().parentNode);
-    let classes = element.attr("class").split(" ");
-    parent.select("circle." + classes[0] + "." + classes[1])
-        .attr("cx", middle.x)
-        .attr("cy", middle.y);
-}
-function mouseUp() {
-    if (d3.event.button != 2 && rect != null) {
-        svg.on("mousemove", null);
-        let parent = rect.select(function () {
-            return this.parentNode;
-        });
-        let width = +rect.attr("width");
-        let height = +rect.attr("height");
-        let surface = width * height;
-        if (surface < 2000) {
-            parent.remove();
-        }
-        if (rectDrawn) {
-            g.append("circle")
-                .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-                .attr("cy", (+rect.attr("y") + (+rect.attr("height"))))
-                .attr("r", 4)
-                .attr("id", "circleBottomRight" + parent.attr("id"))
-                .attr("class", "circle");
-            initializeCircleListeners();
-            rectDrawn = false;
-        }
-    }
-}
-function drawLine() {
-    let current = d3.select(this);
-    let parent = d3.select(this.parentNode);
-    let cx = current.attr("cx");
-    let cy = current.attr("cy");
-    lineData = [{ "x": cx, "y": cy }];
-    line = parent.append("path");
-    line
-        .attr("d", lineFunction(lineData))
-        .attr("stroke", "#b3b2b4")
-        .attr("stroke-width", 2)
-        .attr("class", current.attr("id"))
-        .attr("marker-end", "url(#arrow)")
-        .attr("fill", "none");
-    svg.on("mousemove", moveLine);
-    parent.lower();
-}
-function removeLine() {
-    line.remove();
-    resetListeners();
-}
-function resetListeners() {
-    let count = null;
-    svg
-        .on("mousemove", null)
-        .on("mousedown", mousedown)
-        .on("mouseup", mouseUp)
-        .on("mouseleave", mouseUp)
-        .on("dblclick", null);
-    d3.selectAll("circle")
-        .on("click", drawLine);
-    svg.selectAll("rect")
-        .on("dblclick", navbar_1.openNav)
-        .each(function () {
-        count = d3.select(this.parentNode).attr("id");
-        d3.select(`#circleBottomRight${count}`)
-            .on("click", null);
-    });
-    d3.selectAll(".foreign").select("rect")
-        .on("dblclick", null);
-}
-exports.resetListeners = resetListeners;
-function moveLine() {
-    let event = d3.mouse(this);
-    let newLineData = [lineData[0]];
-    newLineData.push({ "x": event[0], "y": event[1] });
-    lineData = newLineData;
-    line.attr("d", lineFunction(lineData));
-    svg
-        .on("mousedown", null)
-        .on("mouseup", null)
-        .on("mouseleave", null)
-        .on("dblclick", removeLine);
-    d3.selectAll("circle")
-        .raise()
-        .on("click", combineRect);
-}
-function combineRect() {
-    let current = d3.select(this);
-    let parent = d3.select(this.parentNode);
-    let x = lineData[0]["x"];
-    let y = lineData[0]["y"];
-    let sameRect = false;
-    parent.selectAll("circle").each(function () {
-        let cx = d3.select(this).attr("cx");
-        let cy = d3.select(this).attr("cy");
-        if (x == cx && y == cy) {
-            sameRect = true;
-        }
-    });
-    let id = d3.select(this).attr("id");
-    id = id.slice(0, -1);
-    if (!sameRect && id != "circleBottomRight") {
-        lineData[1] = { "x": +current.attr("cx"), "y": current.attr("cy") };
-        line
-            .attr("d", lineFunction(lineData))
-            .attr("class", line.attr("class") + " " + current.attr("id") + "Connector");
-        resetListeners();
-        let midpointX = (+lineData[0]["x"] + +lineData[1]["x"]) / 2;
-        let midpointY = (+lineData[0]["y"] + +lineData[1]["y"]) / 2;
-        let lineParent = d3.select(line.node().parentNode);
-        lineParent.append("circle")
-            .attr("cx", midpointX)
-            .attr("cy", midpointY)
-            .attr("r", 5)
-            .attr("fill", "rgba(179,178,180,0.39)")
-            .attr("class", line.attr("class") + " " + "lineCircle")
-            .on("mouseover", function () {
-            d3.select(this)
-                .style("cursor", "grabbing");
-        })
-            .on("mouseout", function () {
-            d3.select(this)
-                .style("cursor", "default");
-        })
-            .call(dragLine);
-    }
-}
-function updateRectText(object) {
-    let id = document.getElementById('rectInfo').innerHTML;
-    svg.selectAll("g").each(function () {
-        let element = d3.select(this);
-        if (element.attr("id") == id) {
-            element.select("text." + object.id).html(object.value);
-        }
-    });
-}
-exports.updateRectText = updateRectText;
-function updateRectColor(object) {
-    d3.select("#colorPickerBtn").style("background", object.value);
-    let id = document.getElementById('rectInfo').innerHTML;
-    svg.selectAll("g").each(function () {
-        let element = d3.select(this);
-        if (element.attr("id") == id) {
-            element.select("rect").attr("fill", object.value);
-        }
-    });
-}
-exports.updateRectColor = updateRectColor;
-function resetRectBorder() {
-    svg.selectAll("rect")
-        .style("stroke", "#b3b2b4");
-}
-exports.resetRectBorder = resetRectBorder;
-
-},{"./grid":3,"./modules/d3.js":7,"./navbar":10}]},{},[11,6,10,1,2,5,4,3]);
+},{"./graph":3,"./links":6,"./modules/d3":8}]},{},[3,7,11,1,2,6,5,4]);

@@ -2,7 +2,7 @@ import {defineGrid} from "./grid";
 import {clearLinkInputFields, processLinkItem} from "./links";
 import {uploadFile} from "./files";
 import {loadProject, saveProject} from "./controller";
-import {initializeGraph, updateRectColor, updateRectText} from "./script";
+import {initializeGraph, updateRectColor, updateRectText} from "./graph";
 import * as d3 from "./modules/d3";
 
 window.onload = () => {

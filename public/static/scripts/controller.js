@@ -1,21 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const script_1 = require("./script");
-const d3 = require("./modules/d3");
+const graph_1 = require("./graph");
 const files_1 = require("./files");
 const links_1 = require("./links");
+const d3 = require("./modules/d3");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
-function filterNodes() {
-    let nodes = document.getElementById("nodes");
-    let cloned_nodes = nodes.cloneNode(false);
-    let children = nodes.querySelectorAll("g:not(.foreign)");
-    children.forEach.call(children, function (item) {
-        let cloned_item = item.cloneNode(true);
-        cloned_nodes.appendChild(cloned_item);
-    });
-    return cloned_nodes;
-}
 function saveProject() {
     let project = document.getElementById("projectTitle");
     let projectName = project.innerHTML;
@@ -46,13 +36,55 @@ function saveProjectID(projectID) {
     projectTitle.setAttribute("class", projectID);
     showSavePopup();
 }
+function filterNodes() {
+    let nodes = document.getElementById("nodes");
+    let cloned_nodes = nodes.cloneNode(false);
+    let children = nodes.querySelectorAll("g:not(.foreign)");
+    children.forEach.call(children, function (item) {
+        let cloned_item = item.cloneNode(true);
+        cloned_nodes.appendChild(cloned_item);
+    });
+    return cloned_nodes;
+}
 function showSavePopup() {
     let popup = document.getElementById("popup");
     popup.style.opacity = '50%';
     popup.style.display = "block";
     setTimeout(function () {
         popup.style.opacity = '0';
-    }, 2000);
+    }, 1500);
+}
+function loadProject() {
+    let urlParams = new URLSearchParams(window.location.search);
+    let id = urlParams.get('id');
+    let name = urlParams.get('name');
+    let width = urlParams.get('width');
+    let height = urlParams.get('height');
+    if (id != null && name != null) {
+        updateProjectSize(width, height);
+        updateProjectName(name, id);
+        files_1.getProjectFiles(id);
+        links_1.getProjectLinks(id);
+        getProjectNodes(id);
+        getForeignNodes(id);
+    }
+}
+exports.loadProject = loadProject;
+function getForeignNodes(id) {
+    let url = '/treeEditor/foreignNodes?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectNodes(data, true, null, null, true));
+}
+function getProjectNodes(id) {
+    let url = '/treeEditor/nodes?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectNodes(data));
 }
 function updateProjectNodes(data, fromDifferentProject = false, x = null, y = null, initialLoad = false, foreign_id = null) {
     let newCoordinates = false;
@@ -86,7 +118,7 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
                 let element = d3.select(this);
                 element.attr("id", element.attr("id").slice(0, -1).concat(rectCounter));
             });
-            script_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
+            graph_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
             foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
             let foreignNodeDOM = document.getElementById(rectCounter.toString());
             if (initialLoad && element["connectors"] != null) {
@@ -100,13 +132,13 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
                     }
                 }
                 g.remove();
-                script_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
+                graph_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
             }
         }
     }
-    script_1.initializeRectListeners();
-    script_1.initializeCircleListeners();
-    script_1.resetRectBorder();
+    graph_1.initializeRectListeners();
+    graph_1.initializeCircleListeners();
+    graph_1.resetRectBorder();
 }
 exports.updateProjectNodes = updateProjectNodes;
 function deleteForeignNode(element) {
@@ -198,38 +230,6 @@ function handleErrors(response) {
         throw Error(response.statusText);
     return response;
 }
-function getForeignNodes(id) {
-    let url = '/treeEditor/foreignNodes?id=' + id;
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => updateProjectNodes(data, true, null, null, true));
-}
-function getProjectNodes(id) {
-    let url = '/treeEditor/nodes?id=' + id;
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => updateProjectNodes(data));
-}
-function loadProject() {
-    let urlParams = new URLSearchParams(window.location.search);
-    let id = urlParams.get('id');
-    let name = urlParams.get('name');
-    let width = urlParams.get('width');
-    let height = urlParams.get('height');
-    if (id != null && name != null) {
-        updateProjectSize(width, height);
-        updateProjectName(name, id);
-        files_1.getProjectFiles(id);
-        links_1.getProjectLinks(id);
-        getProjectNodes(id);
-        getForeignNodes(id);
-    }
-}
-exports.loadProject = loadProject;
 function updateProjectSize(width, height) {
     d3.select("#graph")
         .attr("width", width)
@@ -240,3 +240,16 @@ function updateProjectName(name, id) {
     projectTitle.innerText = name;
     projectTitle.setAttribute("class", id);
 }
+function deleteItemList(event) {
+    let parent = event.target.parentNode;
+    let id = parent.id;
+    if (id == "") {
+        parent = parent.parentNode;
+        id = parent.id;
+    }
+    parent.remove();
+    event.stopPropagation();
+    saveProject();
+    return id;
+}
+exports.deleteItemList = deleteItemList;

@@ -1,5 +1,4 @@
-import {saveProject} from "./controller";
-import {deleteItemList} from "./navbar";
+import {deleteItemList, saveProject} from "./controller";
 import * as d3 from "./modules/d3";
 let toDOM = require("./modules/toDOM.js");
 

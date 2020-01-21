@@ -21,8 +21,12 @@ function initializeGraph(margin) {
         .on("start", dragStartBorder)
         .on("drag", dragMoveBorder);
     lineFunction = d3.line()
-        .x(function (d) { return d.x; })
-        .y(function (d) { return d.y; })
+        .x(function (d) {
+        return d.x;
+    })
+        .y(function (d) {
+        return d.y;
+    })
         .curve(d3.curveCardinal);
     dragLine = d3.drag()
         .on("start", dragStartLine)
