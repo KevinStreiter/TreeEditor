@@ -43,7 +43,6 @@ export function saveProject() {
     let nodes = filterNodes();
     nodes = toJSON(nodes);
     let files = document.getElementById("fileList");
-    console.log(files)
     files = toJSON(files);
     let links = document.getElementById("linkList");
     links = toJSON(links);
@@ -282,7 +281,7 @@ function updateProjectLinks(data) {
     for (let i = items.length; i--;) {
         items[i].addEventListener("click", updateLinkDisplay);
     }
-    document.querySelectorAll(".linkBtn").forEach(item => {
+    document.querySelectorAll(".deleteLinkBtn").forEach(item => {
         item.addEventListener('click', executeDeleteLinkListListener);
     });
 }
