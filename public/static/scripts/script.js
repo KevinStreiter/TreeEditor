@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 const navbar_1 = require("./navbar");
 const controller_1 = require("./controller");
+const files_1 = require("./files");
 let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, xTickDistance, yTickDistance, rectDrawn = false;
 window.onload = () => {
     initializePage();
@@ -58,7 +59,7 @@ function initializePage() {
         document.getElementById("fileChooser").click();
     });
     d3.select("#fileChooser").on("input", function () {
-        controller_1.uploadFile();
+        files_1.uploadFile();
     });
     d3.select("#saveButton").on("click", function () {
         controller_1.saveProject();

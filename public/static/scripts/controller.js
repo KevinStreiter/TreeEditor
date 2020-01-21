@@ -3,26 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const script_1 = require("./script");
 const d3 = require("./modules/d3");
 const navbar_1 = require("./navbar");
+const files_1 = require("./files");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
-function getUploadedFile(filename) {
-    let url = '/treeEditor/files?filename=' + filename;
-    fetch(url, {
-        method: 'GET',
-        credentials: 'include'
-    })
-        .then(response => response.blob())
-        .then(function (blob) {
-        url = URL.createObjectURL(blob);
-        window.open(url);
-    });
-}
-function deleteFile(filename) {
-    let url = '/treeEditor/files/delete?filename=' + filename;
-    fetch(url, {
-        method: 'POST'
-    });
-}
 function filterNodes() {
     let nodes = document.getElementById("nodes");
     let cloned_nodes = nodes.cloneNode(false);
@@ -190,7 +173,7 @@ function saveForeignNode(data, fromDifferentProject, x, y) {
         .then(handleErrors)
         .then(response => {
         updateProjectNodes(data, fromDifferentProject, x, y, false, newest_foreign_id);
-        getProjectFiles(data[0]["node_id"]);
+        files_1.getProjectFiles(data[0]["node_id"]);
         getProjectLinks(data[0]["node_id"]);
     })
         .catch((error) => {
@@ -231,22 +214,6 @@ function getProjectNodes(id) {
         .then(response => response.json())
         .then(data => updateProjectNodes(data));
 }
-function updateProjectFiles(data) {
-    let nav = document.getElementById("fileList");
-    for (let element of data) {
-        let node = toDOM(element["element"]);
-        nav.appendChild(document.importNode(node, true));
-    }
-    let items = nav.getElementsByTagName("li");
-    for (let i = items.length; i--;) {
-        items[i].addEventListener("click", function () {
-            getUploadedFile(items[i].getAttribute("id"));
-        });
-    }
-    document.querySelectorAll(".deleteFileBtn").forEach(item => {
-        item.addEventListener('click', executeDeleteFileListListener);
-    });
-}
 function updateProjectLinks(data) {
     let nav = document.getElementById("linkList");
     for (let element of data) {
@@ -260,14 +227,6 @@ function updateProjectLinks(data) {
     document.querySelectorAll(".deleteLinkBtn").forEach(item => {
         item.addEventListener('click', navbar_1.executeDeleteLinkListListener);
     });
-}
-function getProjectFiles(id) {
-    let url = '/treeEditor/projectFiles?id=' + id;
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => updateProjectFiles(data));
 }
 function getProjectLinks(id) {
     let url = '/treeEditor/projectLinks?id=' + id;
@@ -286,7 +245,7 @@ function loadProject() {
     if (id != null && name != null) {
         updateProjectSize(width, height);
         updateProjectName(name, id);
-        getProjectFiles(id);
+        files_1.getProjectFiles(id);
         getProjectLinks(id);
         getProjectNodes(id);
         getForeignNodes(id);
@@ -303,64 +262,3 @@ function updateProjectName(name, id) {
     projectTitle.innerText = name;
     projectTitle.setAttribute("class", id);
 }
-function uploadFile() {
-    let file_input = document.querySelector('[type=file]');
-    let files = file_input.files;
-    let name = files[0].name;
-    let formData = new FormData();
-    formData.append('file', files[0]);
-    let rectInfo = document.getElementById('rectInfo').innerHTML;
-    let url = '/treeEditor/files/upload?rectInfo=' + rectInfo;
-    fetch(url, {
-        method: 'POST',
-        body: formData,
-    })
-        .then(response => response.text())
-        .then(function (data) {
-        updateFileList(data);
-        saveProject();
-    });
-}
-exports.uploadFile = uploadFile;
-function updateFileList(filename) {
-    let file = document.getElementById("fileChooser");
-    let ul = document.getElementById("fileList");
-    let entries = d3.select("#fileList").selectAll("li");
-    let isDuplicate = false;
-    entries.each(function () {
-        let str = this.textContent.slice(0, -1);
-        if (str == file.files[0].name) {
-            isDuplicate = true;
-        }
-    });
-    if (!isDuplicate) {
-        let li = document.createElement("li");
-        li.appendChild(document.createTextNode(file.files[0].name));
-        li.setAttribute("id", filename);
-        li.insertAdjacentHTML('beforeend', `<a class="deleteFileBtn"><i class="fa fa-times"></i></a>`);
-        ul.appendChild(li);
-        li.addEventListener("click", function () {
-            getUploadedFile(filename);
-        });
-    }
-    document.querySelectorAll(".deleteFileBtn").forEach(item => {
-        item.addEventListener('click', executeDeleteFileListListener);
-    });
-}
-function executeDeleteFileListListener(event) {
-    let id = deleteItemList(event);
-    deleteFile(id);
-}
-function deleteItemList(event) {
-    let parent = event.target.parentNode;
-    let id = parent.id;
-    if (id == "") {
-        parent = parent.parentNode;
-        id = parent.id;
-    }
-    parent.remove();
-    event.stopPropagation();
-    saveProject();
-    return id;
-}
-exports.deleteItemList = deleteItemList;

@@ -4,26 +4,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const script_1 = require("./script");
 const d3 = require("./modules/d3");
 const navbar_1 = require("./navbar");
+const files_1 = require("./files");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
-function getUploadedFile(filename) {
-    let url = '/treeEditor/files?filename=' + filename;
-    fetch(url, {
-        method: 'GET',
-        credentials: 'include'
-    })
-        .then(response => response.blob())
-        .then(function (blob) {
-        url = URL.createObjectURL(blob);
-        window.open(url);
-    });
-}
-function deleteFile(filename) {
-    let url = '/treeEditor/files/delete?filename=' + filename;
-    fetch(url, {
-        method: 'POST'
-    });
-}
 function filterNodes() {
     let nodes = document.getElementById("nodes");
     let cloned_nodes = nodes.cloneNode(false);
@@ -191,7 +174,7 @@ function saveForeignNode(data, fromDifferentProject, x, y) {
         .then(handleErrors)
         .then(response => {
         updateProjectNodes(data, fromDifferentProject, x, y, false, newest_foreign_id);
-        getProjectFiles(data[0]["node_id"]);
+        files_1.getProjectFiles(data[0]["node_id"]);
         getProjectLinks(data[0]["node_id"]);
     })
         .catch((error) => {
@@ -232,22 +215,6 @@ function getProjectNodes(id) {
         .then(response => response.json())
         .then(data => updateProjectNodes(data));
 }
-function updateProjectFiles(data) {
-    let nav = document.getElementById("fileList");
-    for (let element of data) {
-        let node = toDOM(element["element"]);
-        nav.appendChild(document.importNode(node, true));
-    }
-    let items = nav.getElementsByTagName("li");
-    for (let i = items.length; i--;) {
-        items[i].addEventListener("click", function () {
-            getUploadedFile(items[i].getAttribute("id"));
-        });
-    }
-    document.querySelectorAll(".deleteFileBtn").forEach(item => {
-        item.addEventListener('click', executeDeleteFileListListener);
-    });
-}
 function updateProjectLinks(data) {
     let nav = document.getElementById("linkList");
     for (let element of data) {
@@ -261,14 +228,6 @@ function updateProjectLinks(data) {
     document.querySelectorAll(".deleteLinkBtn").forEach(item => {
         item.addEventListener('click', navbar_1.executeDeleteLinkListListener);
     });
-}
-function getProjectFiles(id) {
-    let url = '/treeEditor/projectFiles?id=' + id;
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => updateProjectFiles(data));
 }
 function getProjectLinks(id) {
     let url = '/treeEditor/projectLinks?id=' + id;
@@ -287,7 +246,7 @@ function loadProject() {
     if (id != null && name != null) {
         updateProjectSize(width, height);
         updateProjectName(name, id);
-        getProjectFiles(id);
+        files_1.getProjectFiles(id);
         getProjectLinks(id);
         getProjectNodes(id);
         getForeignNodes(id);
@@ -304,6 +263,57 @@ function updateProjectName(name, id) {
     projectTitle.innerText = name;
     projectTitle.setAttribute("class", id);
 }
+
+},{"./files":2,"./modules/d3":4,"./modules/toDOM.js":5,"./modules/toJSON.js":6,"./navbar":7,"./script":8}],2:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const controller_1 = require("./controller");
+const navbar_1 = require("./navbar");
+let toDOM = require("./modules/toDOM.js");
+const d3 = require("./modules/d3");
+function getUploadedFile(filename) {
+    let url = '/treeEditor/files?filename=' + filename;
+    fetch(url, {
+        method: 'GET',
+        credentials: 'include'
+    })
+        .then(response => response.blob())
+        .then(function (blob) {
+        url = URL.createObjectURL(blob);
+        window.open(url);
+    });
+}
+function deleteFile(filename) {
+    let url = '/treeEditor/files/delete?filename=' + filename;
+    fetch(url, {
+        method: 'POST'
+    });
+}
+function updateProjectFiles(data) {
+    let nav = document.getElementById("fileList");
+    for (let element of data) {
+        let node = toDOM(element["element"]);
+        nav.appendChild(document.importNode(node, true));
+    }
+    let items = nav.getElementsByTagName("li");
+    for (let i = items.length; i--;) {
+        items[i].addEventListener("click", function () {
+            getUploadedFile(items[i].getAttribute("id"));
+        });
+    }
+    document.querySelectorAll(".deleteFileBtn").forEach(item => {
+        item.addEventListener('click', executeDeleteFileListListener);
+    });
+}
+function getProjectFiles(id) {
+    let url = '/treeEditor/projectFiles?id=' + id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => updateProjectFiles(data));
+}
+exports.getProjectFiles = getProjectFiles;
 function uploadFile() {
     let file_input = document.querySelector('[type=file]');
     let files = file_input.files;
@@ -319,7 +329,7 @@ function uploadFile() {
         .then(response => response.text())
         .then(function (data) {
         updateFileList(data);
-        saveProject();
+        controller_1.saveProject();
     });
 }
 exports.uploadFile = uploadFile;
@@ -349,24 +359,11 @@ function updateFileList(filename) {
     });
 }
 function executeDeleteFileListListener(event) {
-    let id = deleteItemList(event);
+    let id = navbar_1.deleteItemList(event);
     deleteFile(id);
 }
-function deleteItemList(event) {
-    let parent = event.target.parentNode;
-    let id = parent.id;
-    if (id == "") {
-        parent = parent.parentNode;
-        id = parent.id;
-    }
-    parent.remove();
-    event.stopPropagation();
-    saveProject();
-    return id;
-}
-exports.deleteItemList = deleteItemList;
 
-},{"./modules/d3":3,"./modules/toDOM.js":4,"./modules/toJSON.js":5,"./navbar":6,"./script":7}],2:[function(require,module,exports){
+},{"./controller":1,"./modules/d3":4,"./modules/toDOM.js":5,"./navbar":7}],3:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -503,7 +500,7 @@ function removeNode(node) {
     }
 }
 
-},{"./controller":1,"./modules/d3":3,"./modules/toDOM.js":4}],3:[function(require,module,exports){
+},{"./controller":1,"./modules/d3":4,"./modules/toDOM.js":5}],4:[function(require,module,exports){
 // https://d3js.org v5.12.0 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -18933,7 +18930,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 module.exports = function toDOM(obj) {
     if (typeof obj == 'string') {
         obj = JSON.parse(obj);
@@ -18974,7 +18971,7 @@ module.exports = function toDOM(obj) {
     }
     return node;
 };
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 module.exports = function toJSON(node) {
     node = node || this;
     var obj = {
@@ -19009,7 +19006,7 @@ module.exports = function toJSON(node) {
 };
 
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
@@ -19134,7 +19131,7 @@ function initializeDeleteLinkItemListener() {
     });
 }
 function executeDeleteLinkListListener(event) {
-    let id = controller_1.deleteItemList(event);
+    let id = deleteItemList(event);
     let linkInfo = document.getElementById('linkInfo');
     if (id == linkInfo.innerHTML) {
         linkInfo.innerHTML = "";
@@ -19189,13 +19186,27 @@ function clearLinkInputFields() {
     linkVal.value = "";
 }
 exports.clearLinkInputFields = clearLinkInputFields;
+function deleteItemList(event) {
+    let parent = event.target.parentNode;
+    let id = parent.id;
+    if (id == "") {
+        parent = parent.parentNode;
+        id = parent.id;
+    }
+    parent.remove();
+    event.stopPropagation();
+    controller_1.saveProject();
+    return id;
+}
+exports.deleteItemList = deleteItemList;
 
-},{"./controller":1,"./modules/d3":3,"./script":7}],7:[function(require,module,exports){
+},{"./controller":1,"./modules/d3":4,"./script":8}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
 const navbar_1 = require("./navbar");
 const controller_1 = require("./controller");
+const files_1 = require("./files");
 let svg, graph, boundaries, margin, height, width, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, xTickDistance, yTickDistance, rectDrawn = false;
 window.onload = () => {
     initializePage();
@@ -19251,7 +19262,7 @@ function initializePage() {
         document.getElementById("fileChooser").click();
     });
     d3.select("#fileChooser").on("input", function () {
-        controller_1.uploadFile();
+        files_1.uploadFile();
     });
     d3.select("#saveButton").on("click", function () {
         controller_1.saveProject();
@@ -19800,4 +19811,4 @@ function clone(selector) {
     return d3.select(node.parentNode.insertBefore(node.cloneNode(true), node.nextSibling));
 }
 
-},{"./controller":1,"./modules/d3.js":3,"./navbar":6}]},{},[7,2,6,1]);
+},{"./controller":1,"./files":2,"./modules/d3.js":4,"./navbar":7}]},{},[8,3,7,1,2]);

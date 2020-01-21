@@ -1,6 +1,6 @@
 import * as d3 from "./modules/d3";
 import {resetListeners, resetRectBorder} from "./script";
-import {deleteItemList, saveProject} from "./controller";
+import {saveProject} from "./controller";
 
 export function openNav() {
     let current = d3.select(this);
@@ -185,4 +185,17 @@ export function clearLinkInputFields() {
     let linkVal = <HTMLInputElement> document.getElementById('linkVal');
     linkName.value = "";
     linkVal.value = "";
+}
+
+export function deleteItemList (event) {
+    let parent = event.target.parentNode;
+    let id = parent.id;
+    if (id == "") {
+        parent = parent.parentNode;
+        id = parent.id;
+    }
+    parent.remove();
+    event.stopPropagation();
+    saveProject();
+    return id;
 }

@@ -122,7 +122,7 @@ function initializeDeleteLinkItemListener() {
     });
 }
 function executeDeleteLinkListListener(event) {
-    let id = controller_1.deleteItemList(event);
+    let id = deleteItemList(event);
     let linkInfo = document.getElementById('linkInfo');
     if (id == linkInfo.innerHTML) {
         linkInfo.innerHTML = "";
@@ -177,3 +177,16 @@ function clearLinkInputFields() {
     linkVal.value = "";
 }
 exports.clearLinkInputFields = clearLinkInputFields;
+function deleteItemList(event) {
+    let parent = event.target.parentNode;
+    let id = parent.id;
+    if (id == "") {
+        parent = parent.parentNode;
+        id = parent.id;
+    }
+    parent.remove();
+    event.stopPropagation();
+    controller_1.saveProject();
+    return id;
+}
+exports.deleteItemList = deleteItemList;
