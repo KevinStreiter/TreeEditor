@@ -99,8 +99,9 @@ function insertNewLinkItem(name, url) {
     let isDuplicate: boolean = false;
     let counter = 0;
     entries.each(function () {
-        if (+d3.select(this).attr("id") >= counter) {
-            counter = +d3.select(this).attr("id")
+        let linkID = d3.select(this).attr("id").split("_", 2)[1];
+        if (+linkID >= counter) {
+            counter = +linkID
         }
         if (this.textContent == name) {
             isDuplicate = true;
@@ -111,19 +112,27 @@ function insertNewLinkItem(name, url) {
         let li = document.createElement("li");
         li.appendChild(document.createTextNode(name));
         li.setAttribute("class", id);
-        li.setAttribute("id", counter.toString());
+        li.setAttribute("id", "Link_" + counter.toString());
         li.insertAdjacentHTML('beforeend',`<a class="deleteBtn"><i class="fa fa-times"></i></a>`);
         li.insertAdjacentHTML('beforeend',`<a href=${url} target="_blank" class="linkBtn"><i class="fa fa-external-link"></i></a>`);
         ul.appendChild(li);
         li.addEventListener("click", updateLinkDisplay);
     }
+    initializeDeleteLinkItemListener();
+}
+
+function initializeDeleteLinkItemListener() {
     document.querySelectorAll(".deleteBtn").forEach(item => {
         item.addEventListener('click', executeDeleteLinkListListener);
     });
 }
 
 export function executeDeleteLinkListListener(event) {
-    deleteItemList(event);
+    let id = deleteItemList(event);
+    let linkInfo = document.getElementById('linkInfo');
+    if (id == linkInfo.innerHTML) {
+        linkInfo.innerHTML = "";
+    }
 }
 
 function resetLinkBorderColor() {
@@ -138,7 +147,7 @@ function updateLinkItem(name, url, linkId) {
 
     d3.select("#linkList").selectAll("li").each(function () {
         let element = d3.select(this);
-        if (linkId == +element.attr("id")) {
+        if (linkId == element.attr("id")) {
 
         let children = [];
         element.selectAll("a").each(function () {
@@ -152,7 +161,8 @@ function updateLinkItem(name, url, linkId) {
         element.node().insertAdjacentElement('beforeend', children[0]);
         element.node().insertAdjacentElement('beforeend', children[1]);
         }
-    })
+    });
+    initializeDeleteLinkItemListener();
 }
 
 export function updateLinkDisplay(event) {

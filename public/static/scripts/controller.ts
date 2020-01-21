@@ -116,6 +116,7 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
             foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
             let foreignNodeDOM = document.getElementById(rectCounter.toString());
 
+
             if (initialLoad && element["connectors"] != null) {
                 let connectors = toDOM(element["connectors"]);
                 foreignNodeDOM.appendChild(document.importNode(new DOMParser()
