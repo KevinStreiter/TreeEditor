@@ -1,5 +1,5 @@
 import * as d3 from "./modules/d3";
-import {getNode, saveProject, deleteForeignNode} from "./controller";
+import {getNode, saveProject, deleteForeignNode, deleteForeignConnector} from "./controller";
 let toDOM = require("./modules/toDOM.js");
 
 let target, event;
@@ -103,13 +103,14 @@ function removeNode(node) {
         d3.selectAll("g").each(function () {
             let element = d3.select(this);
             if (element.attr("id") == node.parentNode.id) {
-                element.remove();
                 deleteForeignNode(element);
+                element.remove();
             }
             if (element.attr("id") != "grid" && element.attr("id") != null) {
                 element.selectAll("path").each(function () {
                     let line = d3.select(this);
                     if (line.attr("class").search(node.parentNode.id) != -1) {
+                        deleteForeignConnector(element, line);
                         line.remove()
                     }
                 });

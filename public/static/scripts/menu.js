@@ -107,13 +107,14 @@ function removeNode(node) {
         d3.selectAll("g").each(function () {
             let element = d3.select(this);
             if (element.attr("id") == node.parentNode.id) {
-                element.remove();
                 controller_1.deleteForeignNode(element);
+                element.remove();
             }
             if (element.attr("id") != "grid" && element.attr("id") != null) {
                 element.selectAll("path").each(function () {
                     let line = d3.select(this);
                     if (line.attr("class").search(node.parentNode.id) != -1) {
+                        controller_1.deleteForeignConnector(element, line);
                         line.remove();
                     }
                 });

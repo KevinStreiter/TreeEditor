@@ -163,6 +163,17 @@ export function deleteForeignNode(element) {
     })
 }
 
+export function deleteForeignConnector(element, connector) {
+    let project_id = document.getElementById("projectTitle").getAttribute("class");
+    let parent = d3.select(connector.node().parentNode);
+    if (parent.attr("class") != null) {
+        let url = '/treeEditor/foreignNodes/Connectors/reset?foreign_id=' + parent.attr("id") + '&project_id=' + project_id;
+        fetch(url, {
+            method: 'POST',
+        }).then(response => saveProject());
+    }
+}
+
 function updateForeignNodes() {
     let nodes = document.getElementById("nodes");
     let project_id = document.getElementById("projectTitle").getAttribute("class");

@@ -138,6 +138,13 @@ $app->post('/treeEditor/foreignNodes/delete', function ($request, $response, $ar
     $connection->query("DELETE FROM Foreign_Nodes WHERE foreign_id ='{$foreign_id}' AND project_id='{$project_id}'");
 });
 
+$app->post('/treeEditor/foreignNodes/Connectors/reset', function ($request, $response, $args) {
+    $foreign_id = $request->getParam('foreign_id');
+    $project_id = $request->getParam('project_id');
+    $connection = $this->get(Connection::class);
+    $connection->query("UPDATE Foreign_Nodes SET connectors = NULL WHERE foreign_id = '{$foreign_id}' AND project_id = '{$project_id}'");
+});
+
 $app->post('/treeEditor/foreignNode/update', function (Request $request) {
     $connection = $this->get(Connection::class);
     $data = $request->getBody();
