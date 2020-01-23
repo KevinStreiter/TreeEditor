@@ -5,6 +5,18 @@ import * as d3 from "./modules/d3";
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
 
+export function preventEnterInput(e) {
+    let projectTitle = document.getElementById('projectTitle');
+    if (e.key === 'Enter') {
+        projectTitle.contentEditable = 'false';
+        projectTitle.contentEditable = 'true';
+    } else {
+        if (projectTitle.textContent.length > 70) {
+            e.preventDefault();
+        }
+    }
+}
+
 export function saveProject() {
     let project = document.getElementById("projectTitle");
     let projectName = project.innerHTML;

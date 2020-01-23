@@ -6,6 +6,19 @@ const links_1 = require("./links");
 const d3 = require("./modules/d3");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
+function preventEnterInput(e) {
+    let projectTitle = document.getElementById('projectTitle');
+    if (e.key === 'Enter') {
+        projectTitle.contentEditable = 'false';
+        projectTitle.contentEditable = 'true';
+    }
+    else {
+        if (projectTitle.textContent.length > 70) {
+            e.preventDefault();
+        }
+    }
+}
+exports.preventEnterInput = preventEnterInput;
 function saveProject() {
     let project = document.getElementById("projectTitle");
     let projectName = project.innerHTML;

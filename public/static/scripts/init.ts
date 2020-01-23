@@ -1,7 +1,7 @@
 import {defineGrid} from "./grid";
 import {clearLinkInputFields, processLinkItem} from "./links";
 import {uploadFile} from "./files";
-import {loadProject, saveProject} from "./controller";
+import {loadProject, preventEnterInput, saveProject} from "./controller";
 import {initializeGraph, updateRectColor, updateRectText} from "./graph";
 import * as d3 from "./modules/d3";
 
@@ -17,6 +17,13 @@ function getMargin () {
 }
 
 function initializePageListeners() {
+    let projectTitle = document.getElementById('projectTitle');
+    projectTitle.addEventListener('keypress', preventEnterInput);
+
+    projectTitle.addEventListener('click', function (e) {
+        projectTitle.contentEditable = 'true';
+    });
+
     d3.select("#titleText").on("input", function () {
         updateRectText(this)
     });

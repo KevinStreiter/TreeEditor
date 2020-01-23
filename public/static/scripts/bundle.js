@@ -7,6 +7,19 @@ const links_1 = require("./links");
 const d3 = require("./modules/d3");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
+function preventEnterInput(e) {
+    let projectTitle = document.getElementById('projectTitle');
+    if (e.key === 'Enter') {
+        projectTitle.contentEditable = 'false';
+        projectTitle.contentEditable = 'true';
+    }
+    else {
+        if (projectTitle.textContent.length > 70) {
+            e.preventDefault();
+        }
+    }
+}
+exports.preventEnterInput = preventEnterInput;
 function saveProject() {
     let project = document.getElementById("projectTitle");
     let projectName = project.innerHTML;
@@ -1002,6 +1015,11 @@ function getMargin() {
     return { top: 3, right: 2, bottom: 2, left: 2 };
 }
 function initializePageListeners() {
+    let projectTitle = document.getElementById('projectTitle');
+    projectTitle.addEventListener('keypress', controller_1.preventEnterInput);
+    projectTitle.addEventListener('click', function (e) {
+        projectTitle.contentEditable = 'true';
+    });
     d3.select("#titleText").on("input", function () {
         graph_1.updateRectText(this);
     });
@@ -1226,13 +1244,17 @@ function updateProjectMenu(data) {
         let duplicateClass = setDuplicateClass(foreignNodes, item);
         let node = toDOM(item["element"]);
         let nodeText = node.getElementsByClassName("titleText")[0].innerHTML;
+        let projectName = item["name"];
+        if (projectName.length > 40) {
+            projectName = projectName.substring(0, 40) + '...';
+        }
         if (nodeText == "") {
             nodeText = item["node_id"];
         }
         if (tempId != item["project_id"] && project_id != item["project_id"]) {
             menu.insertAdjacentHTML('beforeend', `<li class="menu-item submenu" id="${item["project_id"]}">\n` +
                 `<button type="button" class="menu-btn"> <i class="fa fa-folder-open"></i>` +
-                `<span class="menu-text">${item["name"]}</span> </button>\n` +
+                `<span class="menu-text">${projectName}</span> </button>\n` +
                 `<menu class="menu"><li class="menu-item ${duplicateClass}" id="${item["node_id"]}">\n` +
                 `<button type="button" class="menu-btn"><i class="fa fa-link"></i>` +
                 `<span class="menu-text">${nodeText}</span></button>\n</li></menu>`);

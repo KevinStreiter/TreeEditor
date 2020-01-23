@@ -44,13 +44,17 @@ function updateProjectMenu(data) {
         let duplicateClass = setDuplicateClass(foreignNodes, item);
         let node = toDOM(item["element"]);
         let nodeText = node.getElementsByClassName("titleText")[0].innerHTML;
+        let projectName = item["name"];
+        if (projectName.length > 40) {
+            projectName = projectName.substring(0, 40) + '...';
+        }
         if (nodeText == "") {
             nodeText = item["node_id"];
         }
         if (tempId != item["project_id"] && project_id != item["project_id"]) {
             menu.insertAdjacentHTML('beforeend', `<li class="menu-item submenu" id="${item["project_id"]}">\n` +
                 `<button type="button" class="menu-btn"> <i class="fa fa-folder-open"></i>` +
-                `<span class="menu-text">${item["name"]}</span> </button>\n` +
+                `<span class="menu-text">${projectName}</span> </button>\n` +
                 `<menu class="menu"><li class="menu-item ${duplicateClass}" id="${item["node_id"]}">\n`+
                 `<button type="button" class="menu-btn"><i class="fa fa-link"></i>`+
                 `<span class="menu-text">${nodeText}</span></button>\n</li></menu>`);
