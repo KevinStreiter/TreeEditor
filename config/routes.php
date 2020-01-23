@@ -22,6 +22,14 @@ $app->get('/treeEditor/projects', function ($request, $response, $args) {
     return $response->withJson($rows);
 });
 
+$app->get('/treeEditor/projectName', function ($request, $response, $args) {
+    $id = $request->getParam('id');
+    $query = $this->get(Connection::class)->newQuery();
+    $query = $query->select('name')->from('Projects')->andWhere(['project_id' => $id]);;
+    $rows = $query->execute()->fetchAll('assoc') ?: [];
+    return $response->withJson($rows);
+});
+
 $app->get('/treeEditor/projectsAndNodes', function ($request, $response, $args) {
     $connection = $this->get(Connection::class);
     $rows = $connection->execute('SELECT * FROM Projects INNER JOIN Nodes using (project_id)')

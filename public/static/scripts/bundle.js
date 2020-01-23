@@ -119,6 +119,7 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
                 let element = d3.select(this);
                 element.attr("id", element.attr("id").slice(0, -1).concat(rectCounter));
             });
+            insertForeignNodeDescription(foreignNode, foreignRect, element);
             graph_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
             foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
             let foreignNodeDOM = document.getElementById(rectCounter.toString());
@@ -142,6 +143,23 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
     graph_1.resetRectBorder();
 }
 exports.updateProjectNodes = updateProjectNodes;
+function insertForeignNodeDescription(foreignNode, foreignRect, element) {
+    let project_id = element['node_id'].split("_", 2)[0];
+    let url = '/treeEditor/projectName?id=' + project_id;
+    fetch(url, {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => {
+        foreignNode.append("text")
+            .attr("x", +foreignRect.attr("x"))
+            .attr("y", +foreignRect.attr("y") - 2)
+            .attr("font-weight", 9)
+            .attr("class", "descriptionText")
+            .style('font-size', 9)
+            .text(data[0]["name"]);
+    });
+}
 function deleteForeignNode(element) {
     let foreign_id = element.attr("id");
     let project_id = document.getElementById("projectTitle").getAttribute("class");
@@ -653,6 +671,9 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
         parent.select("text.contentText")
             .attr("x", +current.attr("x") + 10)
             .attr("y", +current.attr("y") + 40);
+        parent.select("text.descriptionText")
+            .attr("x", +current.attr("x"))
+            .attr("y", +current.attr("y") - 2);
     }
 }
 exports.updateRectSize = updateRectSize;

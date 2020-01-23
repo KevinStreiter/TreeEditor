@@ -282,6 +282,9 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
         parent.select("text.contentText")
             .attr("x", +current.attr("x") + 10)
             .attr("y", +current.attr("y") + 40);
+        parent.select("text.descriptionText")
+            .attr("x", +current.attr("x"))
+            .attr("y", +current.attr("y") - 2);
     }
 }
 exports.updateRectSize = updateRectSize;

@@ -253,3 +253,12 @@ h5 {
 #linkClearBtn {
     margin-left: -1px;
 }
+
+.titleText, .contentText, .descriptionText {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    z-index: -1;
+}
