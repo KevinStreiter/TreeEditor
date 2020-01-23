@@ -112,3 +112,8 @@
     -webkit-transition-delay: 100ms;
     transition-delay: 300ms;
 }
+
+.duplicate {
+    opacity: 50%;
+    pointer-events: none;
+}

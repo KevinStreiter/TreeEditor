@@ -155,7 +155,6 @@ function deleteForeignConnector(element, connector) {
     let project_id = document.getElementById("projectTitle").getAttribute("class");
     let parent = d3.select(connector.node().parentNode);
     if (parent.attr("class") != null) {
-        console.log(parent.attr("class"));
         let url = '/treeEditor/foreignNodes/Connectors/reset?foreign_id=' + parent.attr("id") + '&project_id=' + project_id;
         fetch(url, {
             method: 'POST',
@@ -1199,8 +1198,11 @@ function getProjects() {
 function updateProjectMenu(data) {
     let menu = document.querySelector('.menu');
     let project_id = document.getElementById("projectTitle").getAttribute("class");
+    let nodes = document.getElementById("nodes");
+    let foreignNodes = nodes.querySelectorAll("g.foreign");
     let tempId = null;
     for (let item of data) {
+        let duplicateClass = setDuplicateClass(foreignNodes, item);
         let node = toDOM(item["element"]);
         let nodeText = node.getElementsByClassName("titleText")[0].innerHTML;
         if (nodeText == "") {
@@ -1210,7 +1212,7 @@ function updateProjectMenu(data) {
             menu.insertAdjacentHTML('beforeend', `<li class="menu-item submenu" id="${item["project_id"]}">\n` +
                 `<button type="button" class="menu-btn"> <i class="fa fa-folder-open"></i>` +
                 `<span class="menu-text">${item["name"]}</span> </button>\n` +
-                `<menu class="menu"><li class="menu-item" id="${item["node_id"]}">\n` +
+                `<menu class="menu"><li class="menu-item ${duplicateClass}" id="${item["node_id"]}">\n` +
                 `<button type="button" class="menu-btn"><i class="fa fa-link"></i>` +
                 `<span class="menu-text">${nodeText}</span></button>\n</li></menu>`);
             tempId = item["project_id"];
@@ -1219,7 +1221,7 @@ function updateProjectMenu(data) {
             let submenu = document.getElementById(`${item["project_id"]}`);
             if (submenu != null) {
                 let submenuEntry = submenu.querySelector('.menu');
-                submenuEntry.insertAdjacentHTML('beforeend', `<li class="menu-item" id="${item["node_id"]}">\n` +
+                submenuEntry.insertAdjacentHTML('beforeend', `<li class="menu-item ${duplicateClass}" id="${item["node_id"]}">\n` +
                     `<button type="button" class="menu-btn" "${item["node_id"]}"><i class="fa fa-link"></i>` +
                     `<span class="menu-text">${nodeText}</span></button>\n</li>`);
             }
@@ -1289,6 +1291,17 @@ function removeNode(node) {
         parent.select("circle." + classes[0] + "." + classes[1]).remove();
         target.remove();
     }
+}
+function setDuplicateClass(foreignNodes, item) {
+    let duplicateClass = "";
+    foreignNodes.forEach(function (value) {
+        let element = d3.select(value);
+        let nodeClass = element.attr("class").split(" ", 2)[1];
+        if (nodeClass == item["node_id"]) {
+            duplicateClass = "duplicate";
+        }
+    });
+    return duplicateClass;
 }
 
 },{"./controller":1,"./modules/d3":8,"./modules/toDOM.js":9}],8:[function(require,module,exports){
