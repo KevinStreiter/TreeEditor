@@ -8,11 +8,19 @@ use Slim\Http\UploadedFile;
 use Cake\Database\Connection;
 
 $app->get('/treeEditor', function ($request, $response, $args) {
-    return $this->get(PhpRenderer::class)->render($response, "/home.html", $args);
+    return $this->get(PhpRenderer::class)->render($response, "/Editor/homeEditor.html", $args);
+});
+
+$app->get('/treeMap', function ($request, $response, $args) {
+    return $this->get(PhpRenderer::class)->render($response, "/View/homeView.html", $args);
+});
+
+$app->get('/treeMap/project', function ($request, $response, $args) {
+    return $this->get(PhpRenderer::class)->render($response, "/View/projectView.html", $args);
 });
 
 $app->get('/treeEditor/project', function ($request, $response, $args) {
-    return $this->get(PhpRenderer::class)->render($response, "/project.html", $args);
+    return $this->get(PhpRenderer::class)->render($response, "/Editor/projectEditor.html", $args);
 });
 
 $app->get('/treeEditor/projects', function ($request, $response, $args) {

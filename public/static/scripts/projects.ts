@@ -23,10 +23,11 @@ function listProjects(data) {
     for (let project of data) {
         let li = document.createElement("li");
         li.appendChild(document.createTextNode(project["name"]));
-        li.insertAdjacentHTML('beforeend',`<a class="deleteProjectBtn"><i class="fa fa-times"></i></a>`);
+        if (isEditable()) {
+            li.insertAdjacentHTML('beforeend',`<a class="deleteProjectBtn"><i class="fa fa-times"></i></a>`);
+        }
         li.setAttribute("id", project["project_id"]);
         ul.appendChild(li);
-
         li.addEventListener("click", function () {
             openProject(project["project_id"], project["name"], project["width"], project["height"])
         });
@@ -50,5 +51,14 @@ function initDeleteProject(event) {
 }
 
 function openProject(id, name, width, height) {
-    window.location.href = "/treeEditor/project?id=" + id + "&name=" + name + "&width=" + width + "&height=" + height;
+    if (isEditable()) {
+        window.location.href = "/treeEditor/project?id=" + id + "&name=" + name + "&width=" + width + "&height=" + height;
+    }
+    else {
+        window.location.href = "/treeMap/project?id=" + id + "&name=" + name + "&width=" + width + "&height=" + height;
+    }
+}
+
+function isEditable() {
+    return window.location.href.indexOf('Editor') > 0
 }

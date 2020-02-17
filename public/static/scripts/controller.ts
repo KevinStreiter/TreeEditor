@@ -69,7 +69,7 @@ function showSavePopup() {
     },1500);
 }
 
-export function loadProject() {
+export async function loadProject() {
     let urlParams = new URLSearchParams(window.location.search);
     let id = urlParams.get('id');
     let name = urlParams.get('name');
@@ -83,6 +83,9 @@ export function loadProject() {
         getProjectNodes(id);
         getForeignNodes(id);
     }
+    return new Promise((resolve) => {
+        setTimeout(() => resolve("done!"), 1000)
+    });
 }
 
 function getForeignNodes(id) {
