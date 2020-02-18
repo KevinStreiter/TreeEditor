@@ -311,7 +311,7 @@ function deleteItemList(event) {
 }
 exports.deleteItemList = deleteItemList;
 
-},{"./files":2,"./graph":3,"./links":6,"./modules/d3":8,"./modules/toDOM.js":9,"./modules/toJSON.js":10}],2:[function(require,module,exports){
+},{"./files":2,"./graph":3,"./links":6,"./modules/d3":7,"./modules/toDOM.js":8,"./modules/toJSON.js":9}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const controller_1 = require("./controller");
@@ -413,7 +413,7 @@ function executeDeleteFileListListener(event) {
     deleteFile(id);
 }
 
-},{"./controller":1,"./modules/d3":8,"./modules/toDOM.js":9}],3:[function(require,module,exports){
+},{"./controller":1,"./modules/d3":7,"./modules/toDOM.js":8}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3.js");
@@ -877,7 +877,7 @@ function resetRectBorder() {
 }
 exports.resetRectBorder = resetRectBorder;
 
-},{"./grid":4,"./modules/d3.js":8,"./navbar":11}],4:[function(require,module,exports){
+},{"./grid":4,"./modules/d3.js":7,"./navbar":10}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
@@ -958,15 +958,17 @@ function clone(selector) {
     return d3.select(node.parentNode.insertBefore(node.cloneNode(true), node.nextSibling));
 }
 function checkBoundaries(element) {
-    if (elementIsNearBottomBoundary(element)) {
-        svg.attr("height", +svg.attr("height") + yTickDistance);
-        height += yTickDistance;
-        appendYGridLine();
-    }
-    if (elementIsNearRightBoundary(element)) {
-        svg.attr("width", +svg.attr("width") + xTickDistance);
-        width += xTickDistance;
-        appendXGridLine();
+    if (svg != null) {
+        if (elementIsNearBottomBoundary(element)) {
+            svg.attr("height", +svg.attr("height") + yTickDistance);
+            height += yTickDistance;
+            appendYGridLine();
+        }
+        if (elementIsNearRightBoundary(element)) {
+            svg.attr("width", +svg.attr("width") + xTickDistance);
+            width += xTickDistance;
+            appendXGridLine();
+        }
     }
 }
 function elementIsNearBottomBoundary(element) {
@@ -1010,7 +1012,7 @@ function alignRectWithGrid(current, newXCoordinate, newYCoordinate, borderMove) 
 }
 exports.alignRectWithGrid = alignRectWithGrid;
 
-},{"./modules/d3":8}],5:[function(require,module,exports){
+},{"./modules/d3":7}],5:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -1025,13 +1027,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const controller_1 = require("./controller");
 const graph_1 = require("./graph");
 const d3 = require("./modules/d3");
+const grid_1 = require("./grid");
 window.onload = () => __awaiter(void 0, void 0, void 0, function* () {
     graph_1.initializeGraph(getMargin());
     yield controller_1.loadProject();
+    grid_1.defineGrid(getMargin());
+    hideGrid();
     removeAllListeners();
 });
 function getMargin() {
     return { top: 3, right: 2, bottom: 2, left: 2 };
+}
+function hideGrid() {
+    d3.select("#grid").style("visibility", "hidden");
 }
 function removeAllListeners() {
     d3.select("#graph")
@@ -1056,7 +1064,7 @@ function removeAllListeners() {
         .call(drag);
 }
 
-},{"./controller":1,"./graph":3,"./modules/d3":8}],6:[function(require,module,exports){
+},{"./controller":1,"./graph":3,"./grid":4,"./modules/d3":7}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const controller_1 = require("./controller");
@@ -1198,163 +1206,7 @@ function getProjectLinks(id) {
 }
 exports.getProjectLinks = getProjectLinks;
 
-},{"./controller":1,"./modules/d3":8,"./modules/toDOM.js":9}],7:[function(require,module,exports){
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const d3 = require("./modules/d3");
-const controller_1 = require("./controller");
-let toDOM = require("./modules/toDOM.js");
-let target, event;
-document.addEventListener('contextmenu', onContextMenu, false);
-function showMenu(x, y) {
-    d3.selectAll(".submenu").remove();
-    let menu = document.querySelector('.menu');
-    let delEntry = document.getElementById('menu-delete-btn');
-    menu.classList.add('show-menu');
-    menu.style.left = x + 'px';
-    menu.style.top = y + 'px';
-    if (target.tagName == "rect" || target.tagName == "path") {
-        delEntry.style.display = 'inherit';
-    }
-    else if (target.tagName == "svg") {
-        delEntry.style.display = 'none';
-        getProjects();
-    }
-    else {
-        hideMenu();
-    }
-}
-function getProjects() {
-    let url = '/treeEditor/projectsAndNodes';
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => updateProjectMenu(data));
-}
-function updateProjectMenu(data) {
-    let menu = document.querySelector('.menu');
-    let project_id = document.getElementById("projectTitle").getAttribute("class");
-    let nodes = document.getElementById("nodes");
-    let foreignNodes = nodes.querySelectorAll("g.foreign");
-    let tempId = null;
-    for (let item of data) {
-        let duplicateClass = setDuplicateClass(foreignNodes, item);
-        let node = toDOM(item["element"]);
-        let nodeText = node.getElementsByClassName("titleText")[0].innerHTML;
-        let projectName = item["name"];
-        if (projectName.length > 40) {
-            projectName = projectName.substring(0, 40) + '...';
-        }
-        if (nodeText == "") {
-            nodeText = item["node_id"];
-        }
-        if (tempId != item["project_id"] && project_id != item["project_id"]) {
-            menu.insertAdjacentHTML('beforeend', `<li class="menu-item submenu" id="${item["project_id"]}">\n` +
-                `<button type="button" class="menu-btn"> <i class="fa fa-folder-open"></i>` +
-                `<span class="menu-text">${projectName}</span> </button>\n` +
-                `<menu class="menu"><li class="menu-item ${duplicateClass}" id="${item["node_id"]}">\n` +
-                `<button type="button" class="menu-btn"><i class="fa fa-link"></i>` +
-                `<span class="menu-text">${nodeText}</span></button>\n</li></menu>`);
-            tempId = item["project_id"];
-        }
-        else if (tempId != null) {
-            let submenu = document.getElementById(`${item["project_id"]}`);
-            if (submenu != null) {
-                let submenuEntry = submenu.querySelector('.menu');
-                submenuEntry.insertAdjacentHTML('beforeend', `<li class="menu-item ${duplicateClass}" id="${item["node_id"]}">\n` +
-                    `<button type="button" class="menu-btn" "${item["node_id"]}"><i class="fa fa-link"></i>` +
-                    `<span class="menu-text">${nodeText}</span></button>\n</li>`);
-            }
-        }
-    }
-    if (tempId == null) {
-        hideMenu();
-    }
-}
-function hideMenu() {
-    let menu = document.querySelector('.menu');
-    menu.classList.remove('show-menu');
-}
-function onContextMenu(e) {
-    return __awaiter(this, void 0, void 0, function* () {
-        e.preventDefault();
-        yield controller_1.saveProject();
-        event = e;
-        target = e.target;
-        showMenu(e.pageX, e.pageY);
-        document.addEventListener('click', onClick, false);
-    });
-}
-function onClick(e) {
-    if (e.target.innerText == "Delete" || e.target.parentNode.innerText == "Delete") {
-        removeNode(target);
-    }
-    else {
-        let nodeId = e.target.parentNode.id;
-        if (nodeId == "") {
-            nodeId = e.target.parentNode.parentNode.id;
-        }
-        let graph = document.getElementById('GraphContainer').getBoundingClientRect();
-        controller_1.getNode(nodeId, true, event.pageX, event.pageY - graph.top);
-    }
-    hideMenu();
-    document.removeEventListener('click', onClick);
-}
-function removeNode(node) {
-    if (node.nodeName == "rect") {
-        d3.selectAll("g").each(function () {
-            let element = d3.select(this);
-            if (element.attr("id") == node.parentNode.id) {
-                controller_1.deleteForeignNode(element);
-                element.remove();
-            }
-            if (element.attr("id") != "grid" && element.attr("id") != null) {
-                element.selectAll("path").each(function () {
-                    let line = d3.select(this);
-                    if (line.attr("class").search(node.parentNode.id) != -1) {
-                        controller_1.deleteForeignConnector(element, line);
-                        line.remove();
-                    }
-                });
-                element.selectAll("circle").each(function () {
-                    let circle = d3.select(this);
-                    if (circle.attr("class").search(node.parentNode.id) != -1) {
-                        circle.remove();
-                    }
-                });
-            }
-        });
-    }
-    else if (node.nodeName == "path") {
-        let parent = d3.select(node.parentNode);
-        let classes = d3.select(target).attr("class").split(" ");
-        parent.select("circle." + classes[0] + "." + classes[1]).remove();
-        target.remove();
-    }
-}
-function setDuplicateClass(foreignNodes, item) {
-    let duplicateClass = "";
-    foreignNodes.forEach(function (value) {
-        let element = d3.select(value);
-        let nodeClass = element.attr("class").split(" ", 2)[1];
-        if (nodeClass == item["node_id"]) {
-            duplicateClass = "duplicate";
-        }
-    });
-    return duplicateClass;
-}
-
-},{"./controller":1,"./modules/d3":8,"./modules/toDOM.js":9}],8:[function(require,module,exports){
+},{"./controller":1,"./modules/d3":7,"./modules/toDOM.js":8}],7:[function(require,module,exports){
 // https://d3js.org v5.12.0 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -19784,7 +19636,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
 
-},{}],9:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = function toDOM(obj) {
     if (typeof obj == 'string') {
         obj = JSON.parse(obj);
@@ -19825,7 +19677,7 @@ module.exports = function toDOM(obj) {
     }
     return node;
 };
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports = function toJSON(node) {
     node = node || this;
     var obj = {
@@ -19860,7 +19712,7 @@ module.exports = function toJSON(node) {
 };
 
 
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("./modules/d3");
@@ -19930,4 +19782,4 @@ function listLinks(id) {
     });
 }
 
-},{"./graph":3,"./links":6,"./modules/d3":8}]},{},[3,7,11,1,2,6,5,4]);
+},{"./graph":3,"./links":6,"./modules/d3":7}]},{},[3,10,1,2,6,5,4]);

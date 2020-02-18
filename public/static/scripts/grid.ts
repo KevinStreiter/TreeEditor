@@ -95,16 +95,18 @@ function clone(selector) {
 }
 
 function checkBoundaries(element) {
-    if (elementIsNearBottomBoundary(element)) {
-        svg.attr("height", +svg.attr("height") + yTickDistance);
-        height += yTickDistance;
-        appendYGridLine()
+    if (svg != null) {
+        if (elementIsNearBottomBoundary(element)) {
+            svg.attr("height", +svg.attr("height") + yTickDistance);
+            height += yTickDistance;
+            appendYGridLine()
 
-    }
-    if (elementIsNearRightBoundary(element)) {
-        svg.attr("width", +svg.attr("width") + xTickDistance);
-        width += xTickDistance;
-        appendXGridLine();
+        }
+        if (elementIsNearRightBoundary(element)) {
+            svg.attr("width", +svg.attr("width") + xTickDistance);
+            width += xTickDistance;
+            appendXGridLine();
+        }
     }
 }
 

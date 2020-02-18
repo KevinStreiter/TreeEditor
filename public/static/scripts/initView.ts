@@ -1,15 +1,22 @@
 import {loadProject} from "./controller";
 import {initializeGraph} from "./graph";
 import * as d3 from "./modules/d3";
+import {defineGrid} from "./grid";
 
 window.onload = async () => {
     initializeGraph(getMargin());
     await loadProject();
+    defineGrid(getMargin());
+    hideGrid();
     removeAllListeners();
 };
 
 function getMargin () {
     return {top: 3, right: 2, bottom: 2, left: 2};
+}
+
+function hideGrid() {
+    d3.select("#grid").style("visibility", "hidden");
 }
 
 function removeAllListeners() {
