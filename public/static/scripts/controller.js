@@ -91,8 +91,8 @@ function loadProject() {
             getProjectNodes(id);
             getForeignNodes(id);
         }
-        return new Promise((resolve, reject) => {
-            setTimeout(() => resolve("done!"), 1000);
+        return new Promise((resolve) => {
+            setTimeout(() => resolve("done!"), 20);
         });
     });
 }

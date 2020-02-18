@@ -5,10 +5,10 @@ import {loadProject, preventEnterInput, saveProject} from "./controller";
 import {initializeGraph, updateRectColor, updateRectText} from "./graph";
 import * as d3 from "./modules/d3";
 
-window.onload = () => {
+window.onload = async () => {
     initializeGraph(getMargin());
     initializePageListeners();
-    loadProject();
+    await loadProject();
     defineGrid(getMargin());
 };
 

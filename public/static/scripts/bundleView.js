@@ -92,8 +92,8 @@ function loadProject() {
             getProjectNodes(id);
             getForeignNodes(id);
         }
-        return new Promise((resolve, reject) => {
-            setTimeout(() => resolve("done!"), 1000);
+        return new Promise((resolve) => {
+            setTimeout(() => resolve("done!"), 20);
         });
     });
 }
@@ -1028,7 +1028,7 @@ const d3 = require("./modules/d3");
 window.onload = () => __awaiter(void 0, void 0, void 0, function* () {
     graph_1.initializeGraph(getMargin());
     yield controller_1.loadProject();
-    yield removeAllListeners();
+    removeAllListeners();
 });
 function getMargin() {
     return { top: 3, right: 2, bottom: 2, left: 2 };
@@ -1038,11 +1038,22 @@ function removeAllListeners() {
         .on("mousedown", null)
         .on("mouseup", null)
         .on("mouseleave", null);
+    let drag = d3.drag()
+        .on("start", null)
+        .on("drag", null);
+    d3.selectAll("g")
+        .call(drag);
     d3.selectAll("rect")
         .on("click", null)
         .on("dblclick", null)
         .on("mouseover", null)
-        .on("mouseout", null);
+        .on("mouseout", null)
+        .call(drag);
+    d3.selectAll("circle")
+        .on("mouseover", null)
+        .on("mouseout", null)
+        .on("click", null)
+        .call(drag);
 }
 
 },{"./controller":1,"./graph":3,"./modules/d3":8}],6:[function(require,module,exports){

@@ -18,9 +18,23 @@ function removeAllListeners() {
         .on("mouseup", null)
         .on("mouseleave", null);
 
+    let drag = d3.drag()
+        .on("start", null)
+        .on("drag", null);
+
+    d3.selectAll("g")
+        .call(drag);
+
     d3.selectAll("rect")
         .on("click", null)
         .on("dblclick", null)
         .on("mouseover", null)
-        .on("mouseout", null);
+        .on("mouseout", null)
+        .call(drag);
+
+    d3.selectAll("circle")
+        .on("mouseover", null)
+        .on("mouseout", null)
+        .on("click", null)
+        .call(drag);
 }

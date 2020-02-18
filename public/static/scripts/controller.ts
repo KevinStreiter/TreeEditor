@@ -84,7 +84,7 @@ export async function loadProject() {
         getForeignNodes(id);
     }
     return new Promise((resolve) => {
-        setTimeout(() => resolve("done!"), 1000)
+        setTimeout(() => resolve("done!"), 20)
     });
 }
 
