@@ -9,6 +9,7 @@ window.onload = async () => {
     defineGrid(getMargin());
     hideGrid();
     removeAllListeners();
+    initializeRectZooming(getMargin());
 };
 
 function getMargin () {
@@ -44,4 +45,50 @@ function removeAllListeners() {
         .on("mouseout", null)
         .on("click", null)
         .call(drag);
+}
+
+function initializeRectZooming(margin) {
+    let graph = document.getElementById('GraphContainer'),
+        boundaries = graph.getBoundingClientRect(),
+        width = boundaries.width - margin.left - margin.right,
+        height = boundaries.height - margin.top - margin.bottom;
+
+    let nodes = d3.select("#nodes");
+    const zoom = d3.zoom()
+        .scaleExtent([1, 8])
+        .on("zoom", zoomed);
+
+    d3.select("#graph").on("click", reset);
+
+    nodes.call(zoom);
+    nodes.selectAll("g").select("rect").on("click", clicked);
+
+    function zoomed() {
+        const {transform} = d3.event;
+        nodes.attr("transform", transform);
+        nodes.attr("stroke-width", 1 / transform.k);
+    }
+
+    function reset() {
+        nodes.transition().duration(1000).call(
+            zoom.transform,
+            d3.zoomIdentity,
+            d3.zoomTransform(nodes.node()).invert([width / 2, height / 2])
+        );
+    }
+
+    function clicked(d) {
+        let rect = d3.select(this);
+        const [x, y] = [+rect.attr("x"), +rect.attr("y")];
+        const [rectHeight, rectWidth] = [+rect.attr("height"), +rect.attr("width")];
+        d3.event.stopPropagation();
+        nodes.transition().duration(1000).call(
+            zoom.transform,
+            d3.zoomIdentity
+                .translate(width / 2, height / 2)
+                .scale(Math.min(8, 0.9 / Math.max(rectHeight / width, rectWidth / height)))
+                .translate(-(x + rectWidth / 2), -(y + rectHeight / 2)),
+            d3.mouse(nodes.node())
+        );
+    }
 }

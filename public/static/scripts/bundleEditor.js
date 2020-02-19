@@ -1,5 +1,14 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const graph_1 = require("./graph");
 const files_1 = require("./files");
@@ -69,19 +78,24 @@ function showSavePopup() {
     }, 1500);
 }
 function loadProject() {
-    let urlParams = new URLSearchParams(window.location.search);
-    let id = urlParams.get('id');
-    let name = urlParams.get('name');
-    let width = urlParams.get('width');
-    let height = urlParams.get('height');
-    if (id != null && name != null) {
-        updateProjectSize(width, height);
-        updateProjectName(name, id);
-        files_1.getProjectFiles(id);
-        links_1.getProjectLinks(id);
-        getProjectNodes(id);
-        getForeignNodes(id);
-    }
+    return __awaiter(this, void 0, void 0, function* () {
+        let urlParams = new URLSearchParams(window.location.search);
+        let id = urlParams.get('id');
+        let name = urlParams.get('name');
+        let width = urlParams.get('width');
+        let height = urlParams.get('height');
+        if (id != null && name != null) {
+            updateProjectSize(width, height);
+            updateProjectName(name, id);
+            files_1.getProjectFiles(id);
+            links_1.getProjectLinks(id);
+            getProjectNodes(id);
+            getForeignNodes(id);
+        }
+        return new Promise((resolve) => {
+            setTimeout(() => resolve("loaded"), 500);
+        });
+    });
 }
 exports.loadProject = loadProject;
 function getForeignNodes(id) {
@@ -944,15 +958,17 @@ function clone(selector) {
     return d3.select(node.parentNode.insertBefore(node.cloneNode(true), node.nextSibling));
 }
 function checkBoundaries(element) {
-    if (elementIsNearBottomBoundary(element)) {
-        svg.attr("height", +svg.attr("height") + yTickDistance);
-        height += yTickDistance;
-        appendYGridLine();
-    }
-    if (elementIsNearRightBoundary(element)) {
-        svg.attr("width", +svg.attr("width") + xTickDistance);
-        width += xTickDistance;
-        appendXGridLine();
+    if (svg != null) {
+        if (elementIsNearBottomBoundary(element)) {
+            svg.attr("height", +svg.attr("height") + yTickDistance);
+            height += yTickDistance;
+            appendYGridLine();
+        }
+        if (elementIsNearRightBoundary(element)) {
+            svg.attr("width", +svg.attr("width") + xTickDistance);
+            width += xTickDistance;
+            appendXGridLine();
+        }
     }
 }
 function elementIsNearBottomBoundary(element) {
@@ -19923,4 +19939,4 @@ function listLinks(id) {
     });
 }
 
-},{"./graph":3,"./links":6,"./modules/d3":8}]},{},[3,7,11,1,2,6,5,4]);
+},{"./graph":3,"./links":6,"./modules/d3":8}]},{},[3,11,7,1,2,6,5,4]);
