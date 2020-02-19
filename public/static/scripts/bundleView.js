@@ -1079,17 +1079,16 @@ function initializeRectZooming(margin) {
         nodes.attr("stroke-width", 1 / transform.k);
     }
     function reset() {
-        nodes.transition().duration(1000).call(zoom.transform, d3.zoomIdentity, d3.zoomTransform(nodes.node()).invert([width / 2, height / 2]));
+        nodes.transition().duration(1500).call(zoom.transform, d3.zoomIdentity, d3.zoomTransform(nodes.node()).invert([width / 2, height / 2]));
     }
     function clicked(d) {
         let rect = d3.select(this);
         const [x, y] = [+rect.attr("x"), +rect.attr("y")];
         const [rectHeight, rectWidth] = [+rect.attr("height"), +rect.attr("width")];
-        console.log(x, y);
         d3.event.stopPropagation();
-        nodes.transition().duration(1000).call(zoom.transform, d3.zoomIdentity
+        nodes.transition().duration(1500).call(zoom.transform, d3.zoomIdentity
             .translate(width / 2, height / 2)
-            .scale(Math.min(8, 0.9 / Math.max(rectHeight / width, rectWidth / height)))
+            .scale(Math.min(20, 0.9 / Math.max(rectHeight / height, rectWidth / width)))
             .translate(-(x + rectWidth / 2), -(y + rectHeight / 2)), d3.mouse(nodes.node()));
     }
 }
