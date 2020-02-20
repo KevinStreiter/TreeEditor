@@ -13,7 +13,8 @@ function selectFilesByNode(id) {
         let fileName = current.attr("id");
         if (fileName.split("_", 2)[0] == id) {
             let path = await getUploadedFile(fileName);
-            createThumbnail(path);
+            await createCanvas(id);
+            await createThumbnail(path);
         }
     });
 
@@ -31,9 +32,16 @@ function getUploadedFile(filename) {
         })
 }
 
+function createCanvas(id) {
+    let node_svg = d3.select("#graphContainer").append("svg")
+        .attr("width", 50)
+        .attr("height", 50);
+    let canvas = node_svg.append('canvas')
+    console.log(canvas)
+}
+
 
 async function createThumbnail(path) {
-    PDFJS.workerSrc = './modules/pdfjs-dist/pdf.worker.js';
     const loadingTask = PDFJS.getDocument(path);
     const pdf = await loadingTask.promise;
     const page = await pdf.getPage(1);
