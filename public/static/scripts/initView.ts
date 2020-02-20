@@ -2,6 +2,7 @@ import {loadProject} from "./controller";
 import {initializeGraph} from "./graph";
 import * as d3 from "./modules/d3";
 import {defineGrid} from "./grid";
+import {initializeNodeContent} from "./node";
 
 window.onload = async () => {
     initializeGraph(getMargin());
@@ -77,8 +78,9 @@ function initializeRectZooming(margin) {
         );
     }
 
-    function clicked(d) {
+    function clicked() {
         let rect = d3.select(this);
+        let parent = d3.select(this.parentNode);
         const [x, y] = [+rect.attr("x"), +rect.attr("y")];
         const [rectHeight, rectWidth] = [+rect.attr("height"), +rect.attr("width")];
         d3.event.stopPropagation();
@@ -90,5 +92,6 @@ function initializeRectZooming(margin) {
                 .translate(-(x + rectWidth / 2), -(y + rectHeight / 2)),
             d3.mouse(nodes.node())
         );
+        initializeNodeContent(+parent.attr("id"));
     }
 }
