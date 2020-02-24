@@ -100698,11 +100698,16 @@ function getUploadedFile(filename) {
     });
 }
 function createCanvas(id) {
-    let node_svg = d3.select("#graphContainer").append("svg")
-        .attr("width", 50)
-        .attr("height", 50);
-    let canvas = node_svg.append('canvas');
-    console.log(canvas);
+    let node_svg = d3.select("#GraphContainer");
+    let foreignObject = node_svg.append("foreignObject").attr("id", "node_window_" + id);
+    // add embedded body to foreign object
+    var foBody = foreignObject.append("xhtml:body")
+        .style("margin", "0px")
+        .style("padding", "0px")
+        .style("background-color", "none")
+        .style("border", "1px solid lightgray");
+    // add embedded canvas to embedded body
+    var canvas = foBody.append("canvas");
 }
 function createThumbnail(path) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -100711,7 +100716,7 @@ function createThumbnail(path) {
         const page = yield pdf.getPage(1);
         const scale = 0.5;
         const viewport = page.getViewport({ scale: scale });
-        const canvas = document.getElementById("pdf");
+        const canvas = document.getElementById("node_window_1");
         const context = canvas.getContext("2d");
         canvas.height = viewport.height;
         canvas.width = viewport.width;
