@@ -100680,8 +100680,7 @@ function selectFilesByNode(id) {
             let fileName = current.attr("id");
             if (fileName.split("_", 2)[0] == id) {
                 let path = yield getUploadedFile(fileName);
-                yield createCanvas(id);
-                yield createThumbnail(path);
+                yield createCanvas(id).then(value => createThumbnail(path, value));
             }
         });
     });
@@ -100698,25 +100697,37 @@ function getUploadedFile(filename) {
     });
 }
 function createCanvas(id) {
-    let node_svg = d3.select("#GraphContainer");
-    let foreignObject = node_svg.append("foreignObject").attr("id", "node_window_" + id);
-    // add embedded body to foreign object
-    var foBody = foreignObject.append("xhtml:body")
-        .style("margin", "0px")
-        .style("padding", "0px")
-        .style("background-color", "none")
-        .style("border", "1px solid lightgray");
-    // add embedded canvas to embedded body
-    var canvas = foBody.append("canvas");
+    let counter = 1;
+    let current_g = d3.select("#canvas_container_" + id);
+    if (current_g.empty()) {
+        d3.select("#nodes").selectAll("g").each(function () {
+            let current = d3.select(this);
+            if (current.attr("id") == id) {
+                current_g = current.append("g").attr("id", "canvas_container_" + id);
+            }
+        });
+    }
+    else {
+        counter = d3.select(`#canvas_container_${id}>foreignObject:last-child`).select("canvas").attr("id").split("_", 2)[1];
+        counter++;
+    }
+    let foreigner = current_g.append("foreignObject");
+    foreigner.append("xhtml:canvas")
+        .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+        .attr("id", "canvas_" + counter)
+        .attr("class", "canvas");
+    return new Promise((resolve) => {
+        setTimeout(() => resolve(counter), 500);
+    });
 }
-function createThumbnail(path) {
+function createThumbnail(path, id) {
     return __awaiter(this, void 0, void 0, function* () {
         const loadingTask = PDFJS.getDocument(path);
         const pdf = yield loadingTask.promise;
         const page = yield pdf.getPage(1);
         const scale = 0.5;
         const viewport = page.getViewport({ scale: scale });
-        const canvas = document.getElementById("node_window_1");
+        const canvas = document.getElementById("canvas_" + id);
         const context = canvas.getContext("2d");
         canvas.height = viewport.height;
         canvas.width = viewport.width;
