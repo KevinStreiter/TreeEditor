@@ -1,5 +1,7 @@
-const PDFJS = require('./modules/pdfjs-dist/pdf.js');
+const PDFJS = require('./modules/pdfjs-dist/build/pdf.js');
 import * as d3 from "./modules/d3";
+
+
 
 export function initializeNodeContent(id) {
     selectFilesByNode(id);
@@ -38,14 +40,19 @@ function createCanvas(id) {
         d3.select("#nodes").selectAll("g").each(function () {
             let current = d3.select(this);
             if (current.attr("id") == id) {
-                current_g = current.append("g").attr("id", "canvas_container_" + id);
+                current_g = current.append("g").attr("id", "canvas_container_" + id)
+                    .attr('xmlns', 'http://www.w3.org/1999/xhtml');
             }
         });
     } else {
         counter = d3.select(`#canvas_container_${id}>foreignObject:last-child`).select("canvas").attr("id").split("_",2)[1];
         counter++;
     }
-    let foreigner = current_g.append("foreignObject");
+    let current_rect = d3.select(current_g.node().parentNode).select("rect");
+    let foreigner = current_g.append("foreignObject")
+        .attr("width", 150)
+        .attr("height", 200)
+        .attr("x", +current_rect.attr("x") + ((counter - 1) * 150) + (counter * 10));
     foreigner.append("xhtml:canvas")
         .attr('xmlns', 'http://www.w3.org/1999/xhtml')
         .attr("id", "canvas_" + counter)
@@ -57,19 +64,25 @@ function createCanvas(id) {
 }
 
 async function createThumbnail(path, id) {
+    PDFJS.GlobalWorkerOptions.workerSrc = '/static/scripts/modules/pdfjs-dist/build/pdf.worker.js';
     const loadingTask = PDFJS.getDocument(path);
     const pdf = await loadingTask.promise;
     const page = await pdf.getPage(1);
-    const scale = 0.5;
+    const scale = 0.1;
+    const resolution = 10;
     const viewport = page.getViewport({scale:scale});
     const canvas = <HTMLCanvasElement> document.getElementById("canvas_"+id);
-    const context = canvas.getContext("2d")
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
+    const context = canvas.getContext("2d");
+    canvas.height = resolution * viewport.height;
+    canvas.width = resolution * viewport.width;
+
+    canvas.style.height = viewport.height.toString() + 'px';
+    canvas.style.width = viewport.width.toString() + 'px';
 
     const renderContext = {
         canvasContext: context,
-        viewport: viewport
+        viewport: viewport,
+        transform: [resolution, 0, 0, resolution, 0, 0] // force it bigger size
     };
     await page.render(renderContext).promise;
 }
