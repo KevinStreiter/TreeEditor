@@ -9,11 +9,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const graph_1 = require("./graph");
 const files_1 = require("./files");
 const links_1 = require("./links");
-const d3 = require("./modules/d3");
+const d3 = __importStar(require("./modules/d3"));
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
 function preventEnterInput(e) {
@@ -313,10 +320,17 @@ exports.deleteItemList = deleteItemList;
 
 },{"./files":2,"./graph":3,"./links":6,"./modules/d3":8,"./modules/toDOM.js":9,"./modules/toJSON.js":10}],2:[function(require,module,exports){
 "use strict";
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const controller_1 = require("./controller");
 let toDOM = require("./modules/toDOM.js");
-const d3 = require("./modules/d3");
+const d3 = __importStar(require("./modules/d3"));
 function getUploadedFile(filename) {
     let url = '/treeEditor/files?filename=' + filename;
     fetch(url, {
@@ -415,8 +429,15 @@ function executeDeleteFileListListener(event) {
 
 },{"./controller":1,"./modules/d3":8,"./modules/toDOM.js":9}],3:[function(require,module,exports){
 "use strict";
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const d3 = require("./modules/d3.js");
+const d3 = __importStar(require("./modules/d3.js"));
 const navbar_1 = require("./navbar");
 const grid_1 = require("./grid");
 let svg, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, rectDrawn = false;
@@ -879,8 +900,15 @@ exports.resetRectBorder = resetRectBorder;
 
 },{"./grid":4,"./modules/d3.js":8,"./navbar":11}],4:[function(require,module,exports){
 "use strict";
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const d3 = require("./modules/d3");
+const d3 = __importStar(require("./modules/d3"));
 let svg, xTickDistance, yTickDistance, boundaries, width, height, graphMargin;
 function defineGrid(margin) {
     graphMargin = margin;
@@ -1014,19 +1042,41 @@ exports.alignRectWithGrid = alignRectWithGrid;
 
 },{"./modules/d3":8}],5:[function(require,module,exports){
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const grid_1 = require("./grid");
 const links_1 = require("./links");
 const files_1 = require("./files");
 const controller_1 = require("./controller");
 const graph_1 = require("./graph");
-const d3 = require("./modules/d3");
-window.onload = () => {
+const concreteRectCreator_1 = require("./node/concreteRectCreator");
+const concreteCircleCreator_1 = require("./node/concreteCircleCreator");
+const d3 = __importStar(require("./modules/d3"));
+window.onload = () => __awaiter(void 0, void 0, void 0, function* () {
     graph_1.initializeGraph(getMargin());
     initializePageListeners();
-    controller_1.loadProject();
+    yield controller_1.loadProject();
     grid_1.defineGrid(getMargin());
-};
+    const nodeCreatorRect = new concreteRectCreator_1.ConcreteRectCreator();
+    console.log(nodeCreatorRect.createNode());
+    const nodeCreatorCircle = new concreteCircleCreator_1.ConcreteCircleCreator();
+    console.log(nodeCreatorCircle.createNode());
+});
 function getMargin() {
     return { top: 3, right: 2, bottom: 2, left: 2 };
 }
@@ -1065,11 +1115,18 @@ function initializePageListeners() {
     });
 }
 
-},{"./controller":1,"./files":2,"./graph":3,"./grid":4,"./links":6,"./modules/d3":8}],6:[function(require,module,exports){
+},{"./controller":1,"./files":2,"./graph":3,"./grid":4,"./links":6,"./modules/d3":8,"./node/concreteCircleCreator":13,"./node/concreteRectCreator":14}],6:[function(require,module,exports){
 "use strict";
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const controller_1 = require("./controller");
-const d3 = require("./modules/d3");
+const d3 = __importStar(require("./modules/d3"));
 let toDOM = require("./modules/toDOM.js");
 function processLinkItem() {
     let name = document.getElementById("linkName");
@@ -1218,8 +1275,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const d3 = require("./modules/d3");
+const d3 = __importStar(require("./modules/d3"));
 const controller_1 = require("./controller");
 let toDOM = require("./modules/toDOM.js");
 let target, event;
@@ -19871,8 +19935,15 @@ module.exports = function toJSON(node) {
 
 },{}],11:[function(require,module,exports){
 "use strict";
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const d3 = require("./modules/d3");
+const d3 = __importStar(require("./modules/d3"));
 const graph_1 = require("./graph");
 const links_1 = require("./links");
 function openNav() {
@@ -19939,4 +20010,63 @@ function listLinks(id) {
     });
 }
 
-},{"./graph":3,"./links":6,"./modules/d3":8}]},{},[3,11,7,1,2,6,5,4]);
+},{"./graph":3,"./links":6,"./modules/d3":8}],12:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Circle {
+    draw() {
+        return "circle";
+    }
+}
+exports.Circle = Circle;
+
+},{}],13:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const nodeCreator_1 = require("./nodeCreator");
+const circle_1 = require("./circle");
+class ConcreteCircleCreator extends nodeCreator_1.NodeCreator {
+    createNode() {
+        return new circle_1.Circle();
+    }
+}
+exports.ConcreteCircleCreator = ConcreteCircleCreator;
+
+},{"./circle":12,"./nodeCreator":16}],14:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const nodeCreator_1 = require("./nodeCreator");
+const rect_1 = require("./rect");
+class ConcreteRectCreator extends nodeCreator_1.NodeCreator {
+    createNode() {
+        return new rect_1.Rect();
+    }
+}
+exports.ConcreteRectCreator = ConcreteRectCreator;
+
+},{"./nodeCreator":16,"./rect":17}],15:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+
+},{}],16:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class NodeCreator {
+    draw() {
+        const node = this.createNode();
+        return node.draw();
+    }
+}
+exports.NodeCreator = NodeCreator;
+
+},{}],17:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Rect {
+    draw() {
+        return "rect";
+    }
+}
+exports.Rect = Rect;
+
+},{}]},{},[7,3,11,1,2,6,5,4,12,13,14,17,15,16]);
