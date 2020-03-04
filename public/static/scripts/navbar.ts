@@ -96,11 +96,11 @@ export function transformNodeObject() {
 function transformRectToCircle(element) {
     element
         .transition()
-        .ease(d3.easeLinear)
+        .ease(d3.easeSin)
         .delay(20)
-        .duration(1000)
-        .attr("rx", +element.attr("x") / 2)
-        .attr("ry", +element.attr("y") / 2);
+        .duration(1200)
+        .attr("rx", "100%")
+        .attr("ry", "100%");
 
     d3.select(element.node().parentNode).attr("transformation", "circle");
 }
@@ -108,10 +108,9 @@ function transformRectToCircle(element) {
 function transformCircleToRect(element) {
     element
         .transition()
-        .ease(d3.easeLinear)
-        .duration(1000)
-        .attr("rx", 2)
-        .attr("ry", 2);
+        .duration(1200)
+        .attr("rx", "0%")
+        .attr("ry", "0%");
 
     d3.select(element.node().parentNode).attr("transformation", "rect");
 }

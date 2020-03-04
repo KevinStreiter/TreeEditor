@@ -19979,20 +19979,19 @@ exports.transformNodeObject = transformNodeObject;
 function transformRectToCircle(element) {
     element
         .transition()
-        .ease(d3.easeLinear)
+        .ease(d3.easeSin)
         .delay(20)
-        .duration(1000)
-        .attr("rx", +element.attr("x") / 2)
-        .attr("ry", +element.attr("y") / 2);
+        .duration(1200)
+        .attr("rx", "100%")
+        .attr("ry", "100%");
     d3.select(element.node().parentNode).attr("transformation", "circle");
 }
 function transformCircleToRect(element) {
     element
         .transition()
-        .ease(d3.easeLinear)
-        .duration(1000)
-        .attr("rx", 2)
-        .attr("ry", 2);
+        .duration(1200)
+        .attr("rx", "0%")
+        .attr("ry", "0%");
     d3.select(element.node().parentNode).attr("transformation", "rect");
 }
 
@@ -20084,8 +20083,6 @@ class Rect extends abstractNode_1.AbstractNode {
         this.nodeObject = g.append(this.getNodeType())
             .attr("x", event[0] + 5)
             .attr("y", event[1] + 5)
-            .attr("rx", 2)
-            .attr("ry", 2)
             .attr('height', 0)
             .attr('width', 0)
             .attr("fill", "#f8f8f8")

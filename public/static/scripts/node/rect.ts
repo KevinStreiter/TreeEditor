@@ -20,8 +20,6 @@ export class Rect extends AbstractNode {
         this.nodeObject = g.append(this.getNodeType())
             .attr("x", event[0] + 5)
             .attr("y", event[1] + 5)
-            .attr("rx", 2)
-            .attr("ry", 2)
             .attr('height', 0)
             .attr('width', 0)
             .attr("fill", "#f8f8f8")
