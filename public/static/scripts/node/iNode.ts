@@ -1,4 +1,9 @@
 export interface INode {
     draw(event): any;
-    getNodeType();
+    getNodeType(): string;
+    getNodeObject();
+    initializeNodeListener();
+    appendNodeObject(g, event);
+    appendNodeObjectText(g);
+    appendNodeObjectCircles(g, counter);
 }

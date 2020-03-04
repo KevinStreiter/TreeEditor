@@ -2,7 +2,7 @@ import {defineGrid} from "./grid";
 import {clearLinkInputFields, processLinkItem} from "./links";
 import {uploadFile} from "./files";
 import {loadProject, preventEnterInput, saveProject} from "./controller";
-import {initializeGraph, updateRectColor, updateRectText} from "./graph";
+import {initializeGraph, updateRectColor, updateRectText, updateToggleButton} from "./graph";
 import * as d3 from "./modules/d3";
 
 window.onload = async () => {
@@ -29,6 +29,11 @@ function initializePageListeners() {
     });
     d3.select("#contentText").on("input", function () {
         updateRectText(this)
+    });
+
+    d3.selectAll(".toggle").on("click", function() {
+        console.log(this)
+        updateToggleButton();
     });
 
     d3.select("#linkSaveBtn").on("click", function () {

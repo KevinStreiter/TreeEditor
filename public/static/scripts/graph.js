@@ -45,7 +45,8 @@ function mousedown() {
     if (d3.event.button != 2) {
         let event = d3.mouse(this);
         const rectNode = new concreteRectCreator_1.ConcreteRectCreator().createNode();
-        rect = rectNode.draw(event);
+        rectNode.draw(event);
+        rect = rectNode.getNodeObject();
         nodeDrawn = true;
         svg.on("mousemove", mouseMove);
     }
@@ -414,3 +415,17 @@ function resetRectBorder() {
         .style("stroke", "#b3b2b4");
 }
 exports.resetRectBorder = resetRectBorder;
+function updateToggleButton() {
+    document.querySelectorAll('.toggle').forEach(element => {
+        element.classList.toggle('active');
+        let inputElement = element;
+        if (inputElement.style.display == 'none') {
+            console.log(inputElement.style.display);
+            inputElement.style.display = '';
+        }
+        else {
+            inputElement.style.display = 'none;';
+        }
+    });
+}
+exports.updateToggleButton = updateToggleButton;

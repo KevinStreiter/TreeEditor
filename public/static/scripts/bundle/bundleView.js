@@ -485,7 +485,8 @@ function mousedown() {
     if (d3.event.button != 2) {
         let event = d3.mouse(this);
         const rectNode = new concreteRectCreator_1.ConcreteRectCreator().createNode();
-        rect = rectNode.draw(event);
+        rectNode.draw(event);
+        rect = rectNode.getNodeObject();
         nodeDrawn = true;
         svg.on("mousemove", mouseMove);
     }
@@ -854,6 +855,20 @@ function resetRectBorder() {
         .style("stroke", "#b3b2b4");
 }
 exports.resetRectBorder = resetRectBorder;
+function updateToggleButton() {
+    document.querySelectorAll('.toggle').forEach(element => {
+        element.classList.toggle('active');
+        let inputElement = element;
+        if (inputElement.style.display == 'none') {
+            console.log(inputElement.style.display);
+            inputElement.style.display = '';
+        }
+        else {
+            inputElement.style.display = 'none;';
+        }
+    });
+}
+exports.updateToggleButton = updateToggleButton;
 
 },{"./grid":5,"./modules/d3.js":8,"./navbar":13,"./node/concreteRectCreator":16}],5:[function(require,module,exports){
 "use strict";
@@ -100763,72 +100778,42 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = __importStar(require("../modules/d3"));
-const graph_1 = require("../graph");
 class AbstractNode {
     draw(event) {
-        let rectCounter = 1;
+        let nodeType = this.getNodeType();
         let svg = d3.select("#graph");
-        svg.selectAll("rect").each(function () {
-            let id = +d3.select(this.parentNode).attr("id");
-            if (id >= rectCounter) {
-                rectCounter = id + 1;
+        let nodes = svg.select("#nodes");
+        let g = nodes.append("g");
+        let counter = 1;
+        nodes.selectAll("*").each(function () {
+            let id = +d3.select(this).attr("id");
+            if (id >= counter) {
+                counter = id + 1;
             }
         });
-        let g = d3.select("#nodes").append("g")
-            .attr("id", rectCounter);
-        let rect = g.append("rect")
-            .attr("x", event[0] + 5)
-            .attr("y", event[1] + 5)
-            .attr("rx", 2)
-            .attr("ry", 2)
-            .attr('height', 0)
-            .attr('width', 0)
-            .attr("fill", "#f8f8f8")
-            .attr("class", "rect");
-        graph_1.initializeRectListeners();
-        g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 20)
-            .attr("font-weight", 20)
-            .attr("class", "titleText")
-            .style('font-size', 22)
-            .text();
-        g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 40)
-            .attr("class", "contentText")
-            .text();
-        g.append("circle")
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", +rect.attr("y"))
-            .attr("r", 5)
-            .attr("id", "circleTop" + rectCounter)
-            .attr("class", "circle");
-        g.append("circle")
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", (+rect.attr("y") + +rect.attr("height")))
-            .attr("r", 5)
-            .attr("id", "circleBottom" + rectCounter)
-            .attr("class", "circle");
-        g.append("circle")
-            .attr("cx", +rect.attr("x"))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
-            .attr("r", 5)
-            .attr("id", "circleLeft" + rectCounter)
-            .attr("class", "circle");
-        g.append("circle")
-            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
-            .attr("r", 5)
-            .attr("id", "circleRight" + rectCounter)
-            .attr("class", "circle");
-        return rect;
+        g.attr("id", counter);
+        this.appendNodeObject(g, event);
+        this.appendNodeObjectText(g);
+        this.appendNodeObjectCircles(g, counter);
+        this.initializeNodeListener();
     }
-    getNodeType() { }
+    getNodeType() {
+        return "node";
+    }
+    appendNodeObject(g, event) { }
+    ;
+    appendNodeObjectText(g) { }
+    ;
+    appendNodeObjectCircles(g, counter) { }
+    ;
+    initializeNodeListener() { }
+    ;
+    getNodeObject() { }
+    ;
 }
 exports.AbstractNode = AbstractNode;
 
-},{"../graph":4,"../modules/d3":8}],16:[function(require,module,exports){
+},{"../modules/d3":8}],16:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const nodeCreator_1 = require("./nodeCreator");
@@ -100844,10 +100829,6 @@ exports.ConcreteRectCreator = ConcreteRectCreator;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class NodeCreator {
-    draw() {
-        const node = this.createNode();
-        return node.draw();
-    }
 }
 exports.NodeCreator = NodeCreator;
 
@@ -100855,6 +100836,7 @@ exports.NodeCreator = NodeCreator;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstractNode_1 = require("./abstractNode");
+const graph_1 = require("../graph");
 class Rect extends abstractNode_1.AbstractNode {
     draw(event) {
         return super.draw(event);
@@ -100862,10 +100844,67 @@ class Rect extends abstractNode_1.AbstractNode {
     getNodeType() {
         return "rect";
     }
+    getNodeObject() {
+        return this.nodeObject;
+    }
+    appendNodeObject(g, event) {
+        this.nodeObject = g.append(this.getNodeType())
+            .attr("x", event[0] + 5)
+            .attr("y", event[1] + 5)
+            .attr('height', 0)
+            .attr('width', 0)
+            .attr("fill", "#f8f8f8")
+            .attr("class", this.getNodeType());
+        this.nodeObject.attr("rx", +this.nodeObject.attr("x") / 2)
+            .attr("ry", +this.nodeObject.attr("y") / 2);
+    }
+    appendNodeObjectText(g) {
+        g.append("text")
+            .attr("x", +this.nodeObject.attr("x") + 10)
+            .attr("y", +this.nodeObject.attr("y") + 20)
+            .attr("font-weight", 20)
+            .attr("class", "titleText")
+            .style('font-size', 22)
+            .text();
+        g.append("text")
+            .attr("x", +this.nodeObject.attr("x") + 10)
+            .attr("y", +this.nodeObject.attr("y") + 40)
+            .attr("class", "contentText")
+            .text();
+    }
+    appendNodeObjectCircles(g, counter) {
+        g.append("circle")
+            .attr("cx", +this.nodeObject.attr("cx"))
+            .attr("cy", +this.nodeObject.attr("cy") + +this.nodeObject.attr("r"))
+            .attr("r", 5)
+            .attr("id", "circleTop" + counter)
+            .attr("class", "circle");
+        g.append("circle")
+            .attr("cx", +this.nodeObject.attr("cx") + +this.nodeObject.attr("r"))
+            .attr("cy", +this.nodeObject.attr("cy") - +this.nodeObject.attr("r"))
+            .attr("r", 5)
+            .attr("id", "circleBottom" + counter)
+            .attr("class", "circle");
+        g.append("circle")
+            .attr("cx", +this.nodeObject.attr("cx") - +this.nodeObject.attr("r"))
+            .attr("cy", +this.nodeObject.attr("cy"))
+            .attr("r", 5)
+            .attr("id", "circleLeft" + counter)
+            .attr("class", "circle");
+        g.append("circle")
+            .attr("cx", +this.nodeObject.attr("cx") + +this.nodeObject.attr("r"))
+            .attr("cy", +this.nodeObject.attr("cy"))
+            .attr("r", 5)
+            .attr("id", "circleRight" + counter)
+            .attr("class", "circle");
+    }
+    initializeNodeListener() {
+        graph_1.initializeRectListeners();
+    }
 }
 exports.Rect = Rect;
 
-},{"./abstractNode":15}],19:[function(require,module,exports){
+},{"../graph":4,"./abstractNode":15}],19:[function(require,module,exports){
 (function (global){
 'use strict';
 

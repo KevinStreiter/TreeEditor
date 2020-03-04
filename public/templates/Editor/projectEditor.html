@@ -13,7 +13,7 @@
 <body>
 <menu class="menu">
     <li class="menu-item">
-        <button type="button" class="menu-btn" id="menu-delete-btn"><i class="fa-trash"></i> <span class="menu-text">Delete</span></button>
+        <button type="button" class="menu-btn" id="menu-delete-btn"><i class="fa fa-trash"></i> <span class="menu-text">Delete</span></button>
     </li>
 </menu>
 
@@ -39,6 +39,20 @@
             <textarea id="titleText" name="Title" rows="1" maxlength="25"></textarea>
             <h4>Description</h4>
             <textarea id="contentText" name="Content" rows="4" maxlength="140"></textarea>
+            <div class="row">
+                <div class="column">
+                    <h4>Color</h4>
+                    <a id="colorPickerBtn" class="Button"><i class="fa fa-paint-brush"></i></a>
+                    <input id="colorPicker" type="color" name="favcolor" style="display: none;"><br>
+                </div>
+                <div class="column"><h4>Circle</h4>
+                    <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+
             <h4>Links</h4>
             <input name="linkName" type="text" id="linkName" class="linkTxt" placeholder="Name" maxlength="21"/>
             <input type="text" id="linkVal" class="linkTxt" placeholder="URL"/>
@@ -46,9 +60,6 @@
             <a id="linkClearBtn" class="Button"><i class="fa fa-cut"></i></a>
             <ul id="linkList">
             </ul>
-            <h4>Color</h4>
-            <a id="colorPickerBtn" class="Button"><i class="fa fa-paint-brush"></i></a>
-            <input id="colorPicker" type="color" name="favcolor" style="display: none;"><br>
             <h4>Files</h4>
             <a id="fileChooserBtn" class="Button"><i class="fa fa-upload"></i></a>
             <input id="fileChooser" type="file" name="file" style="display: none;">
