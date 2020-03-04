@@ -1,3 +1,4 @@
 export interface INode {
-    draw();
+    draw(event): any;
+    getNodeType();
 }

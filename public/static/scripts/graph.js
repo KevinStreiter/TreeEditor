@@ -10,7 +10,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = __importStar(require("./modules/d3.js"));
 const navbar_1 = require("./navbar");
 const grid_1 = require("./grid");
-let svg, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, rectDrawn = false;
+const concreteRectCreator_1 = require("./node/concreteRectCreator");
+let svg, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, nodeDrawn = false;
 function initializeGraph(margin) {
     let graph = document.getElementById('GraphContainer'), boundaries = graph.getBoundingClientRect(), width = boundaries.width - margin.left - margin.right, height = boundaries.height - margin.top - margin.bottom;
     svg = d3.select("#graph")
@@ -43,63 +44,9 @@ exports.initializeGraph = initializeGraph;
 function mousedown() {
     if (d3.event.button != 2) {
         let event = d3.mouse(this);
-        let rectCounter = 1;
-        svg.selectAll("rect").each(function () {
-            let id = +d3.select(this.parentNode).attr("id");
-            if (id >= rectCounter) {
-                rectCounter = id + 1;
-            }
-        });
-        g = nodes.append("g")
-            .attr("id", rectCounter)
-            .call(dragRect);
-        rect = g.append("rect")
-            .attr("x", event[0] + 5)
-            .attr("y", event[1] + 5)
-            .attr("rx", 2)
-            .attr("ry", 2)
-            .attr('height', 0)
-            .attr('width', 0)
-            .attr("fill", "#f8f8f8")
-            .attr("class", "rect");
-        initializeRectListeners();
-        g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 20)
-            .attr("font-weight", 20)
-            .attr("class", "titleText")
-            .style('font-size', 22)
-            .text();
-        g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 40)
-            .attr("class", "contentText")
-            .text();
-        g.append("circle")
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", +rect.attr("y"))
-            .attr("r", 5)
-            .attr("id", "circleTop" + rectCounter)
-            .attr("class", "circle");
-        g.append("circle")
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", (+rect.attr("y") + +rect.attr("height")))
-            .attr("r", 5)
-            .attr("id", "circleBottom" + rectCounter)
-            .attr("class", "circle");
-        g.append("circle")
-            .attr("cx", +rect.attr("x"))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
-            .attr("r", 5)
-            .attr("id", "circleLeft" + rectCounter)
-            .attr("class", "circle");
-        g.append("circle")
-            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
-            .attr("r", 5)
-            .attr("id", "circleRight" + rectCounter)
-            .attr("class", "circle");
-        rectDrawn = true;
+        const rectNode = new concreteRectCreator_1.ConcreteRectCreator().createNode();
+        rect = rectNode.draw(event);
+        nodeDrawn = true;
         svg.on("mousemove", mouseMove);
     }
 }
@@ -331,15 +278,15 @@ function mouseUp() {
         if (surface < 2000) {
             parent.remove();
         }
-        if (rectDrawn) {
-            g.append("circle")
+        else if (nodeDrawn) {
+            d3.select("#nodes>g:last-child").append("circle")
                 .attr("cx", (+rect.attr("x") + +rect.attr("width")))
                 .attr("cy", (+rect.attr("y") + (+rect.attr("height"))))
                 .attr("r", 4)
                 .attr("id", "circleBottomRight" + parent.attr("id"))
                 .attr("class", "circle");
             initializeCircleListeners();
-            rectDrawn = false;
+            nodeDrawn = false;
         }
     }
 }

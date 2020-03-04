@@ -3,22 +3,13 @@ import {clearLinkInputFields, processLinkItem} from "./links";
 import {uploadFile} from "./files";
 import {loadProject, preventEnterInput, saveProject} from "./controller";
 import {initializeGraph, updateRectColor, updateRectText} from "./graph";
-import {ConcreteRectCreator} from "./node/concreteRectCreator";
-import {ConcreteCircleCreator} from "./node/concreteCircleCreator";
 import * as d3 from "./modules/d3";
 
 window.onload = async () => {
     initializeGraph(getMargin());
     initializePageListeners();
-    await loadProject();
+    loadProject();
     defineGrid(getMargin());
-
-    const nodeCreatorRect = new ConcreteRectCreator();
-    console.log(nodeCreatorRect.createNode());
-    const nodeCreatorCircle = new ConcreteCircleCreator();
-    console.log(nodeCreatorCircle.createNode())
-
-
 };
 
 function getMargin () {

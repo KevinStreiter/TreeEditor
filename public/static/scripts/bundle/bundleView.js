@@ -450,7 +450,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = __importStar(require("./modules/d3.js"));
 const navbar_1 = require("./navbar");
 const grid_1 = require("./grid");
-let svg, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, rectDrawn = false;
+const concreteRectCreator_1 = require("./node/concreteRectCreator");
+let svg, nodes, g, rect, dragRect, dragBorder, dragLine, line, deltaX, deltaY, deltaXBorder, deltaYBorder, deltaXLine, deltaYLine, deltaXCircle, deltaYCircle, rectWidth, rectHeight, lineData, lineFunction, nodeDrawn = false;
 function initializeGraph(margin) {
     let graph = document.getElementById('GraphContainer'), boundaries = graph.getBoundingClientRect(), width = boundaries.width - margin.left - margin.right, height = boundaries.height - margin.top - margin.bottom;
     svg = d3.select("#graph")
@@ -483,63 +484,9 @@ exports.initializeGraph = initializeGraph;
 function mousedown() {
     if (d3.event.button != 2) {
         let event = d3.mouse(this);
-        let rectCounter = 1;
-        svg.selectAll("rect").each(function () {
-            let id = +d3.select(this.parentNode).attr("id");
-            if (id >= rectCounter) {
-                rectCounter = id + 1;
-            }
-        });
-        g = nodes.append("g")
-            .attr("id", rectCounter)
-            .call(dragRect);
-        rect = g.append("rect")
-            .attr("x", event[0] + 5)
-            .attr("y", event[1] + 5)
-            .attr("rx", 2)
-            .attr("ry", 2)
-            .attr('height', 0)
-            .attr('width', 0)
-            .attr("fill", "#f8f8f8")
-            .attr("class", "rect");
-        initializeRectListeners();
-        g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 20)
-            .attr("font-weight", 20)
-            .attr("class", "titleText")
-            .style('font-size', 22)
-            .text();
-        g.append("text")
-            .attr("x", +rect.attr("x") + 10)
-            .attr("y", +rect.attr("y") + 40)
-            .attr("class", "contentText")
-            .text();
-        g.append("circle")
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", +rect.attr("y"))
-            .attr("r", 5)
-            .attr("id", "circleTop" + rectCounter)
-            .attr("class", "circle");
-        g.append("circle")
-            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
-            .attr("cy", (+rect.attr("y") + +rect.attr("height")))
-            .attr("r", 5)
-            .attr("id", "circleBottom" + rectCounter)
-            .attr("class", "circle");
-        g.append("circle")
-            .attr("cx", +rect.attr("x"))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
-            .attr("r", 5)
-            .attr("id", "circleLeft" + rectCounter)
-            .attr("class", "circle");
-        g.append("circle")
-            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
-            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
-            .attr("r", 5)
-            .attr("id", "circleRight" + rectCounter)
-            .attr("class", "circle");
-        rectDrawn = true;
+        const rectNode = new concreteRectCreator_1.ConcreteRectCreator().createNode();
+        rect = rectNode.draw(event);
+        nodeDrawn = true;
         svg.on("mousemove", mouseMove);
     }
 }
@@ -771,15 +718,15 @@ function mouseUp() {
         if (surface < 2000) {
             parent.remove();
         }
-        if (rectDrawn) {
-            g.append("circle")
+        else if (nodeDrawn) {
+            d3.select("#nodes>g:last-child").append("circle")
                 .attr("cx", (+rect.attr("x") + +rect.attr("width")))
                 .attr("cy", (+rect.attr("y") + (+rect.attr("height"))))
                 .attr("r", 4)
                 .attr("id", "circleBottomRight" + parent.attr("id"))
                 .attr("class", "circle");
             initializeCircleListeners();
-            rectDrawn = false;
+            nodeDrawn = false;
         }
     }
 }
@@ -908,7 +855,7 @@ function resetRectBorder() {
 }
 exports.resetRectBorder = resetRectBorder;
 
-},{"./grid":5,"./modules/d3.js":8,"./navbar":13}],5:[function(require,module,exports){
+},{"./grid":5,"./modules/d3.js":8,"./navbar":13,"./node/concreteRectCreator":16}],5:[function(require,module,exports){
 "use strict";
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
@@ -44347,7 +44294,7 @@ function () {
 });
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./pdf.worker.js":10,"_process":46,"buffer":24,"fs":23,"http":68,"https":28,"node-ensure":1,"url":89,"zlib":22}],10:[function(require,module,exports){
+},{"./pdf.worker.js":10,"_process":50,"buffer":28,"fs":27,"http":72,"https":32,"node-ensure":1,"url":93,"zlib":26}],10:[function(require,module,exports){
 (function (process,global,Buffer){
 /**
  * @licstart The following is the entire license notice for the
@@ -100549,7 +100496,7 @@ function () {
 });
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"_process":46,"buffer":24}],11:[function(require,module,exports){
+},{"_process":50,"buffer":28}],11:[function(require,module,exports){
 module.exports = function toDOM(obj) {
     if (typeof obj == 'string') {
         obj = JSON.parse(obj);
@@ -100806,6 +100753,119 @@ function createThumbnail(path, id) {
 }
 
 },{"./modules/d3":8,"./modules/pdfjs-dist/build/pdf.js":9}],15:[function(require,module,exports){
+"use strict";
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const d3 = __importStar(require("../modules/d3"));
+const graph_1 = require("../graph");
+class AbstractNode {
+    draw(event) {
+        let rectCounter = 1;
+        let svg = d3.select("#graph");
+        svg.selectAll("rect").each(function () {
+            let id = +d3.select(this.parentNode).attr("id");
+            if (id >= rectCounter) {
+                rectCounter = id + 1;
+            }
+        });
+        let g = d3.select("#nodes").append("g")
+            .attr("id", rectCounter);
+        let rect = g.append("rect")
+            .attr("x", event[0] + 5)
+            .attr("y", event[1] + 5)
+            .attr("rx", 2)
+            .attr("ry", 2)
+            .attr('height', 0)
+            .attr('width', 0)
+            .attr("fill", "#f8f8f8")
+            .attr("class", "rect");
+        graph_1.initializeRectListeners();
+        g.append("text")
+            .attr("x", +rect.attr("x") + 10)
+            .attr("y", +rect.attr("y") + 20)
+            .attr("font-weight", 20)
+            .attr("class", "titleText")
+            .style('font-size', 22)
+            .text();
+        g.append("text")
+            .attr("x", +rect.attr("x") + 10)
+            .attr("y", +rect.attr("y") + 40)
+            .attr("class", "contentText")
+            .text();
+        g.append("circle")
+            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
+            .attr("cy", +rect.attr("y"))
+            .attr("r", 5)
+            .attr("id", "circleTop" + rectCounter)
+            .attr("class", "circle");
+        g.append("circle")
+            .attr("cx", (+rect.attr("x") + (+rect.attr("width") / 2)))
+            .attr("cy", (+rect.attr("y") + +rect.attr("height")))
+            .attr("r", 5)
+            .attr("id", "circleBottom" + rectCounter)
+            .attr("class", "circle");
+        g.append("circle")
+            .attr("cx", +rect.attr("x"))
+            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
+            .attr("r", 5)
+            .attr("id", "circleLeft" + rectCounter)
+            .attr("class", "circle");
+        g.append("circle")
+            .attr("cx", (+rect.attr("x") + +rect.attr("width")))
+            .attr("cy", (+rect.attr("y") + (+rect.attr("height") / 2)))
+            .attr("r", 5)
+            .attr("id", "circleRight" + rectCounter)
+            .attr("class", "circle");
+        return rect;
+    }
+    getNodeType() { }
+}
+exports.AbstractNode = AbstractNode;
+
+},{"../graph":4,"../modules/d3":8}],16:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const nodeCreator_1 = require("./nodeCreator");
+const rect_1 = require("./rect");
+class ConcreteRectCreator extends nodeCreator_1.NodeCreator {
+    createNode() {
+        return new rect_1.Rect();
+    }
+}
+exports.ConcreteRectCreator = ConcreteRectCreator;
+
+},{"./nodeCreator":17,"./rect":18}],17:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class NodeCreator {
+    draw() {
+        const node = this.createNode();
+        return node.draw();
+    }
+}
+exports.NodeCreator = NodeCreator;
+
+},{}],18:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const abstractNode_1 = require("./abstractNode");
+class Rect extends abstractNode_1.AbstractNode {
+    draw(event) {
+        return super.draw(event);
+    }
+    getNodeType() {
+        return "rect";
+    }
+}
+exports.Rect = Rect;
+
+},{"./abstractNode":15}],19:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -101315,7 +101375,7 @@ var objectKeys = Object.keys || function (obj) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"object-assign":33,"util/":18}],16:[function(require,module,exports){
+},{"object-assign":37,"util/":22}],20:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -101340,14 +101400,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],17:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],18:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -101937,7 +101997,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":17,"_process":46,"inherits":16}],19:[function(require,module,exports){
+},{"./support/isBuffer":21,"_process":50,"inherits":20}],23:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -102091,9 +102151,9 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],20:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 
-},{}],21:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 (function (process,Buffer){
 'use strict';
 /* eslint camelcase: "off" */
@@ -102505,7 +102565,7 @@ Zlib.prototype._reset = function () {
 
 exports.Zlib = Zlib;
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":46,"assert":15,"buffer":24,"pako/lib/zlib/constants":36,"pako/lib/zlib/deflate.js":38,"pako/lib/zlib/inflate.js":40,"pako/lib/zlib/zstream":44}],22:[function(require,module,exports){
+},{"_process":50,"assert":19,"buffer":28,"pako/lib/zlib/constants":40,"pako/lib/zlib/deflate.js":42,"pako/lib/zlib/inflate.js":44,"pako/lib/zlib/zstream":48}],26:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -103117,9 +103177,9 @@ util.inherits(DeflateRaw, Zlib);
 util.inherits(InflateRaw, Zlib);
 util.inherits(Unzip, Zlib);
 }).call(this,require('_process'))
-},{"./binding":21,"_process":46,"assert":15,"buffer":24,"stream":67,"util":94}],23:[function(require,module,exports){
-arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],24:[function(require,module,exports){
+},{"./binding":25,"_process":50,"assert":19,"buffer":28,"stream":71,"util":98}],27:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],28:[function(require,module,exports){
 (function (Buffer){
 /*!
  * The buffer module from node.js, for the browser.
@@ -104922,7 +104982,7 @@ var hexSliceLookupTable = (function () {
 })()
 
 }).call(this,require("buffer").Buffer)
-},{"base64-js":19,"buffer":24,"ieee754":29}],25:[function(require,module,exports){
+},{"base64-js":23,"buffer":28,"ieee754":33}],29:[function(require,module,exports){
 module.exports = {
   "100": "Continue",
   "101": "Switching Protocols",
@@ -104988,7 +105048,7 @@ module.exports = {
   "511": "Network Authentication Required"
 }
 
-},{}],26:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -105099,7 +105159,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":31}],27:[function(require,module,exports){
+},{"../../is-buffer/index.js":35}],31:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -105624,7 +105684,7 @@ function functionBindPolyfill(context) {
   };
 }
 
-},{}],28:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 var http = require('http')
 var url = require('url')
 
@@ -105657,7 +105717,7 @@ function validateParams (params) {
   return params
 }
 
-},{"http":68,"url":89}],29:[function(require,module,exports){
+},{"http":72,"url":93}],33:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -105743,7 +105803,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],30:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -105772,7 +105832,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],31:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -105795,14 +105855,14 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],32:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],33:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 /*
 object-assign
 (c) Sindre Sorhus
@@ -105894,7 +105954,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],34:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 'use strict';
 
 
@@ -106001,7 +106061,7 @@ exports.setTyped = function (on) {
 
 exports.setTyped(TYPED_OK);
 
-},{}],35:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 'use strict';
 
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
@@ -106054,7 +106114,7 @@ function adler32(adler, buf, len, pos) {
 
 module.exports = adler32;
 
-},{}],36:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -106124,7 +106184,7 @@ module.exports = {
   //Z_NULL:                 null // Use -1 or null inline, depending on var type
 };
 
-},{}],37:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 'use strict';
 
 // Note: we can't get significant speed boost here.
@@ -106185,7 +106245,7 @@ function crc32(crc, buf, len, pos) {
 
 module.exports = crc32;
 
-},{}],38:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -108061,7 +108121,7 @@ exports.deflatePrime = deflatePrime;
 exports.deflateTune = deflateTune;
 */
 
-},{"../utils/common":34,"./adler32":35,"./crc32":37,"./messages":42,"./trees":43}],39:[function(require,module,exports){
+},{"../utils/common":38,"./adler32":39,"./crc32":41,"./messages":46,"./trees":47}],43:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -108408,7 +108468,7 @@ module.exports = function inflate_fast(strm, start) {
   return;
 };
 
-},{}],40:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -109966,7 +110026,7 @@ exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
 */
 
-},{"../utils/common":34,"./adler32":35,"./crc32":37,"./inffast":39,"./inftrees":41}],41:[function(require,module,exports){
+},{"../utils/common":38,"./adler32":39,"./crc32":41,"./inffast":43,"./inftrees":45}],45:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -110311,7 +110371,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   return 0;
 };
 
-},{"../utils/common":34}],42:[function(require,module,exports){
+},{"../utils/common":38}],46:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -110345,7 +110405,7 @@ module.exports = {
   '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
 };
 
-},{}],43:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -111569,7 +111629,7 @@ exports._tr_flush_block  = _tr_flush_block;
 exports._tr_tally = _tr_tally;
 exports._tr_align = _tr_align;
 
-},{"../utils/common":34}],44:[function(require,module,exports){
+},{"../utils/common":38}],48:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -111618,7 +111678,7 @@ function ZStream() {
 
 module.exports = ZStream;
 
-},{}],45:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -111667,7 +111727,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 
 
 }).call(this,require('_process'))
-},{"_process":46}],46:[function(require,module,exports){
+},{"_process":50}],50:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -111853,7 +111913,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],47:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -112390,7 +112450,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],48:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -112476,7 +112536,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],49:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -112563,16 +112623,16 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],50:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":48,"./encode":49}],51:[function(require,module,exports){
+},{"./decode":52,"./encode":53}],55:[function(require,module,exports){
 module.exports = require('./lib/_stream_duplex.js');
 
-},{"./lib/_stream_duplex.js":52}],52:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":56}],56:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -112704,7 +112764,7 @@ Duplex.prototype._destroy = function (err, cb) {
 
   pna.nextTick(cb, err);
 };
-},{"./_stream_readable":54,"./_stream_writable":56,"core-util-is":26,"inherits":30,"process-nextick-args":45}],53:[function(require,module,exports){
+},{"./_stream_readable":58,"./_stream_writable":60,"core-util-is":30,"inherits":34,"process-nextick-args":49}],57:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -112752,7 +112812,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":55,"core-util-is":26,"inherits":30}],54:[function(require,module,exports){
+},{"./_stream_transform":59,"core-util-is":30,"inherits":34}],58:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -113774,7 +113834,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":52,"./internal/streams/BufferList":57,"./internal/streams/destroy":58,"./internal/streams/stream":59,"_process":46,"core-util-is":26,"events":27,"inherits":30,"isarray":32,"process-nextick-args":45,"safe-buffer":60,"string_decoder/":61,"util":20}],55:[function(require,module,exports){
+},{"./_stream_duplex":56,"./internal/streams/BufferList":61,"./internal/streams/destroy":62,"./internal/streams/stream":63,"_process":50,"core-util-is":30,"events":31,"inherits":34,"isarray":36,"process-nextick-args":49,"safe-buffer":64,"string_decoder/":65,"util":24}],59:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -113989,7 +114049,7 @@ function done(stream, er, data) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":52,"core-util-is":26,"inherits":30}],56:[function(require,module,exports){
+},{"./_stream_duplex":56,"core-util-is":30,"inherits":34}],60:[function(require,module,exports){
 (function (process,global,setImmediate){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -114679,7 +114739,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"./_stream_duplex":52,"./internal/streams/destroy":58,"./internal/streams/stream":59,"_process":46,"core-util-is":26,"inherits":30,"process-nextick-args":45,"safe-buffer":60,"timers":88,"util-deprecate":91}],57:[function(require,module,exports){
+},{"./_stream_duplex":56,"./internal/streams/destroy":62,"./internal/streams/stream":63,"_process":50,"core-util-is":30,"inherits":34,"process-nextick-args":49,"safe-buffer":64,"timers":92,"util-deprecate":95}],61:[function(require,module,exports){
 'use strict';
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -114759,7 +114819,7 @@ if (util && util.inspect && util.inspect.custom) {
     return this.constructor.name + ' ' + obj;
   };
 }
-},{"safe-buffer":60,"util":20}],58:[function(require,module,exports){
+},{"safe-buffer":64,"util":24}],62:[function(require,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -114834,10 +114894,10 @@ module.exports = {
   destroy: destroy,
   undestroy: undestroy
 };
-},{"process-nextick-args":45}],59:[function(require,module,exports){
+},{"process-nextick-args":49}],63:[function(require,module,exports){
 module.exports = require('events').EventEmitter;
 
-},{"events":27}],60:[function(require,module,exports){
+},{"events":31}],64:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
 var Buffer = buffer.Buffer
@@ -114901,7 +114961,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":24}],61:[function(require,module,exports){
+},{"buffer":28}],65:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -115198,10 +115258,10 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"safe-buffer":60}],62:[function(require,module,exports){
+},{"safe-buffer":64}],66:[function(require,module,exports){
 module.exports = require('./readable').PassThrough
 
-},{"./readable":63}],63:[function(require,module,exports){
+},{"./readable":67}],67:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = exports;
 exports.Readable = exports;
@@ -115210,13 +115270,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":52,"./lib/_stream_passthrough.js":53,"./lib/_stream_readable.js":54,"./lib/_stream_transform.js":55,"./lib/_stream_writable.js":56}],64:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":56,"./lib/_stream_passthrough.js":57,"./lib/_stream_readable.js":58,"./lib/_stream_transform.js":59,"./lib/_stream_writable.js":60}],68:[function(require,module,exports){
 module.exports = require('./readable').Transform
 
-},{"./readable":63}],65:[function(require,module,exports){
+},{"./readable":67}],69:[function(require,module,exports){
 module.exports = require('./lib/_stream_writable.js');
 
-},{"./lib/_stream_writable.js":56}],66:[function(require,module,exports){
+},{"./lib/_stream_writable.js":60}],70:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
 var Buffer = buffer.Buffer
@@ -115282,7 +115342,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":24}],67:[function(require,module,exports){
+},{"buffer":28}],71:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -115411,7 +115471,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":27,"inherits":30,"readable-stream/duplex.js":51,"readable-stream/passthrough.js":62,"readable-stream/readable.js":63,"readable-stream/transform.js":64,"readable-stream/writable.js":65}],68:[function(require,module,exports){
+},{"events":31,"inherits":34,"readable-stream/duplex.js":55,"readable-stream/passthrough.js":66,"readable-stream/readable.js":67,"readable-stream/transform.js":68,"readable-stream/writable.js":69}],72:[function(require,module,exports){
 (function (global){
 var ClientRequest = require('./lib/request')
 var response = require('./lib/response')
@@ -115499,7 +115559,7 @@ http.METHODS = [
 	'UNSUBSCRIBE'
 ]
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/request":70,"./lib/response":71,"builtin-status-codes":25,"url":89,"xtend":95}],69:[function(require,module,exports){
+},{"./lib/request":74,"./lib/response":75,"builtin-status-codes":29,"url":93,"xtend":99}],73:[function(require,module,exports){
 (function (global){
 exports.fetch = isFunction(global.fetch) && isFunction(global.ReadableStream)
 
@@ -115562,7 +115622,7 @@ function isFunction (value) {
 xhr = null // Help gc
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],70:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -115881,7 +115941,7 @@ var unsafeHeaders = [
 ]
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":69,"./response":71,"_process":46,"buffer":24,"inherits":30,"readable-stream":86}],71:[function(require,module,exports){
+},{"./capability":73,"./response":75,"_process":50,"buffer":28,"inherits":34,"readable-stream":90}],75:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -116092,7 +116152,7 @@ IncomingMessage.prototype._onXHRProgress = function () {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":69,"_process":46,"buffer":24,"inherits":30,"readable-stream":86}],72:[function(require,module,exports){
+},{"./capability":73,"_process":50,"buffer":28,"inherits":34,"readable-stream":90}],76:[function(require,module,exports){
 'use strict';
 
 function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
@@ -116221,7 +116281,7 @@ createErrorType('ERR_UNKNOWN_ENCODING', function (arg) {
 createErrorType('ERR_STREAM_UNSHIFT_AFTER_END_EVENT', 'stream.unshift() after end event');
 module.exports.codes = codes;
 
-},{}],73:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -116363,7 +116423,7 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
   }
 });
 }).call(this,require('_process'))
-},{"./_stream_readable":75,"./_stream_writable":77,"_process":46,"inherits":30}],74:[function(require,module,exports){
+},{"./_stream_readable":79,"./_stream_writable":81,"_process":50,"inherits":34}],78:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -116403,7 +116463,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":76,"inherits":30}],75:[function(require,module,exports){
+},{"./_stream_transform":80,"inherits":34}],79:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -117530,7 +117590,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../errors":72,"./_stream_duplex":73,"./internal/streams/async_iterator":78,"./internal/streams/buffer_list":79,"./internal/streams/destroy":80,"./internal/streams/from":82,"./internal/streams/state":84,"./internal/streams/stream":85,"_process":46,"buffer":24,"events":27,"inherits":30,"string_decoder/":87,"util":20}],76:[function(require,module,exports){
+},{"../errors":76,"./_stream_duplex":77,"./internal/streams/async_iterator":82,"./internal/streams/buffer_list":83,"./internal/streams/destroy":84,"./internal/streams/from":86,"./internal/streams/state":88,"./internal/streams/stream":89,"_process":50,"buffer":28,"events":31,"inherits":34,"string_decoder/":91,"util":24}],80:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -117732,7 +117792,7 @@ function done(stream, er, data) {
   if (stream._transformState.transforming) throw new ERR_TRANSFORM_ALREADY_TRANSFORMING();
   return stream.push(null);
 }
-},{"../errors":72,"./_stream_duplex":73,"inherits":30}],77:[function(require,module,exports){
+},{"../errors":76,"./_stream_duplex":77,"inherits":34}],81:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -118432,7 +118492,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../errors":72,"./_stream_duplex":73,"./internal/streams/destroy":80,"./internal/streams/state":84,"./internal/streams/stream":85,"_process":46,"buffer":24,"inherits":30,"util-deprecate":91}],78:[function(require,module,exports){
+},{"../errors":76,"./_stream_duplex":77,"./internal/streams/destroy":84,"./internal/streams/state":88,"./internal/streams/stream":89,"_process":50,"buffer":28,"inherits":34,"util-deprecate":95}],82:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -118642,7 +118702,7 @@ var createReadableStreamAsyncIterator = function createReadableStreamAsyncIterat
 
 module.exports = createReadableStreamAsyncIterator;
 }).call(this,require('_process'))
-},{"./end-of-stream":81,"_process":46}],79:[function(require,module,exports){
+},{"./end-of-stream":85,"_process":50}],83:[function(require,module,exports){
 'use strict';
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -118853,7 +118913,7 @@ function () {
 
   return BufferList;
 }();
-},{"buffer":24,"util":20}],80:[function(require,module,exports){
+},{"buffer":28,"util":24}],84:[function(require,module,exports){
 (function (process){
 'use strict'; // undocumented cb() API, needed for core, not for public API
 
@@ -118961,7 +119021,7 @@ module.exports = {
   errorOrDestroy: errorOrDestroy
 };
 }).call(this,require('_process'))
-},{"_process":46}],81:[function(require,module,exports){
+},{"_process":50}],85:[function(require,module,exports){
 // Ported from https://github.com/mafintosh/end-of-stream with
 // permission from the author, Mathias Buus (@mafintosh).
 'use strict';
@@ -119066,12 +119126,12 @@ function eos(stream, opts, callback) {
 }
 
 module.exports = eos;
-},{"../../../errors":72}],82:[function(require,module,exports){
+},{"../../../errors":76}],86:[function(require,module,exports){
 module.exports = function () {
   throw new Error('Readable.from is not available in the browser')
 };
 
-},{}],83:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 // Ported from https://github.com/mafintosh/pump with
 // permission from the author, Mathias Buus (@mafintosh).
 'use strict';
@@ -119169,7 +119229,7 @@ function pipeline() {
 }
 
 module.exports = pipeline;
-},{"../../../errors":72,"./end-of-stream":81}],84:[function(require,module,exports){
+},{"../../../errors":76,"./end-of-stream":85}],88:[function(require,module,exports){
 'use strict';
 
 var ERR_INVALID_OPT_VALUE = require('../../../errors').codes.ERR_INVALID_OPT_VALUE;
@@ -119197,9 +119257,9 @@ function getHighWaterMark(state, options, duplexKey, isDuplex) {
 module.exports = {
   getHighWaterMark: getHighWaterMark
 };
-},{"../../../errors":72}],85:[function(require,module,exports){
-arguments[4][59][0].apply(exports,arguments)
-},{"dup":59,"events":27}],86:[function(require,module,exports){
+},{"../../../errors":76}],89:[function(require,module,exports){
+arguments[4][63][0].apply(exports,arguments)
+},{"dup":63,"events":31}],90:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = exports;
 exports.Readable = exports;
@@ -119210,9 +119270,9 @@ exports.PassThrough = require('./lib/_stream_passthrough.js');
 exports.finished = require('./lib/internal/streams/end-of-stream.js');
 exports.pipeline = require('./lib/internal/streams/pipeline.js');
 
-},{"./lib/_stream_duplex.js":73,"./lib/_stream_passthrough.js":74,"./lib/_stream_readable.js":75,"./lib/_stream_transform.js":76,"./lib/_stream_writable.js":77,"./lib/internal/streams/end-of-stream.js":81,"./lib/internal/streams/pipeline.js":83}],87:[function(require,module,exports){
-arguments[4][61][0].apply(exports,arguments)
-},{"dup":61,"safe-buffer":66}],88:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":77,"./lib/_stream_passthrough.js":78,"./lib/_stream_readable.js":79,"./lib/_stream_transform.js":80,"./lib/_stream_writable.js":81,"./lib/internal/streams/end-of-stream.js":85,"./lib/internal/streams/pipeline.js":87}],91:[function(require,module,exports){
+arguments[4][65][0].apply(exports,arguments)
+},{"dup":65,"safe-buffer":70}],92:[function(require,module,exports){
 (function (setImmediate,clearImmediate){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -119291,7 +119351,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":46,"timers":88}],89:[function(require,module,exports){
+},{"process/browser.js":50,"timers":92}],93:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -120025,7 +120085,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":90,"punycode":47,"querystring":50}],90:[function(require,module,exports){
+},{"./util":94,"punycode":51,"querystring":54}],94:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -120043,7 +120103,7 @@ module.exports = {
   }
 };
 
-},{}],91:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 (function (global){
 
 /**
@@ -120114,13 +120174,13 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],92:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],93:[function(require,module,exports){
-arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],94:[function(require,module,exports){
-arguments[4][18][0].apply(exports,arguments)
-},{"./support/isBuffer":93,"_process":46,"dup":18,"inherits":92}],95:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],97:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],98:[function(require,module,exports){
+arguments[4][22][0].apply(exports,arguments)
+},{"./support/isBuffer":97,"_process":50,"dup":22,"inherits":96}],99:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
