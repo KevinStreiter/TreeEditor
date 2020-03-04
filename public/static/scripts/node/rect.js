@@ -16,13 +16,12 @@ class Rect extends abstractNode_1.AbstractNode {
         this.nodeObject = g.append(this.getNodeType())
             .attr("x", event[0] + 5)
             .attr("y", event[1] + 5)
+            .attr("rx", 2)
+            .attr("ry", 2)
             .attr('height', 0)
             .attr('width', 0)
             .attr("fill", "#f8f8f8")
             .attr("class", this.getNodeType());
-        this.nodeObject
-            .attr("rx", +this.nodeObject.attr("x") / 2)
-            .attr("ry", +this.nodeObject.attr("y") / 2);
     }
     appendNodeObjectText(g) {
         g.append("text")

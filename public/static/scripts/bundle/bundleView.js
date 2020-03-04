@@ -100662,11 +100662,19 @@ function transformNodeObject() {
 exports.transformNodeObject = transformNodeObject;
 function transformRectToCircle(element) {
     element
+        .transition()
+        .ease(d3.easeCircle)
+        .delay(100)
+        .duration(1000)
         .attr("rx", +element.attr("x") / 2)
         .attr("ry", +element.attr("y") / 2);
 }
 function transformCircleToRect(element) {
     element
+        .transition()
+        .ease(d3.easeExp)
+        .delay(100)
+        .duration(1000)
         .attr("rx", 2)
         .attr("ry", 2);
 }

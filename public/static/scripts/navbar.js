@@ -29,6 +29,7 @@ function openNav() {
     links_1.resetLinkBorderColor();
     graph_1.resetRectBorder();
     graph_1.resetListeners();
+    updateTransformationSwitch(parent);
     d3.select(this)
         .style("stroke", "red")
         .on("dblclick", closeNav);
@@ -48,6 +49,7 @@ function closeNav() {
     links_1.resetLinkBorderColor();
     graph_1.resetRectBorder();
     graph_1.resetListeners();
+    resetTransformationSwitch();
 }
 function listFiles(id) {
     let entries = d3.select("#fileList").selectAll("li");
@@ -73,6 +75,14 @@ function listLinks(id) {
         }
     });
 }
+function updateTransformationSwitch(element) {
+    let transformation = element.attr("transformation");
+    let transformationSwitch = d3.select("#circleSwitchInput");
+    transformation == "circle" ? transformationSwitch.property('checked', true) : transformationSwitch.property('checked', false);
+}
+function resetTransformationSwitch() {
+    d3.select("#circleSwitchInput").property('checked', false);
+}
 function transformNodeObject() {
     let isEnabled = d3.select("#circleSwitchInput").property('checked');
     let id = document.getElementById('rectInfo').innerHTML;
@@ -86,11 +96,20 @@ function transformNodeObject() {
 exports.transformNodeObject = transformNodeObject;
 function transformRectToCircle(element) {
     element
+        .transition()
+        .ease(d3.easeLinear)
+        .delay(20)
+        .duration(1000)
         .attr("rx", +element.attr("x") / 2)
         .attr("ry", +element.attr("y") / 2);
+    d3.select(element.node().parentNode).attr("transformation", "circle");
 }
 function transformCircleToRect(element) {
     element
+        .transition()
+        .ease(d3.easeLinear)
+        .duration(1000)
         .attr("rx", 2)
         .attr("ry", 2);
+    d3.select(element.node().parentNode).attr("transformation", "rect");
 }
