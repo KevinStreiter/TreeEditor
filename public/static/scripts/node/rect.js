@@ -20,7 +20,8 @@ class Rect extends abstractNode_1.AbstractNode {
             .attr('width', 0)
             .attr("fill", "#f8f8f8")
             .attr("class", this.getNodeType());
-        this.nodeObject.attr("rx", +this.nodeObject.attr("x") / 2)
+        this.nodeObject
+            .attr("rx", +this.nodeObject.attr("x") / 2)
             .attr("ry", +this.nodeObject.attr("y") / 2);
     }
     appendNodeObjectText(g) {

@@ -845,20 +845,6 @@ function resetRectBorder() {
         .style("stroke", "#b3b2b4");
 }
 exports.resetRectBorder = resetRectBorder;
-function updateToggleButton() {
-    document.querySelectorAll('.toggle').forEach(element => {
-        element.classList.toggle('active');
-        let inputElement = element;
-        if (inputElement.style.display == 'none') {
-            console.log(inputElement.style.display);
-            inputElement.style.display = '';
-        }
-        else {
-            inputElement.style.display = 'none;';
-        }
-    });
-}
-exports.updateToggleButton = updateToggleButton;
 
 },{"./grid":4,"./modules/d3.js":8,"./navbar":11,"./node/concreteRectCreator":13}],4:[function(require,module,exports){
 "use strict";
@@ -1024,6 +1010,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const grid_1 = require("./grid");
 const links_1 = require("./links");
 const files_1 = require("./files");
+const navbar_1 = require("./navbar");
 const controller_1 = require("./controller");
 const graph_1 = require("./graph");
 const d3 = __importStar(require("./modules/d3"));
@@ -1048,9 +1035,8 @@ function initializePageListeners() {
     d3.select("#contentText").on("input", function () {
         graph_1.updateRectText(this);
     });
-    d3.selectAll(".toggle").on("click", function () {
-        console.log(this);
-        graph_1.updateToggleButton();
+    d3.select("#circleSwitch").on("input", function () {
+        navbar_1.transformNodeObject();
     });
     d3.select("#linkSaveBtn").on("click", function () {
         links_1.processLinkItem();
@@ -1075,7 +1061,7 @@ function initializePageListeners() {
     });
 }
 
-},{"./controller":1,"./files":2,"./graph":3,"./grid":4,"./links":6,"./modules/d3":8}],6:[function(require,module,exports){
+},{"./controller":1,"./files":2,"./graph":3,"./grid":4,"./links":6,"./modules/d3":8,"./navbar":11}],6:[function(require,module,exports){
 "use strict";
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
@@ -19969,6 +19955,27 @@ function listLinks(id) {
         }
     });
 }
+function transformNodeObject() {
+    let isEnabled = d3.select("#circleSwitchInput").property('checked');
+    let id = document.getElementById('rectInfo').innerHTML;
+    let nodes = d3.select("#nodes");
+    nodes.selectAll("rect").each(function () {
+        if (d3.select(this.parentNode).attr("id") == id) {
+            isEnabled ? transformRectToCircle(d3.select(this)) : transformCircleToRect(d3.select(this));
+        }
+    });
+}
+exports.transformNodeObject = transformNodeObject;
+function transformRectToCircle(element) {
+    element
+        .attr("rx", +element.attr("x") / 2)
+        .attr("ry", +element.attr("y") / 2);
+}
+function transformCircleToRect(element) {
+    element
+        .attr("rx", 2)
+        .attr("ry", 2);
+}
 
 },{"./graph":3,"./links":6,"./modules/d3":8}],12:[function(require,module,exports){
 "use strict";
@@ -20062,7 +20069,8 @@ class Rect extends abstractNode_1.AbstractNode {
             .attr('width', 0)
             .attr("fill", "#f8f8f8")
             .attr("class", this.getNodeType());
-        this.nodeObject.attr("rx", +this.nodeObject.attr("x") / 2)
+        this.nodeObject
+            .attr("rx", +this.nodeObject.attr("x") / 2)
             .attr("ry", +this.nodeObject.attr("y") / 2);
     }
     appendNodeObjectText(g) {

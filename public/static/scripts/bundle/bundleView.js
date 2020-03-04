@@ -855,20 +855,6 @@ function resetRectBorder() {
         .style("stroke", "#b3b2b4");
 }
 exports.resetRectBorder = resetRectBorder;
-function updateToggleButton() {
-    document.querySelectorAll('.toggle').forEach(element => {
-        element.classList.toggle('active');
-        let inputElement = element;
-        if (inputElement.style.display == 'none') {
-            console.log(inputElement.style.display);
-            inputElement.style.display = '';
-        }
-        else {
-            inputElement.style.display = 'none;';
-        }
-    });
-}
-exports.updateToggleButton = updateToggleButton;
 
 },{"./grid":5,"./modules/d3.js":8,"./navbar":13,"./node/concreteRectCreator":16}],5:[function(require,module,exports){
 "use strict";
@@ -100663,6 +100649,27 @@ function listLinks(id) {
         }
     });
 }
+function transformNodeObject() {
+    let isEnabled = d3.select("#circleSwitchInput").property('checked');
+    let id = document.getElementById('rectInfo').innerHTML;
+    let nodes = d3.select("#nodes");
+    nodes.selectAll("rect").each(function () {
+        if (d3.select(this.parentNode).attr("id") == id) {
+            isEnabled ? transformRectToCircle(d3.select(this)) : transformCircleToRect(d3.select(this));
+        }
+    });
+}
+exports.transformNodeObject = transformNodeObject;
+function transformRectToCircle(element) {
+    element
+        .attr("rx", +element.attr("x") / 2)
+        .attr("ry", +element.attr("y") / 2);
+}
+function transformCircleToRect(element) {
+    element
+        .attr("rx", 2)
+        .attr("ry", 2);
+}
 
 },{"./graph":4,"./links":7,"./modules/d3":8}],14:[function(require,module,exports){
 "use strict";
@@ -100855,7 +100862,8 @@ class Rect extends abstractNode_1.AbstractNode {
             .attr('width', 0)
             .attr("fill", "#f8f8f8")
             .attr("class", this.getNodeType());
-        this.nodeObject.attr("rx", +this.nodeObject.attr("x") / 2)
+        this.nodeObject
+            .attr("rx", +this.nodeObject.attr("x") / 2)
             .attr("ry", +this.nodeObject.attr("y") / 2);
     }
     appendNodeObjectText(g) {

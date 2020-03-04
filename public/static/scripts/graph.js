@@ -415,17 +415,3 @@ function resetRectBorder() {
         .style("stroke", "#b3b2b4");
 }
 exports.resetRectBorder = resetRectBorder;
-function updateToggleButton() {
-    document.querySelectorAll('.toggle').forEach(element => {
-        element.classList.toggle('active');
-        let inputElement = element;
-        if (inputElement.style.display == 'none') {
-            console.log(inputElement.style.display);
-            inputElement.style.display = '';
-        }
-        else {
-            inputElement.style.display = 'none;';
-        }
-    });
-}
-exports.updateToggleButton = updateToggleButton;

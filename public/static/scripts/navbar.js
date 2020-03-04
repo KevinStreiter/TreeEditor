@@ -73,3 +73,24 @@ function listLinks(id) {
         }
     });
 }
+function transformNodeObject() {
+    let isEnabled = d3.select("#circleSwitchInput").property('checked');
+    let id = document.getElementById('rectInfo').innerHTML;
+    let nodes = d3.select("#nodes");
+    nodes.selectAll("rect").each(function () {
+        if (d3.select(this.parentNode).attr("id") == id) {
+            isEnabled ? transformRectToCircle(d3.select(this)) : transformCircleToRect(d3.select(this));
+        }
+    });
+}
+exports.transformNodeObject = transformNodeObject;
+function transformRectToCircle(element) {
+    element
+        .attr("rx", +element.attr("x") / 2)
+        .attr("ry", +element.attr("y") / 2);
+}
+function transformCircleToRect(element) {
+    element
+        .attr("rx", 2)
+        .attr("ry", 2);
+}
