@@ -37,21 +37,24 @@ class Rect extends abstractNode_1.AbstractNode {
     }
     appendNodeIconAppendix(g, counter) {
         let appendixContainer = g.append("g")
-            .attr("id", "appendix_container_" + counter)
+            .attr("id", "appendixContainer_" + counter)
             .attr("class", "appendixIcons")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml');
         let foreignObject = appendixContainer.append("foreignObject")
             .attr("width", 40)
-            .attr("height", 40);
+            .attr("height", 40)
+            .attr("class", "foreignAppendix");
         let fileIcon = foreignObject.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
-            .attr("id", "appendix_file_icon" + counter);
+            .attr("class", "appendixFileIcon")
+            .style("display", 'none');
         fileIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "fa fa-paperclip");
         let linkIcon = foreignObject.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
-            .attr("id", "appendix_link_icon" + counter);
+            .attr("class", "appendixLinkIcon")
+            .style("display", 'none');
         linkIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "fa fa-external-link");

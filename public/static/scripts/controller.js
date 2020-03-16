@@ -172,6 +172,7 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
             }
         }
         let g = d3.select("#nodes>g:last-child");
+        g.selectAll(".appendixIcons").remove();
         const rectNode = new concreteRectCreator_1.ConcreteRectCreator().createNode();
         rectNode.appendNodeIconAppendix(g, 1);
     }

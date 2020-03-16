@@ -137,8 +137,6 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
                 .attr("x", x)
                 .attr("y", y);
 
-
-
             foreignNode.selectAll("path").remove();
             foreignNode.selectAll("circle.lineCircle").remove();
             foreignNode.selectAll("circle").each(function () {
@@ -168,6 +166,7 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
             }
         }
         let g = d3.select("#nodes>g:last-child");
+        g.selectAll(".appendixIcons").remove();
         const rectNode = new ConcreteRectCreator().createNode();
         rectNode.appendNodeIconAppendix(g, 1);
     }

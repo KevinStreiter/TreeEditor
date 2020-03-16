@@ -68,7 +68,7 @@ function uploadFile() {
         .then(response => response.text())
         .then(function (data) {
         updateFileList(data);
-        insertFileIcon();
+        insertFileIcon(rectInfo);
         controller_1.saveProject();
     });
 }
@@ -102,7 +102,21 @@ function updateFileList(filename) {
         item.addEventListener('click', executeDeleteFileListListener);
     });
 }
-function insertFileIcon() {
+function insertFileIcon(id) {
+    let container = d3.select("#appendixContainer_" + id);
+    let foreign = container.select(".foreignAppendix");
+    let nodes = d3.select("#nodes");
+    nodes.selectAll("g").each(function () {
+        let element = d3.select(this);
+        if (element.attr("id") == id) {
+            let rect = element.select("rect");
+            foreign
+                .attr("x", +rect.attr("x") + 10)
+                .attr("y", +rect.attr("y") + +rect.attr("height") - 25);
+            foreign.select(".appendixFileIcon")
+                .style("display", 'inherit');
+        }
+    });
 }
 function executeDeleteFileListListener(event) {
     let id = controller_1.deleteItemList(event);

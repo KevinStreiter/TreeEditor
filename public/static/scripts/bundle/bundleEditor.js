@@ -173,6 +173,7 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
             }
         }
         let g = d3.select("#nodes>g:last-child");
+        g.selectAll(".appendixIcons").remove();
         const rectNode = new concreteRectCreator_1.ConcreteRectCreator().createNode();
         rectNode.appendNodeIconAppendix(g, 1);
     }
@@ -393,7 +394,7 @@ function uploadFile() {
         .then(response => response.text())
         .then(function (data) {
         updateFileList(data);
-        insertFileIcon();
+        insertFileIcon(rectInfo);
         controller_1.saveProject();
     });
 }
@@ -427,7 +428,21 @@ function updateFileList(filename) {
         item.addEventListener('click', executeDeleteFileListListener);
     });
 }
-function insertFileIcon() {
+function insertFileIcon(id) {
+    let container = d3.select("#appendixContainer_" + id);
+    let foreign = container.select(".foreignAppendix");
+    let nodes = d3.select("#nodes");
+    nodes.selectAll("g").each(function () {
+        let element = d3.select(this);
+        if (element.attr("id") == id) {
+            let rect = element.select("rect");
+            foreign
+                .attr("x", +rect.attr("x") + 10)
+                .attr("y", +rect.attr("y") + +rect.attr("height") - 25);
+            foreign.select(".appendixFileIcon")
+                .style("display", 'inherit');
+        }
+    });
 }
 function executeDeleteFileListListener(event) {
     let id = controller_1.deleteItemList(event);
@@ -677,6 +692,9 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
         parent.select("text.descriptionText")
             .attr("x", +current.attr("x"))
             .attr("y", +current.attr("y") - 2);
+        parent.select(".foreignAppendix")
+            .attr("x", +current.attr("x") + 10)
+            .attr("y", +current.attr("y") + +current.attr("height") - 25);
     }
 }
 exports.updateRectSize = updateRectSize;
@@ -1098,6 +1116,7 @@ function updateLinkList(name, url) {
     let linkId = document.getElementById("linkInfo").innerHTML;
     if (linkId == "") {
         insertNewLinkItem(name, url);
+        insertLinkIcon();
     }
     else {
         updateLinkItem(name, url, linkId);
@@ -1216,6 +1235,23 @@ function getProjectLinks(id) {
         .then(data => updateProjectLinks(data));
 }
 exports.getProjectLinks = getProjectLinks;
+function insertLinkIcon() {
+    let id = document.getElementById('rectInfo').innerHTML;
+    let container = d3.select("#appendixContainer_" + id);
+    let foreign = container.select(".foreignAppendix");
+    let nodes = d3.select("#nodes");
+    nodes.selectAll("g").each(function () {
+        let element = d3.select(this);
+        if (element.attr("id") == id) {
+            let rect = element.select("rect");
+            foreign
+                .attr("x", +rect.attr("x") + 10)
+                .attr("y", +rect.attr("y") + +rect.attr("height") - 50);
+            foreign.select(".appendixLinkIcon")
+                .style("display", 'inherit');
+        }
+    });
+}
 
 },{"./controller":1,"./modules/d3":8,"./modules/toDOM.js":9}],7:[function(require,module,exports){
 "use strict";
@@ -20114,21 +20150,24 @@ class Rect extends abstractNode_1.AbstractNode {
     }
     appendNodeIconAppendix(g, counter) {
         let appendixContainer = g.append("g")
-            .attr("id", "appendix_container_" + counter)
+            .attr("id", "appendixContainer_" + counter)
             .attr("class", "appendixIcons")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml');
         let foreignObject = appendixContainer.append("foreignObject")
             .attr("width", 40)
-            .attr("height", 40);
+            .attr("height", 40)
+            .attr("class", "foreignAppendix");
         let fileIcon = foreignObject.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
-            .attr("id", "appendix_file_icon" + counter);
+            .attr("class", "appendixFileIcon")
+            .style("display", 'none');
         fileIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "fa fa-paperclip");
         let linkIcon = foreignObject.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
-            .attr("id", "appendix_link_icon" + counter);
+            .attr("class", "appendixLinkIcon")
+            .style("display", 'none');
         linkIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "fa fa-external-link");

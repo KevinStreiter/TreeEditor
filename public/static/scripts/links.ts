@@ -20,6 +20,8 @@ function updateLinkList(name, url) {
     let linkId = document.getElementById("linkInfo").innerHTML;
     if (linkId == "") {
         insertNewLinkItem(name, url);
+        insertLinkIcon();
+
     } else {
         updateLinkItem(name, url, linkId);
     }
@@ -143,4 +145,23 @@ export function getProjectLinks(id) {
     })
         .then(response => response.json())
         .then(data => updateProjectLinks(data));
+}
+
+function insertLinkIcon() {
+    let id = document.getElementById('rectInfo').innerHTML;
+    let container = d3.select("#appendixContainer_"+id);
+    let foreign = container.select(".foreignAppendix");
+    let nodes = d3.select("#nodes");
+
+    nodes.selectAll("g").each(function () {
+        let element = d3.select(this);
+        if (element.attr("id") == id) {
+            let rect = element.select("rect");
+            foreign
+                .attr("x", +rect.attr("x") + 10)
+                .attr("y", +rect.attr("y") + +rect.attr("height") - 50);
+            foreign.select(".appendixLinkIcon")
+                .style("display",'inherit');
+        }
+    });
 }
