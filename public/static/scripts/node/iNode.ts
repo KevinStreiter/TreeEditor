@@ -5,5 +5,6 @@ export interface INode {
     initializeNodeListener();
     appendNodeObject(g, event);
     appendNodeObjectText(g);
+    appendNodeIconAppendix(g, counter)
     appendNodeObjectCircles(g, counter);
 }

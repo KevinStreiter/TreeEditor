@@ -21,6 +21,7 @@ const graph_1 = require("./graph");
 const files_1 = require("./files");
 const links_1 = require("./links");
 const d3 = __importStar(require("./modules/d3"));
+const concreteRectCreator_1 = require("./node/concreteRectCreator");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
 function preventEnterInput(e) {
@@ -69,7 +70,7 @@ function saveProjectID(projectID) {
 function filterNodes() {
     let nodes = document.getElementById("nodes");
     let cloned_nodes = nodes.cloneNode(false);
-    let children = nodes.querySelectorAll("g:not(.foreign)");
+    let children = nodes.querySelectorAll("g:not(.foreign):not(.appendixIcons)");
     children.forEach.call(children, function (item) {
         let cloned_item = item.cloneNode(true);
         cloned_nodes.appendChild(cloned_item);
@@ -171,6 +172,9 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
                 graph_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
             }
         }
+        let g = d3.select("#nodes>g:last-child");
+        const rectNode = new concreteRectCreator_1.ConcreteRectCreator().createNode();
+        rectNode.appendNodeIconAppendix(g, 1);
     }
     graph_1.initializeRectListeners();
     graph_1.initializeCircleListeners();
@@ -318,7 +322,7 @@ function deleteItemList(event) {
 }
 exports.deleteItemList = deleteItemList;
 
-},{"./files":2,"./graph":3,"./links":6,"./modules/d3":8,"./modules/toDOM.js":9,"./modules/toJSON.js":10}],2:[function(require,module,exports){
+},{"./files":2,"./graph":3,"./links":6,"./modules/d3":8,"./modules/toDOM.js":9,"./modules/toJSON.js":10,"./node/concreteRectCreator":13}],2:[function(require,module,exports){
 "use strict";
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
@@ -389,6 +393,7 @@ function uploadFile() {
         .then(response => response.text())
         .then(function (data) {
         updateFileList(data);
+        insertFileIcon();
         controller_1.saveProject();
     });
 }
@@ -421,6 +426,8 @@ function updateFileList(filename) {
     document.querySelectorAll(".deleteFileBtn").forEach(item => {
         item.addEventListener('click', executeDeleteFileListListener);
     });
+}
+function insertFileIcon() {
 }
 function executeDeleteFileListListener(event) {
     let id = controller_1.deleteItemList(event);
@@ -20022,6 +20029,7 @@ class AbstractNode {
         g.attr("id", counter);
         this.appendNodeObject(g, event);
         this.appendNodeObjectText(g);
+        this.appendNodeIconAppendix(g, counter);
         this.appendNodeObjectCircles(g, counter);
         this.initializeNodeListener();
     }
@@ -20031,6 +20039,8 @@ class AbstractNode {
     appendNodeObject(g, event) { }
     ;
     appendNodeObjectText(g) { }
+    ;
+    appendNodeIconAppendix(g, counter) { }
     ;
     appendNodeObjectCircles(g, counter) { }
     ;
@@ -20102,6 +20112,27 @@ class Rect extends abstractNode_1.AbstractNode {
             .attr("class", "contentText")
             .text();
     }
+    appendNodeIconAppendix(g, counter) {
+        let appendixContainer = g.append("g")
+            .attr("id", "appendix_container_" + counter)
+            .attr("class", "appendixIcons")
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml');
+        let foreignObject = appendixContainer.append("foreignObject")
+            .attr("width", 40)
+            .attr("height", 40);
+        let fileIcon = foreignObject.append("xhtml:a")
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+            .attr("id", "appendix_file_icon" + counter);
+        fileIcon.append("xhtml:i")
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+            .attr("class", "fa fa-paperclip");
+        let linkIcon = foreignObject.append("xhtml:a")
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+            .attr("id", "appendix_link_icon" + counter);
+        linkIcon.append("xhtml:i")
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+            .attr("class", "fa fa-external-link");
+    }
     appendNodeObjectCircles(g, counter) {
         g.append("circle")
             .attr("cx", +this.nodeObject.attr("cx"))
@@ -20134,4 +20165,4 @@ class Rect extends abstractNode_1.AbstractNode {
 }
 exports.Rect = Rect;
 
-},{"../graph":3,"./abstractNode":12}]},{},[7,3,11,1,2,6,5,4,13,16,14,15,12]);
+},{"../graph":3,"./abstractNode":12}]},{},[7,3,11,1,2,6,5,4,12,13,16,14,15]);

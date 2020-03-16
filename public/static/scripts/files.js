@@ -68,6 +68,7 @@ function uploadFile() {
         .then(response => response.text())
         .then(function (data) {
         updateFileList(data);
+        insertFileIcon();
         controller_1.saveProject();
     });
 }
@@ -100,6 +101,8 @@ function updateFileList(filename) {
     document.querySelectorAll(".deleteFileBtn").forEach(item => {
         item.addEventListener('click', executeDeleteFileListListener);
     });
+}
+function insertFileIcon() {
 }
 function executeDeleteFileListListener(event) {
     let id = controller_1.deleteItemList(event);

@@ -22,6 +22,7 @@ export abstract class AbstractNode implements INode {
 
         this.appendNodeObject(g, event);
         this.appendNodeObjectText(g);
+        this.appendNodeIconAppendix(g, counter);
         this.appendNodeObjectCircles(g, counter);
         this.initializeNodeListener();
     }
@@ -33,6 +34,8 @@ export abstract class AbstractNode implements INode {
     appendNodeObject(g, event) {};
 
     appendNodeObjectText(g) {};
+
+    appendNodeIconAppendix(g, counter) {};
 
     appendNodeObjectCircles(g, counter) {};
 

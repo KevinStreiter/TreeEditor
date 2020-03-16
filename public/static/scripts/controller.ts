@@ -2,6 +2,7 @@ import {resetRectBorder, initializeRectListeners, initializeCircleListeners, upd
 import {getProjectFiles} from "./files";
 import {getProjectLinks} from "./links";
 import * as d3 from "./modules/d3";
+import {ConcreteRectCreator} from "./node/concreteRectCreator";
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
 
@@ -52,7 +53,7 @@ function saveProjectID(projectID) {
 function filterNodes() {
     let nodes = document.getElementById("nodes");
     let cloned_nodes = nodes.cloneNode(false);
-    let children = nodes.querySelectorAll("g:not(.foreign)");
+    let children = nodes.querySelectorAll("g:not(.foreign):not(.appendixIcons)");
     children.forEach.call(children, function(item) {
         let cloned_item = item.cloneNode(true);
         cloned_nodes.appendChild(cloned_item);
@@ -136,6 +137,8 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
                 .attr("x", x)
                 .attr("y", y);
 
+
+
             foreignNode.selectAll("path").remove();
             foreignNode.selectAll("circle.lineCircle").remove();
             foreignNode.selectAll("circle").each(function () {
@@ -164,6 +167,9 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
                 updateRectSize(x,  y, rectCounter, foreignNode, foreignRect, false);
             }
         }
+        let g = d3.select("#nodes>g:last-child");
+        const rectNode = new ConcreteRectCreator().createNode();
+        rectNode.appendNodeIconAppendix(g, 1);
     }
     initializeRectListeners();
     initializeCircleListeners();

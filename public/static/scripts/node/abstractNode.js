@@ -24,6 +24,7 @@ class AbstractNode {
         g.attr("id", counter);
         this.appendNodeObject(g, event);
         this.appendNodeObjectText(g);
+        this.appendNodeIconAppendix(g, counter);
         this.appendNodeObjectCircles(g, counter);
         this.initializeNodeListener();
     }
@@ -33,6 +34,8 @@ class AbstractNode {
     appendNodeObject(g, event) { }
     ;
     appendNodeObjectText(g) { }
+    ;
+    appendNodeIconAppendix(g, counter) { }
     ;
     appendNodeObjectCircles(g, counter) { }
     ;

@@ -20,6 +20,7 @@ const graph_1 = require("./graph");
 const files_1 = require("./files");
 const links_1 = require("./links");
 const d3 = __importStar(require("./modules/d3"));
+const concreteRectCreator_1 = require("./node/concreteRectCreator");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
 function preventEnterInput(e) {
@@ -68,7 +69,7 @@ function saveProjectID(projectID) {
 function filterNodes() {
     let nodes = document.getElementById("nodes");
     let cloned_nodes = nodes.cloneNode(false);
-    let children = nodes.querySelectorAll("g:not(.foreign)");
+    let children = nodes.querySelectorAll("g:not(.foreign):not(.appendixIcons)");
     children.forEach.call(children, function (item) {
         let cloned_item = item.cloneNode(true);
         cloned_nodes.appendChild(cloned_item);
@@ -170,6 +171,9 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
                 graph_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
             }
         }
+        let g = d3.select("#nodes>g:last-child");
+        const rectNode = new concreteRectCreator_1.ConcreteRectCreator().createNode();
+        rectNode.appendNodeIconAppendix(g, 1);
     }
     graph_1.initializeRectListeners();
     graph_1.initializeCircleListeners();

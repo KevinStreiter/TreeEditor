@@ -65,6 +65,7 @@ export function uploadFile() {
         .then(response => response.text())
         .then(function (data) {
             updateFileList(data);
+            insertFileIcon();
             saveProject();
         });
 }
@@ -98,6 +99,10 @@ function updateFileList(filename) {
     document.querySelectorAll(".deleteFileBtn").forEach(item => {
         item.addEventListener('click', executeDeleteFileListListener);
     });
+}
+
+function insertFileIcon() {
+
 }
 
 function executeDeleteFileListListener(event) {

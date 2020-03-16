@@ -42,6 +42,34 @@ export class Rect extends AbstractNode {
             .text();
     }
 
+    appendNodeIconAppendix(g, counter) {
+
+        let appendixContainer = g.append("g")
+            .attr("id", "appendix_container_" + counter)
+            .attr("class", "appendixIcons")
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml');
+
+        let foreignObject = appendixContainer.append("foreignObject")
+            .attr("width", 40)
+            .attr("height", 40);
+
+        let fileIcon = foreignObject.append("xhtml:a")
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+            .attr("id", "appendix_file_icon" + counter);
+
+        fileIcon.append("xhtml:i")
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+            .attr("class", "fa fa-paperclip");
+
+        let linkIcon = foreignObject.append("xhtml:a")
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+            .attr("id", "appendix_link_icon" + counter);
+
+        linkIcon.append("xhtml:i")
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+            .attr("class", "fa fa-external-link");
+}
+
     appendNodeObjectCircles(g, counter) {
         g.append("circle")
             .attr("cx", +this.nodeObject.attr("cx"))
@@ -49,7 +77,6 @@ export class Rect extends AbstractNode {
             .attr("r", 5)
             .attr("id", "circleTop" + counter)
             .attr("class", "circle");
-
 
         g.append("circle")
             .attr("cx", +this.nodeObject.attr("cx") + +this.nodeObject.attr("r"))
