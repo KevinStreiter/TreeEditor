@@ -335,10 +335,16 @@ h5 {
     z-index: -1;
 }
 
+.iconSpan {
+    display: inline;
+}
+
 .iconHide {
     display: none;
+    padding: 2px;
 }
 
 .iconShow {
     display: inherit;
+    padding: 2px;
 }

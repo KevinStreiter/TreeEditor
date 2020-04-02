@@ -109,10 +109,6 @@ function insertFileIcon(id) {
     nodes.selectAll("g").each(function () {
         let element = d3.select(this);
         if (element.attr("id") == id) {
-            let rect = element.select("rect");
-            foreign
-                .attr("x", +rect.attr("x") + 10)
-                .attr("y", +rect.attr("y") + +rect.attr("height") - 25);
             let icon = foreign.select(".appendixFileIcon");
             icon.node().classList.add("iconShow");
             icon.node().classList.remove("iconHide");
@@ -140,11 +136,12 @@ function isFileListEmpty(id): boolean {
     return empty;
 }
 
-function executeDeleteFileListListener(event) {
+async function executeDeleteFileListListener(event) {
     let nodeId = document.getElementById('rectInfo').innerHTML;
     let fileId = deleteItemList(event);
     if(isFileListEmpty(nodeId)) {
         removeFileIcon(nodeId);
     }
+    await saveProject();
     deleteFile(fileId);
 }

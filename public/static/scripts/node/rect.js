@@ -41,16 +41,18 @@ class Rect extends abstractNode_1.AbstractNode {
             .attr("class", "appendixIcons")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml');
         let foreignObject = appendixContainer.append("foreignObject")
-            .attr("width", 40)
-            .attr("height", 40)
+            .attr("width", 50)
+            .attr("height", 15)
             .attr("class", "foreignAppendix");
-        let fileIcon = foreignObject.append("xhtml:a")
+        let span = foreignObject.append("xhtml:span")
+            .attr("class", "iconSpan");
+        let fileIcon = span.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "appendixFileIcon iconHide");
         fileIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "fa fa-paperclip");
-        let linkIcon = foreignObject.append("xhtml:a")
+        let linkIcon = span.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "appendixLinkIcon iconHide");
         linkIcon.append("xhtml:i")

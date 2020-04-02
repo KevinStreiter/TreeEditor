@@ -1,7 +1,7 @@
-*.log
 *.iml
 composer-setup.php
 /.idea/
 /vendor/
 /node_modules/
 /public/uploads/
+/log/

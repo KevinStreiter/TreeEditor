@@ -333,7 +333,6 @@ function deleteItemList(event) {
     }
     parent.remove();
     event.stopPropagation();
-    saveProject();
     return id;
 }
 exports.deleteItemList = deleteItemList;

@@ -247,7 +247,7 @@ exports.updateRectSize = updateRectSize;
 function updateUploadIconPosition(parent, current) {
     parent.select(".foreignAppendix")
         .attr("x", +current.attr("x") + 10)
-        .attr("y", +current.attr("y") + +current.attr("height") - 25);
+        .attr("y", +current.attr("y") + +current.attr("height") - 30);
 }
 exports.updateUploadIconPosition = updateUploadIconPosition;
 function updateLinePath(element, current, x, y, isConnector) {

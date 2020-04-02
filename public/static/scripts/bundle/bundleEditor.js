@@ -334,13 +334,21 @@ function deleteItemList(event) {
     }
     parent.remove();
     event.stopPropagation();
-    saveProject();
     return id;
 }
 exports.deleteItemList = deleteItemList;
 
 },{"./files":2,"./graph":3,"./links":6,"./modules/d3":8,"./modules/toDOM.js":9,"./modules/toJSON.js":10,"./node/concreteRectCreator":13}],2:[function(require,module,exports){
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -451,10 +459,6 @@ function insertFileIcon(id) {
     nodes.selectAll("g").each(function () {
         let element = d3.select(this);
         if (element.attr("id") == id) {
-            let rect = element.select("rect");
-            foreign
-                .attr("x", +rect.attr("x") + 10)
-                .attr("y", +rect.attr("y") + +rect.attr("height") - 25);
             let icon = foreign.select(".appendixFileIcon");
             icon.node().classList.add("iconShow");
             icon.node().classList.remove("iconHide");
@@ -480,12 +484,15 @@ function isFileListEmpty(id) {
     return empty;
 }
 function executeDeleteFileListListener(event) {
-    let nodeId = document.getElementById('rectInfo').innerHTML;
-    let fileId = controller_1.deleteItemList(event);
-    if (isFileListEmpty(nodeId)) {
-        removeFileIcon(nodeId);
-    }
-    deleteFile(fileId);
+    return __awaiter(this, void 0, void 0, function* () {
+        let nodeId = document.getElementById('rectInfo').innerHTML;
+        let fileId = controller_1.deleteItemList(event);
+        if (isFileListEmpty(nodeId)) {
+            removeFileIcon(nodeId);
+        }
+        yield controller_1.saveProject();
+        deleteFile(fileId);
+    });
 }
 
 },{"./controller":1,"./modules/d3":8,"./modules/toDOM.js":9}],3:[function(require,module,exports){
@@ -738,7 +745,7 @@ exports.updateRectSize = updateRectSize;
 function updateUploadIconPosition(parent, current) {
     parent.select(".foreignAppendix")
         .attr("x", +current.attr("x") + 10)
-        .attr("y", +current.attr("y") + +current.attr("height") - 25);
+        .attr("y", +current.attr("y") + +current.attr("height") - 30);
 }
 exports.updateUploadIconPosition = updateUploadIconPosition;
 function updateLinePath(element, current, x, y, isConnector) {
@@ -1286,14 +1293,29 @@ function insertLinkIcon() {
     nodes.selectAll("g").each(function () {
         let element = d3.select(this);
         if (element.attr("id") == id) {
-            let rect = element.select("rect");
-            foreign
-                .attr("x", +rect.attr("x") + 10)
-                .attr("y", +rect.attr("y") + +rect.attr("height") - 50);
-            foreign.select(".appendixLinkIcon")
-                .style("display", 'inherit');
+            let icon = foreign.select(".appendixLinkIcon");
+            icon.node().classList.add("iconShow");
+            icon.node().classList.remove("iconHide");
         }
     });
+}
+function removeLinkIcon(id) {
+    let container = d3.select("#appendixContainer_" + id);
+    let icon = container.select(".appendixLinkIcon");
+    icon.node().classList.add("iconHide");
+    icon.node().classList.remove("iconShow");
+}
+function isLinkListEmpty(id) {
+    let empty = true;
+    let list = d3.select("#linkList");
+    list.selectAll("li").each(function () {
+        let li = d3.select(this).attr("id");
+        if (li.split("_", 2)[0] == id) {
+            empty = false;
+            return;
+        }
+    });
+    return empty;
 }
 
 },{"./controller":1,"./modules/d3":8,"./modules/toDOM.js":9}],7:[function(require,module,exports){
@@ -20197,16 +20219,18 @@ class Rect extends abstractNode_1.AbstractNode {
             .attr("class", "appendixIcons")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml');
         let foreignObject = appendixContainer.append("foreignObject")
-            .attr("width", 40)
-            .attr("height", 40)
+            .attr("width", 50)
+            .attr("height", 15)
             .attr("class", "foreignAppendix");
-        let fileIcon = foreignObject.append("xhtml:a")
+        let span = foreignObject.append("xhtml:span")
+            .attr("class", "iconSpan");
+        let fileIcon = span.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "appendixFileIcon iconHide");
         fileIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "fa fa-paperclip");
-        let linkIcon = foreignObject.append("xhtml:a")
+        let linkIcon = span.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "appendixLinkIcon iconHide");
         linkIcon.append("xhtml:i")

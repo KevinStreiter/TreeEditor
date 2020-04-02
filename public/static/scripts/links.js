@@ -154,12 +154,27 @@ function insertLinkIcon() {
     nodes.selectAll("g").each(function () {
         let element = d3.select(this);
         if (element.attr("id") == id) {
-            let rect = element.select("rect");
-            foreign
-                .attr("x", +rect.attr("x") + 10)
-                .attr("y", +rect.attr("y") + +rect.attr("height") - 50);
-            foreign.select(".appendixLinkIcon")
-                .style("display", 'inherit');
+            let icon = foreign.select(".appendixLinkIcon");
+            icon.node().classList.add("iconShow");
+            icon.node().classList.remove("iconHide");
         }
     });
+}
+function removeLinkIcon(id) {
+    let container = d3.select("#appendixContainer_" + id);
+    let icon = container.select(".appendixLinkIcon");
+    icon.node().classList.add("iconHide");
+    icon.node().classList.remove("iconShow");
+}
+function isLinkListEmpty(id) {
+    let empty = true;
+    let list = d3.select("#linkList");
+    list.selectAll("li").each(function () {
+        let li = d3.select(this).attr("id");
+        if (li.split("_", 2)[0] == id) {
+            empty = false;
+            return;
+        }
+    });
+    return empty;
 }
