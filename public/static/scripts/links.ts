@@ -5,7 +5,7 @@ let toDOM = require("./modules/toDOM.js");
 export function processLinkItem() {
     let name = <HTMLInputElement> document.getElementById("linkName");
     let url = <HTMLInputElement> document.getElementById("linkVal");
-    if (validURL(url.value)) {
+    if (validURL(url.value) && name.value != '') {
         updateLinkList(name.value, url.value);
         saveProject();
     }
@@ -63,11 +63,16 @@ function initializeDeleteLinkItemListener() {
 }
 
 export function executeDeleteLinkListListener(event) {
-    let id = deleteItemList(event);
+    let nodeId = document.getElementById('rectInfo').innerHTML;
+    let linkId = deleteItemList(event);
     let linkInfo = document.getElementById('linkInfo');
-    if (id == linkInfo.innerHTML) {
+    if (linkId == linkInfo.innerHTML) {
         linkInfo.innerHTML = "";
     }
+    if (isLinkListEmpty(nodeId)) {
+        removeLinkIcon(nodeId);
+    }
+    saveProject();
 }
 
 export function resetLinkBorderColor() {
@@ -174,8 +179,8 @@ function isLinkListEmpty(id): boolean {
     let empty = true;
     let list = d3.select("#linkList");
     list.selectAll("li").each(function () {
-        let li = d3.select(this).attr("id");
-        if (li.split("_", 2)[0] == id) {
+        let li = d3.select(this).attr("class");
+        if (li == id) {
             empty = false;
             return;
         }

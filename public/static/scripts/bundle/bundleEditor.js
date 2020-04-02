@@ -182,7 +182,7 @@ function updateUploadIcons() {
     let g = d3.select("#nodes>g:last-child");
     let rect = g.select("rect");
     let fileIconClassName = ".appendixFileIcon";
-    let linkIconClassName = ".appendixFileIcon";
+    let linkIconClassName = ".appendixLinkIcon";
     let fileIcon = g.select(fileIconClassName);
     let linkIcon = g.select(linkIconClassName);
     g.selectAll(".appendixIcons").remove();
@@ -744,8 +744,8 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
 exports.updateRectSize = updateRectSize;
 function updateUploadIconPosition(parent, current) {
     parent.select(".foreignAppendix")
-        .attr("x", +current.attr("x") + 10)
-        .attr("y", +current.attr("y") + +current.attr("height") - 30);
+        .attr("x", +current.attr("x") + 5)
+        .attr("y", +current.attr("y") + +current.attr("height") - 20);
 }
 exports.updateUploadIconPosition = updateUploadIconPosition;
 function updateLinePath(element, current, x, y, isConnector) {
@@ -1152,7 +1152,7 @@ let toDOM = require("./modules/toDOM.js");
 function processLinkItem() {
     let name = document.getElementById("linkName");
     let url = document.getElementById("linkVal");
-    if (validURL(url.value)) {
+    if (validURL(url.value) && name.value != '') {
         updateLinkList(name.value, url.value);
         controller_1.saveProject();
     }
@@ -1206,11 +1206,16 @@ function initializeDeleteLinkItemListener() {
     });
 }
 function executeDeleteLinkListListener(event) {
-    let id = controller_1.deleteItemList(event);
+    let nodeId = document.getElementById('rectInfo').innerHTML;
+    let linkId = controller_1.deleteItemList(event);
     let linkInfo = document.getElementById('linkInfo');
-    if (id == linkInfo.innerHTML) {
+    if (linkId == linkInfo.innerHTML) {
         linkInfo.innerHTML = "";
     }
+    if (isLinkListEmpty(nodeId)) {
+        removeLinkIcon(nodeId);
+    }
+    controller_1.saveProject();
 }
 exports.executeDeleteLinkListListener = executeDeleteLinkListListener;
 function resetLinkBorderColor() {
@@ -1309,8 +1314,8 @@ function isLinkListEmpty(id) {
     let empty = true;
     let list = d3.select("#linkList");
     list.selectAll("li").each(function () {
-        let li = d3.select(this).attr("id");
-        if (li.split("_", 2)[0] == id) {
+        let li = d3.select(this).attr("class");
+        if (li == id) {
             empty = false;
             return;
         }

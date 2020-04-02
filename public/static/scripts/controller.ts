@@ -180,7 +180,7 @@ function updateUploadIcons() {
     let g = d3.select("#nodes>g:last-child");
     let rect = g.select("rect");
     let fileIconClassName = ".appendixFileIcon";
-    let linkIconClassName = ".appendixFileIcon";
+    let linkIconClassName = ".appendixLinkIcon";
     let fileIcon = g.select(fileIconClassName);
     let linkIcon = g.select(linkIconClassName);
     g.selectAll(".appendixIcons").remove();
