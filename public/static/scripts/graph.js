@@ -240,12 +240,16 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
         parent.select("text.descriptionText")
             .attr("x", +current.attr("x"))
             .attr("y", +current.attr("y") - 2);
-        parent.select(".foreignAppendix")
-            .attr("x", +current.attr("x") + 10)
-            .attr("y", +current.attr("y") + +current.attr("height") - 25);
+        updateUploadIconPosition(parent, current);
     }
 }
 exports.updateRectSize = updateRectSize;
+function updateUploadIconPosition(parent, current) {
+    parent.select(".foreignAppendix")
+        .attr("x", +current.attr("x") + 10)
+        .attr("y", +current.attr("y") + +current.attr("height") - 25);
+}
+exports.updateUploadIconPosition = updateUploadIconPosition;
 function updateLinePath(element, current, x, y, isConnector) {
     let length = element.node().getTotalLength();
     let start = null;

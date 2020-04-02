@@ -56,8 +56,7 @@ export class Rect extends AbstractNode {
 
         let fileIcon = foreignObject.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
-            .attr("class", "appendixFileIcon")
-            .style("display",'none');
+            .attr("class", "appendixFileIcon iconHide");
 
         fileIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
@@ -65,13 +64,12 @@ export class Rect extends AbstractNode {
 
         let linkIcon = foreignObject.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
-            .attr("class", "appendixLinkIcon")
-            .style("display",'none');
+            .attr("class", "appendixLinkIcon iconHide");
 
         linkIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "fa fa-external-link");
-}
+    }
 
     appendNodeObjectCircles(g, counter) {
         g.append("circle")

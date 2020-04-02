@@ -113,16 +113,18 @@ function insertFileIcon(id) {
             foreign
                 .attr("x", +rect.attr("x") + 10)
                 .attr("y", +rect.attr("y") + +rect.attr("height") - 25);
-            foreign.select(".appendixFileIcon")
-                .style("display",'inherit');
+            let icon = foreign.select(".appendixFileIcon");
+            icon.node().classList.add("iconShow");
+            icon.node().classList.remove("iconHide");
         }
     });
 }
 
 function removeFileIcon(id) {
     let container = d3.select("#appendixContainer_"+id);
-    container.select(".appendixFileIcon")
-        .style("display",'none');
+    let icon = container.select(".appendixFileIcon");
+    icon.node().classList.add("iconHide");
+    icon.node().classList.remove("iconShow");
 }
 
 function isFileListEmpty(id): boolean {

@@ -1,4 +1,10 @@
-import {resetRectBorder, initializeRectListeners, initializeCircleListeners, updateRectSize} from "./graph";
+import {
+    resetRectBorder,
+    initializeRectListeners,
+    initializeCircleListeners,
+    updateRectSize,
+    updateUploadIconPosition
+} from "./graph";
 import {getProjectFiles} from "./files";
 import {getProjectLinks} from "./links";
 import * as d3 from "./modules/d3";
@@ -144,10 +150,8 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
                 element.attr("id", element.attr("id").slice(0, -1).concat(rectCounter));
             });
             insertForeignNodeDescription(foreignNode, foreignRect, element);
-            updateRectSize(x,  y, rectCounter, foreignNode, foreignRect, false);
             foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
             let foreignNodeDOM = document.getElementById(rectCounter.toString());
-
 
             if (initialLoad && element["connectors"] != null) {
                 let connectors = toDOM(element["connectors"]);
@@ -162,17 +166,36 @@ export function updateProjectNodes(data, fromDifferentProject: Boolean = false, 
                     }
                 }
                 g.remove();
-                updateRectSize(x,  y, rectCounter, foreignNode, foreignRect, false);
             }
+            updateRectSize(x,  y, rectCounter, foreignNode, foreignRect, false);
         }
-        let g = d3.select("#nodes>g:last-child");
-        g.selectAll(".appendixIcons").remove();
-        const rectNode = new ConcreteRectCreator().createNode();
-        rectNode.appendNodeIconAppendix(g, 1);
+    updateUploadIcons();
     }
     initializeRectListeners();
     initializeCircleListeners();
     resetRectBorder();
+}
+
+function updateUploadIcons() {
+    let g = d3.select("#nodes>g:last-child");
+    let rect = g.select("rect");
+    let fileIconClassName = ".appendixFileIcon";
+    let linkIconClassName = ".appendixFileIcon";
+    let fileIcon = g.select(fileIconClassName);
+    let linkIcon = g.select(linkIconClassName);
+    g.selectAll(".appendixIcons").remove();
+    const rectNode = new ConcreteRectCreator().createNode();
+    rectNode.appendNodeIconAppendix(g, g.attr("id"));
+    toggleUploadIconDisplay(g, fileIcon, fileIconClassName);
+    toggleUploadIconDisplay(g, linkIcon, linkIconClassName);
+    updateUploadIconPosition(g, rect);
+}
+
+function toggleUploadIconDisplay(parent, element, className) {
+    if (element.node().classList.contains("iconShow")) {
+        parent.select(className).node().classList.add("iconShow");
+        parent.select(className).node().classList.remove("iconHide");
+    }
 }
 
 function insertForeignNodeDescription(foreignNode, foreignRect, element) {
@@ -253,7 +276,7 @@ function saveForeignNode(data, fromDifferentProject, x, y) {
     let project_id = document.getElementById("projectTitle").getAttribute("class");
     let  newest_foreign_id = 1;
     let nodes = document.getElementById("nodes");
-    let g = nodes.querySelectorAll("g");
+    let g = nodes.querySelectorAll("g:not(.appendixIcons)");
     let idList = [];
     g.forEach(function (value) {
         let element = d3.select(value);

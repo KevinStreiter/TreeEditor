@@ -155,7 +155,6 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
                 element.attr("id", element.attr("id").slice(0, -1).concat(rectCounter));
             });
             insertForeignNodeDescription(foreignNode, foreignRect, element);
-            graph_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
             foreignNode.select(`#circleBottomRight${rectCounter}`).remove();
             let foreignNodeDOM = document.getElementById(rectCounter.toString());
             if (initialLoad && element["connectors"] != null) {
@@ -169,19 +168,36 @@ function updateProjectNodes(data, fromDifferentProject = false, x = null, y = nu
                     }
                 }
                 g.remove();
-                graph_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
             }
+            graph_1.updateRectSize(x, y, rectCounter, foreignNode, foreignRect, false);
         }
-        let g = d3.select("#nodes>g:last-child");
-        g.selectAll(".appendixIcons").remove();
-        const rectNode = new concreteRectCreator_1.ConcreteRectCreator().createNode();
-        rectNode.appendNodeIconAppendix(g, 1);
+        updateUploadIcons();
     }
     graph_1.initializeRectListeners();
     graph_1.initializeCircleListeners();
     graph_1.resetRectBorder();
 }
 exports.updateProjectNodes = updateProjectNodes;
+function updateUploadIcons() {
+    let g = d3.select("#nodes>g:last-child");
+    let rect = g.select("rect");
+    let fileIconClassName = ".appendixFileIcon";
+    let linkIconClassName = ".appendixFileIcon";
+    let fileIcon = g.select(fileIconClassName);
+    let linkIcon = g.select(linkIconClassName);
+    g.selectAll(".appendixIcons").remove();
+    const rectNode = new concreteRectCreator_1.ConcreteRectCreator().createNode();
+    rectNode.appendNodeIconAppendix(g, g.attr("id"));
+    toggleUploadIconDisplay(g, fileIcon, fileIconClassName);
+    toggleUploadIconDisplay(g, linkIcon, linkIconClassName);
+    graph_1.updateUploadIconPosition(g, rect);
+}
+function toggleUploadIconDisplay(parent, element, className) {
+    if (element.node().classList.contains("iconShow")) {
+        parent.select(className).node().classList.add("iconShow");
+        parent.select(className).node().classList.remove("iconHide");
+    }
+}
 function insertForeignNodeDescription(foreignNode, foreignRect, element) {
     let project_id = element['node_id'].split("_", 2)[0];
     let url = '/treeEditor/projectName?id=' + project_id;
@@ -255,7 +271,7 @@ function saveForeignNode(data, fromDifferentProject, x, y) {
     let project_id = document.getElementById("projectTitle").getAttribute("class");
     let newest_foreign_id = 1;
     let nodes = document.getElementById("nodes");
-    let g = nodes.querySelectorAll("g");
+    let g = nodes.querySelectorAll("g:not(.appendixIcons)");
     let idList = [];
     g.forEach(function (value) {
         let element = d3.select(value);
@@ -439,15 +455,17 @@ function insertFileIcon(id) {
             foreign
                 .attr("x", +rect.attr("x") + 10)
                 .attr("y", +rect.attr("y") + +rect.attr("height") - 25);
-            foreign.select(".appendixFileIcon")
-                .style("display", 'inherit');
+            let icon = foreign.select(".appendixFileIcon");
+            icon.node().classList.add("iconShow");
+            icon.node().classList.remove("iconHide");
         }
     });
 }
 function removeFileIcon(id) {
     let container = d3.select("#appendixContainer_" + id);
-    container.select(".appendixFileIcon")
-        .style("display", 'none');
+    let icon = container.select(".appendixFileIcon");
+    icon.node().classList.add("iconHide");
+    icon.node().classList.remove("iconShow");
 }
 function isFileListEmpty(id) {
     let empty = true;
@@ -713,12 +731,16 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
         parent.select("text.descriptionText")
             .attr("x", +current.attr("x"))
             .attr("y", +current.attr("y") - 2);
-        parent.select(".foreignAppendix")
-            .attr("x", +current.attr("x") + 10)
-            .attr("y", +current.attr("y") + +current.attr("height") - 25);
+        updateUploadIconPosition(parent, current);
     }
 }
 exports.updateRectSize = updateRectSize;
+function updateUploadIconPosition(parent, current) {
+    parent.select(".foreignAppendix")
+        .attr("x", +current.attr("x") + 10)
+        .attr("y", +current.attr("y") + +current.attr("height") - 25);
+}
+exports.updateUploadIconPosition = updateUploadIconPosition;
 function updateLinePath(element, current, x, y, isConnector) {
     let length = element.node().getTotalLength();
     let start = null;
@@ -20180,15 +20202,13 @@ class Rect extends abstractNode_1.AbstractNode {
             .attr("class", "foreignAppendix");
         let fileIcon = foreignObject.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
-            .attr("class", "appendixFileIcon")
-            .style("display", 'none');
+            .attr("class", "appendixFileIcon iconHide");
         fileIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "fa fa-paperclip");
         let linkIcon = foreignObject.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
-            .attr("class", "appendixLinkIcon")
-            .style("display", 'none');
+            .attr("class", "appendixLinkIcon iconHide");
         linkIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "fa fa-external-link");
