@@ -119,7 +119,30 @@ function insertFileIcon(id) {
     });
 }
 
+function removeFileIcon(id) {
+    let container = d3.select("#appendixContainer_"+id);
+    container.select(".appendixFileIcon")
+        .style("display",'none');
+}
+
+function isFileListEmpty(id): boolean {
+    let empty = true;
+    let list = d3.select("#fileList");
+    list.selectAll("li").each(function () {
+        let li = d3.select(this).attr("id");
+        if (li.split("_", 2)[0] == id) {
+            empty = false;
+            return;
+        }
+    });
+    return empty;
+}
+
 function executeDeleteFileListListener(event) {
-    let id = deleteItemList(event);
-    deleteFile(id);
+    let nodeId = document.getElementById('rectInfo').innerHTML;
+    let fileId = deleteItemList(event);
+    if(isFileListEmpty(nodeId)) {
+        removeFileIcon(nodeId);
+    }
+    deleteFile(fileId);
 }
