@@ -335,16 +335,25 @@ h5 {
     z-index: -1;
 }
 
-.iconSpan {
+.iconBorderDiv {
+    background: #f3f2f4;
+    opacity: 0.8;
+}
+
+.iconDiv {
     display: inline;
+    font-size: 0.7rem
 }
 
 .iconHide {
     display: none;
-    padding: 2px;
 }
 
 .iconShow {
     display: inherit;
-    padding: 2px;
+    color: #b3b2b4;
+}
+
+.iconShow:hover {
+    cursor: pointer;
 }

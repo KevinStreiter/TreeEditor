@@ -744,8 +744,8 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
 exports.updateRectSize = updateRectSize;
 function updateUploadIconPosition(parent, current) {
     parent.select(".foreignAppendix")
-        .attr("x", +current.attr("x") + 5)
-        .attr("y", +current.attr("y") + +current.attr("height") - 20);
+        .attr("x", +current.attr("x"))
+        .attr("y", +current.attr("y") - 21);
 }
 exports.updateUploadIconPosition = updateUploadIconPosition;
 function updateLinePath(element, current, x, y, isConnector) {
@@ -20224,23 +20224,25 @@ class Rect extends abstractNode_1.AbstractNode {
             .attr("class", "appendixIcons")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml');
         let foreignObject = appendixContainer.append("foreignObject")
-            .attr("width", 50)
-            .attr("height", 15)
+            .attr("width", 32)
+            .attr("height", 20)
             .attr("class", "foreignAppendix");
-        let span = foreignObject.append("xhtml:span")
-            .attr("class", "iconSpan");
-        let fileIcon = span.append("xhtml:a")
+        let divBorder = foreignObject.append("xhtml:div")
+            .attr("class", "iconBorderDiv");
+        let div = divBorder.append("xhtml:div")
+            .attr("class", "iconDiv");
+        let fileIcon = div.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "appendixFileIcon iconHide");
         fileIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
-            .attr("class", "fa fa-paperclip");
-        let linkIcon = span.append("xhtml:a")
+            .attr("class", "fa fa-file fa-fw");
+        let linkIcon = div.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "appendixLinkIcon iconHide");
         linkIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
-            .attr("class", "fa fa-external-link");
+            .attr("class", "fa fa-link fa-fw");
     }
     appendNodeObjectCircles(g, counter) {
         g.append("circle")

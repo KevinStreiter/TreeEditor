@@ -114,6 +114,7 @@ function insertFileIcon(id) {
             icon.node().classList.remove("iconHide");
         }
     });
+
 }
 
 function removeFileIcon(id) {

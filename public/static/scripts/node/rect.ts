@@ -50,28 +50,31 @@ export class Rect extends AbstractNode {
             .attr('xmlns', 'http://www.w3.org/1999/xhtml');
 
         let foreignObject = appendixContainer.append("foreignObject")
-            .attr("width", 50)
-            .attr("height", 15)
+            .attr("width", 32)
+            .attr("height", 20)
             .attr("class", "foreignAppendix");
 
-        let span = foreignObject.append("xhtml:span")
-            .attr("class", "iconSpan");
+        let divBorder = foreignObject.append("xhtml:div")
+            .attr("class", "iconBorderDiv");
 
-        let fileIcon = span.append("xhtml:a")
+        let div = divBorder.append("xhtml:div")
+            .attr("class", "iconDiv");
+
+        let fileIcon = div.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "appendixFileIcon iconHide");
 
         fileIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
-            .attr("class", "fa fa-paperclip");
+            .attr("class", "fa fa-file fa-fw");
 
-        let linkIcon = span.append("xhtml:a")
+        let linkIcon = div.append("xhtml:a")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "appendixLinkIcon iconHide");
 
         linkIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
-            .attr("class", "fa fa-external-link");
+            .attr("class", "fa fa-link fa-fw");
     }
 
     appendNodeObjectCircles(g, counter) {
