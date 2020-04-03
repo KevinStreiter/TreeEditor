@@ -22,6 +22,7 @@ const files_1 = require("./files");
 const links_1 = require("./links");
 const d3 = __importStar(require("./modules/d3"));
 const concreteRectCreator_1 = require("./node/concreteRectCreator");
+const modal_1 = require("./modal");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
 function preventEnterInput(e) {
@@ -199,6 +200,11 @@ function toggleUploadIconDisplay(parent, element, className) {
     if (element.node().classList.contains("iconShow")) {
         parent.select(className).node().classList.add("iconShow");
         parent.select(className).node().classList.remove("iconHide");
+        if (className == ".appendixContentTextIcon") {
+            parent.select(className).on("click", function () {
+                modal_1.openModalWindow(parent);
+            });
+        }
     }
 }
 function insertForeignNodeDescription(foreignNode, foreignRect, element) {
@@ -341,7 +347,7 @@ function deleteItemList(event) {
 }
 exports.deleteItemList = deleteItemList;
 
-},{"./files":2,"./graph":3,"./links":7,"./modules/d3":10,"./modules/toDOM.js":11,"./modules/toJSON.js":12,"./node/concreteRectCreator":15}],2:[function(require,module,exports){
+},{"./files":2,"./graph":3,"./links":7,"./modal":9,"./modules/d3":10,"./modules/toDOM.js":11,"./modules/toJSON.js":12,"./node/concreteRectCreator":15}],2:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -1047,6 +1053,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = __importStar(require("./modules/d3"));
+const modal_1 = require("./modal");
+const graph_1 = require("./graph");
 function insertLinkIcon() {
     let id = document.getElementById('rectInfo').innerHTML;
     let container = d3.select("#appendixContainer_" + id);
@@ -1060,6 +1068,8 @@ function insertLinkIcon() {
             icon.node().classList.remove("iconHide");
         }
     });
+    let parent = d3.select(container.node().parentNode);
+    graph_1.updateUploadIconPosition(parent, parent.select("rect"));
 }
 exports.insertLinkIcon = insertLinkIcon;
 function removeLinkIcon(id) {
@@ -1094,6 +1104,8 @@ function insertFileIcon(id) {
             icon.node().classList.remove("iconHide");
         }
     });
+    let parent = d3.select(container.node().parentNode);
+    graph_1.updateUploadIconPosition(parent, parent.select("rect"));
 }
 exports.insertFileIcon = insertFileIcon;
 function removeFileIcon(id) {
@@ -1146,8 +1158,13 @@ function insertContentTextIcon(id) {
             let icon = foreign.select(".appendixContentTextIcon");
             icon.node().classList.add("iconShow");
             icon.node().classList.remove("iconHide");
+            icon.on("click", function () {
+                modal_1.openModalWindow(element);
+            });
         }
     });
+    let parent = d3.select(container.node().parentNode);
+    graph_1.updateUploadIconPosition(parent, parent.select("rect"));
 }
 function removeContentTextIcon(id) {
     let container = d3.select("#appendixContainer_" + id);
@@ -1156,7 +1173,7 @@ function removeContentTextIcon(id) {
     icon.node().classList.remove("iconShow");
 }
 
-},{"./modules/d3":10}],6:[function(require,module,exports){
+},{"./graph":3,"./modal":9,"./modules/d3":10}],6:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -1551,27 +1568,26 @@ function setDuplicateClass(foreignNodes, item) {
 }
 
 },{"./controller":1,"./modules/d3":10,"./modules/toDOM.js":11}],9:[function(require,module,exports){
-function openModalWindow() {
-    var modal = document.getElementById("myModal");
-    // Get the button that opens the modal
-    var btn = document.getElementById("saveButton");
-    // Get the <span> element that closes the modal
-    var span = document.getElementsByClassName("close")[0];
-    // When the user clicks the button, open the modal
-    btn.onclick = function () {
-        modal.style.display = "block";
-    };
-    // When the user clicks on <span> (x), close the modal
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function openModalWindow(element) {
+    let titleText = document.getElementById("modalTitle");
+    let contentText = document.getElementById("modalContent");
+    titleText.innerHTML = element.select("text.titleText").text();
+    contentText.innerHTML = element.select("text.contentText").text();
+    let modal = document.getElementById("modal");
+    let span = document.getElementsByClassName("close")[0];
+    modal.style.display = "block";
     span.onclick = function () {
         modal.style.display = "none";
     };
-    // When the user clicks anywhere outside of the modal, close it
     window.onclick = function (event) {
         if (event.target == modal) {
             modal.style.display = "none";
         }
     };
 }
+exports.openModalWindow = openModalWindow;
 
 },{}],10:[function(require,module,exports){
 // https://d3js.org v5.12.0 Copyright 2019 Mike Bostock

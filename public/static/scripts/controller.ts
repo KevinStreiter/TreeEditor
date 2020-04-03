@@ -9,6 +9,7 @@ import {getProjectFiles} from "./files";
 import {getProjectLinks} from "./links";
 import * as d3 from "./modules/d3";
 import {ConcreteRectCreator} from "./node/concreteRectCreator";
+import {openModalWindow} from "./modal";
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
 
@@ -198,6 +199,11 @@ function toggleUploadIconDisplay(parent, element, className) {
     if (element.node().classList.contains("iconShow")) {
         parent.select(className).node().classList.add("iconShow");
         parent.select(className).node().classList.remove("iconHide");
+        if (className == ".appendixContentTextIcon") {
+            parent.select(className).on("click", function() {
+                openModalWindow(parent)
+            });
+        }
     }
 }
 

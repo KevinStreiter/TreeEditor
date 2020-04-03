@@ -1,11 +1,12 @@
 import * as d3 from "./modules/d3";
+import {openModalWindow} from "./modal";
+import {updateUploadIconPosition} from "./graph";
 
 export function insertLinkIcon() {
     let id = document.getElementById('rectInfo').innerHTML;
     let container = d3.select("#appendixContainer_"+id);
     let foreign = container.select(".foreignAppendix");
     let nodes = d3.select("#nodes");
-
     nodes.selectAll("g").each(function () {
         let element = d3.select(this);
         if (element.attr("id") == id) {
@@ -14,6 +15,8 @@ export function insertLinkIcon() {
             icon.node().classList.remove("iconHide");
         }
     });
+    let parent = d3.select(container.node().parentNode);
+    updateUploadIconPosition(parent, parent.select("rect"));
 }
 
 export function removeLinkIcon(id) {
@@ -49,7 +52,8 @@ export function insertFileIcon(id) {
             icon.node().classList.remove("iconHide");
         }
     });
-
+    let parent = d3.select(container.node().parentNode);
+    updateUploadIconPosition(parent, parent.select("rect"));
 }
 
 export function removeFileIcon(id) {
@@ -104,8 +108,13 @@ function insertContentTextIcon(id) {
             let icon = foreign.select(".appendixContentTextIcon");
             icon.node().classList.add("iconShow");
             icon.node().classList.remove("iconHide");
+            icon.on("click", function () {
+                openModalWindow(element);
+            });
         }
     });
+    let parent = d3.select(container.node().parentNode);
+    updateUploadIconPosition(parent, parent.select("rect"));
 }
 
 function removeContentTextIcon(id) {

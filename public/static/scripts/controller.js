@@ -21,6 +21,7 @@ const files_1 = require("./files");
 const links_1 = require("./links");
 const d3 = __importStar(require("./modules/d3"));
 const concreteRectCreator_1 = require("./node/concreteRectCreator");
+const modal_1 = require("./modal");
 let toJSON = require("./modules/toJSON.js");
 let toDOM = require("./modules/toDOM.js");
 function preventEnterInput(e) {
@@ -198,6 +199,11 @@ function toggleUploadIconDisplay(parent, element, className) {
     if (element.node().classList.contains("iconShow")) {
         parent.select(className).node().classList.add("iconShow");
         parent.select(className).node().classList.remove("iconHide");
+        if (className == ".appendixContentTextIcon") {
+            parent.select(className).on("click", function () {
+                modal_1.openModalWindow(parent);
+            });
+        }
     }
 }
 function insertForeignNodeDescription(foreignNode, foreignRect, element) {
