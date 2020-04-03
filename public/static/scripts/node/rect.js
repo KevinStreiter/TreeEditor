@@ -41,7 +41,7 @@ class Rect extends abstractNode_1.AbstractNode {
             .attr("class", "appendixIcons")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml');
         let foreignObject = appendixContainer.append("foreignObject")
-            .attr("width", 32)
+            .attr("width", 48)
             .attr("height", 20)
             .attr("class", "foreignAppendix");
         let divBorder = foreignObject.append("xhtml:div")
@@ -60,6 +60,12 @@ class Rect extends abstractNode_1.AbstractNode {
         linkIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "fa fa-link fa-fw");
+        let contentIcon = div.append("xhtml:a")
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+            .attr("class", "appendixContentTextIcon iconHide");
+        contentIcon.append("xhtml:i")
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+            .attr("class", "fa fa-info-circle fa-fw");
     }
     appendNodeObjectCircles(g, counter) {
         g.append("circle")

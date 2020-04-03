@@ -183,13 +183,16 @@ function updateUploadIcons() {
     let rect = g.select("rect");
     let fileIconClassName = ".appendixFileIcon";
     let linkIconClassName = ".appendixLinkIcon";
+    let linkContentTextClassName = ".appendixContentTextIcon";
     let fileIcon = g.select(fileIconClassName);
     let linkIcon = g.select(linkIconClassName);
+    let contentTextIcon = g.select(linkContentTextClassName);
     g.selectAll(".appendixIcons").remove();
     const rectNode = new concreteRectCreator_1.ConcreteRectCreator().createNode();
     rectNode.appendNodeIconAppendix(g, g.attr("id"));
     toggleUploadIconDisplay(g, fileIcon, fileIconClassName);
     toggleUploadIconDisplay(g, linkIcon, linkIconClassName);
+    toggleUploadIconDisplay(g, contentTextIcon, linkContentTextClassName);
     graph_1.updateUploadIconPosition(g, rect);
 }
 function toggleUploadIconDisplay(parent, element, className) {
@@ -208,7 +211,7 @@ function insertForeignNodeDescription(foreignNode, foreignRect, element) {
         .then(data => {
         foreignNode.append("text")
             .attr("x", +foreignRect.attr("x"))
-            .attr("y", +foreignRect.attr("y") - 2)
+            .attr("y", +foreignRect.attr("y") + 9)
             .attr("font-weight", 9)
             .attr("class", "descriptionText")
             .style('font-size', 9)
@@ -338,7 +341,7 @@ function deleteItemList(event) {
 }
 exports.deleteItemList = deleteItemList;
 
-},{"./files":2,"./graph":3,"./links":6,"./modules/d3":8,"./modules/toDOM.js":9,"./modules/toJSON.js":10,"./node/concreteRectCreator":13}],2:[function(require,module,exports){
+},{"./files":2,"./graph":3,"./links":7,"./modules/d3":10,"./modules/toDOM.js":11,"./modules/toJSON.js":12,"./node/concreteRectCreator":15}],2:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -358,6 +361,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const controller_1 = require("./controller");
+const icon_1 = require("./icon");
 let toDOM = require("./modules/toDOM.js");
 const d3 = __importStar(require("./modules/d3"));
 function getUploadedFile(filename) {
@@ -418,7 +422,7 @@ function uploadFile() {
         .then(response => response.text())
         .then(function (data) {
         updateFileList(data);
-        insertFileIcon(rectInfo);
+        icon_1.insertFileIcon(rectInfo);
         controller_1.saveProject();
     });
 }
@@ -452,50 +456,19 @@ function updateFileList(filename) {
         item.addEventListener('click', executeDeleteFileListListener);
     });
 }
-function insertFileIcon(id) {
-    let container = d3.select("#appendixContainer_" + id);
-    let foreign = container.select(".foreignAppendix");
-    let nodes = d3.select("#nodes");
-    nodes.selectAll("g").each(function () {
-        let element = d3.select(this);
-        if (element.attr("id") == id) {
-            let icon = foreign.select(".appendixFileIcon");
-            icon.node().classList.add("iconShow");
-            icon.node().classList.remove("iconHide");
-        }
-    });
-}
-function removeFileIcon(id) {
-    let container = d3.select("#appendixContainer_" + id);
-    let icon = container.select(".appendixFileIcon");
-    icon.node().classList.add("iconHide");
-    icon.node().classList.remove("iconShow");
-}
-function isFileListEmpty(id) {
-    let empty = true;
-    let list = d3.select("#fileList");
-    list.selectAll("li").each(function () {
-        let li = d3.select(this).attr("id");
-        if (li.split("_", 2)[0] == id) {
-            empty = false;
-            return;
-        }
-    });
-    return empty;
-}
 function executeDeleteFileListListener(event) {
     return __awaiter(this, void 0, void 0, function* () {
         let nodeId = document.getElementById('rectInfo').innerHTML;
         let fileId = controller_1.deleteItemList(event);
-        if (isFileListEmpty(nodeId)) {
-            removeFileIcon(nodeId);
+        if (icon_1.isFileListEmpty(nodeId)) {
+            icon_1.removeFileIcon(nodeId);
         }
         yield controller_1.saveProject();
         deleteFile(fileId);
     });
 }
 
-},{"./controller":1,"./modules/d3":8,"./modules/toDOM.js":9}],3:[function(require,module,exports){
+},{"./controller":1,"./icon":5,"./modules/d3":10,"./modules/toDOM.js":11}],3:[function(require,module,exports){
 "use strict";
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
@@ -737,7 +710,7 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
             .attr("y", +current.attr("y") + 40);
         parent.select("text.descriptionText")
             .attr("x", +current.attr("x"))
-            .attr("y", +current.attr("y") - 2);
+            .attr("y", +current.attr("y") + 9);
         updateUploadIconPosition(parent, current);
     }
 }
@@ -921,7 +894,7 @@ function resetRectBorder() {
 }
 exports.resetRectBorder = resetRectBorder;
 
-},{"./grid":4,"./modules/d3.js":8,"./navbar":11,"./node/concreteRectCreator":13}],4:[function(require,module,exports){
+},{"./grid":4,"./modules/d3.js":10,"./navbar":13,"./node/concreteRectCreator":15}],4:[function(require,module,exports){
 "use strict";
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
@@ -1063,7 +1036,127 @@ function alignRectWithGrid(current, newXCoordinate, newYCoordinate, borderMove) 
 }
 exports.alignRectWithGrid = alignRectWithGrid;
 
-},{"./modules/d3":8}],5:[function(require,module,exports){
+},{"./modules/d3":10}],5:[function(require,module,exports){
+"use strict";
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const d3 = __importStar(require("./modules/d3"));
+function insertLinkIcon() {
+    let id = document.getElementById('rectInfo').innerHTML;
+    let container = d3.select("#appendixContainer_" + id);
+    let foreign = container.select(".foreignAppendix");
+    let nodes = d3.select("#nodes");
+    nodes.selectAll("g").each(function () {
+        let element = d3.select(this);
+        if (element.attr("id") == id) {
+            let icon = foreign.select(".appendixLinkIcon");
+            icon.node().classList.add("iconShow");
+            icon.node().classList.remove("iconHide");
+        }
+    });
+}
+exports.insertLinkIcon = insertLinkIcon;
+function removeLinkIcon(id) {
+    let container = d3.select("#appendixContainer_" + id);
+    let icon = container.select(".appendixLinkIcon");
+    icon.node().classList.add("iconHide");
+    icon.node().classList.remove("iconShow");
+}
+exports.removeLinkIcon = removeLinkIcon;
+function isLinkListEmpty(id) {
+    let empty = true;
+    let list = d3.select("#linkList");
+    list.selectAll("li").each(function () {
+        let li = d3.select(this).attr("class");
+        if (li == id) {
+            empty = false;
+            return;
+        }
+    });
+    return empty;
+}
+exports.isLinkListEmpty = isLinkListEmpty;
+function insertFileIcon(id) {
+    let container = d3.select("#appendixContainer_" + id);
+    let foreign = container.select(".foreignAppendix");
+    let nodes = d3.select("#nodes");
+    nodes.selectAll("g").each(function () {
+        let element = d3.select(this);
+        if (element.attr("id") == id) {
+            let icon = foreign.select(".appendixFileIcon");
+            icon.node().classList.add("iconShow");
+            icon.node().classList.remove("iconHide");
+        }
+    });
+}
+exports.insertFileIcon = insertFileIcon;
+function removeFileIcon(id) {
+    let container = d3.select("#appendixContainer_" + id);
+    let icon = container.select(".appendixFileIcon");
+    icon.node().classList.add("iconHide");
+    icon.node().classList.remove("iconShow");
+}
+exports.removeFileIcon = removeFileIcon;
+function isFileListEmpty(id) {
+    let empty = true;
+    let list = d3.select("#fileList");
+    list.selectAll("li").each(function () {
+        let li = d3.select(this).attr("id");
+        if (li.split("_", 2)[0] == id) {
+            empty = false;
+            return;
+        }
+    });
+    return empty;
+}
+exports.isFileListEmpty = isFileListEmpty;
+function processContentText() {
+    let id = document.getElementById('rectInfo').innerHTML;
+    isContentTextEmpty(id) ? removeContentTextIcon(id) : insertContentTextIcon(id);
+}
+exports.processContentText = processContentText;
+function isContentTextEmpty(id) {
+    let empty = false;
+    let nodes = d3.select("#nodes");
+    nodes.selectAll("g").each(function () {
+        let element = d3.select(this);
+        if (element.attr("id") == id) {
+            let txt = element.select("text.contentText").text();
+            if (txt === "") {
+                empty = true;
+                return;
+            }
+        }
+    });
+    return empty;
+}
+function insertContentTextIcon(id) {
+    let container = d3.select("#appendixContainer_" + id);
+    let foreign = container.select(".foreignAppendix");
+    let nodes = d3.select("#nodes");
+    nodes.selectAll("g").each(function () {
+        let element = d3.select(this);
+        if (element.attr("id") == id) {
+            let icon = foreign.select(".appendixContentTextIcon");
+            icon.node().classList.add("iconShow");
+            icon.node().classList.remove("iconHide");
+        }
+    });
+}
+function removeContentTextIcon(id) {
+    let container = d3.select("#appendixContainer_" + id);
+    let icon = container.select(".appendixContentTextIcon");
+    icon.node().classList.add("iconHide");
+    icon.node().classList.remove("iconShow");
+}
+
+},{"./modules/d3":10}],6:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -1088,6 +1181,7 @@ const files_1 = require("./files");
 const navbar_1 = require("./navbar");
 const controller_1 = require("./controller");
 const graph_1 = require("./graph");
+const icon_1 = require("./icon");
 const d3 = __importStar(require("./modules/d3"));
 window.onload = () => __awaiter(void 0, void 0, void 0, function* () {
     graph_1.initializeGraph(getMargin());
@@ -1109,6 +1203,7 @@ function initializePageListeners() {
     });
     d3.select("#contentText").on("input", function () {
         graph_1.updateRectText(this);
+        icon_1.processContentText();
     });
     d3.select("#circleSwitch").on("input", function () {
         navbar_1.transformNodeObject();
@@ -1136,7 +1231,7 @@ function initializePageListeners() {
     });
 }
 
-},{"./controller":1,"./files":2,"./graph":3,"./grid":4,"./links":6,"./modules/d3":8,"./navbar":11}],6:[function(require,module,exports){
+},{"./controller":1,"./files":2,"./graph":3,"./grid":4,"./icon":5,"./links":7,"./modules/d3":10,"./navbar":13}],7:[function(require,module,exports){
 "use strict";
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
@@ -1147,6 +1242,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const controller_1 = require("./controller");
+const icon_1 = require("./icon");
 const d3 = __importStar(require("./modules/d3"));
 let toDOM = require("./modules/toDOM.js");
 function processLinkItem() {
@@ -1166,7 +1262,7 @@ function updateLinkList(name, url) {
     let linkId = document.getElementById("linkInfo").innerHTML;
     if (linkId == "") {
         insertNewLinkItem(name, url);
-        insertLinkIcon();
+        icon_1.insertLinkIcon();
     }
     else {
         updateLinkItem(name, url, linkId);
@@ -1212,8 +1308,8 @@ function executeDeleteLinkListListener(event) {
     if (linkId == linkInfo.innerHTML) {
         linkInfo.innerHTML = "";
     }
-    if (isLinkListEmpty(nodeId)) {
-        removeLinkIcon(nodeId);
+    if (icon_1.isLinkListEmpty(nodeId)) {
+        icon_1.removeLinkIcon(nodeId);
     }
     controller_1.saveProject();
 }
@@ -1290,40 +1386,8 @@ function getProjectLinks(id) {
         .then(data => updateProjectLinks(data));
 }
 exports.getProjectLinks = getProjectLinks;
-function insertLinkIcon() {
-    let id = document.getElementById('rectInfo').innerHTML;
-    let container = d3.select("#appendixContainer_" + id);
-    let foreign = container.select(".foreignAppendix");
-    let nodes = d3.select("#nodes");
-    nodes.selectAll("g").each(function () {
-        let element = d3.select(this);
-        if (element.attr("id") == id) {
-            let icon = foreign.select(".appendixLinkIcon");
-            icon.node().classList.add("iconShow");
-            icon.node().classList.remove("iconHide");
-        }
-    });
-}
-function removeLinkIcon(id) {
-    let container = d3.select("#appendixContainer_" + id);
-    let icon = container.select(".appendixLinkIcon");
-    icon.node().classList.add("iconHide");
-    icon.node().classList.remove("iconShow");
-}
-function isLinkListEmpty(id) {
-    let empty = true;
-    let list = d3.select("#linkList");
-    list.selectAll("li").each(function () {
-        let li = d3.select(this).attr("class");
-        if (li == id) {
-            empty = false;
-            return;
-        }
-    });
-    return empty;
-}
 
-},{"./controller":1,"./modules/d3":8,"./modules/toDOM.js":9}],7:[function(require,module,exports){
+},{"./controller":1,"./icon":5,"./modules/d3":10,"./modules/toDOM.js":11}],8:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -1486,7 +1550,30 @@ function setDuplicateClass(foreignNodes, item) {
     return duplicateClass;
 }
 
-},{"./controller":1,"./modules/d3":8,"./modules/toDOM.js":9}],8:[function(require,module,exports){
+},{"./controller":1,"./modules/d3":10,"./modules/toDOM.js":11}],9:[function(require,module,exports){
+function openModalWindow() {
+    var modal = document.getElementById("myModal");
+    // Get the button that opens the modal
+    var btn = document.getElementById("saveButton");
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+    // When the user clicks the button, open the modal
+    btn.onclick = function () {
+        modal.style.display = "block";
+    };
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function () {
+        modal.style.display = "none";
+    };
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
+}
+
+},{}],10:[function(require,module,exports){
 // https://d3js.org v5.12.0 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -19916,7 +20003,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = function toDOM(obj) {
     if (typeof obj == 'string') {
         obj = JSON.parse(obj);
@@ -19957,7 +20044,7 @@ module.exports = function toDOM(obj) {
     }
     return node;
 };
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports = function toJSON(node) {
     node = node || this;
     var obj = {
@@ -19992,7 +20079,7 @@ module.exports = function toJSON(node) {
 };
 
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
@@ -20108,7 +20195,7 @@ function transformCircleToRect(element) {
     d3.select(element.node().parentNode).attr("transformation", "rect");
 }
 
-},{"./graph":3,"./links":6,"./modules/d3":8}],12:[function(require,module,exports){
+},{"./graph":3,"./links":7,"./modules/d3":10}],14:[function(require,module,exports){
 "use strict";
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
@@ -20157,7 +20244,7 @@ class AbstractNode {
 }
 exports.AbstractNode = AbstractNode;
 
-},{"../modules/d3":8}],13:[function(require,module,exports){
+},{"../modules/d3":10}],15:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const nodeCreator_1 = require("./nodeCreator");
@@ -20169,18 +20256,18 @@ class ConcreteRectCreator extends nodeCreator_1.NodeCreator {
 }
 exports.ConcreteRectCreator = ConcreteRectCreator;
 
-},{"./nodeCreator":15,"./rect":16}],14:[function(require,module,exports){
+},{"./nodeCreator":17,"./rect":18}],16:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class NodeCreator {
 }
 exports.NodeCreator = NodeCreator;
 
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstractNode_1 = require("./abstractNode");
@@ -20224,7 +20311,7 @@ class Rect extends abstractNode_1.AbstractNode {
             .attr("class", "appendixIcons")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml');
         let foreignObject = appendixContainer.append("foreignObject")
-            .attr("width", 32)
+            .attr("width", 48)
             .attr("height", 20)
             .attr("class", "foreignAppendix");
         let divBorder = foreignObject.append("xhtml:div")
@@ -20243,6 +20330,12 @@ class Rect extends abstractNode_1.AbstractNode {
         linkIcon.append("xhtml:i")
             .attr('xmlns', 'http://www.w3.org/1999/xhtml')
             .attr("class", "fa fa-link fa-fw");
+        let contentIcon = div.append("xhtml:a")
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+            .attr("class", "appendixContentTextIcon iconHide");
+        contentIcon.append("xhtml:i")
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+            .attr("class", "fa fa-info-circle fa-fw");
     }
     appendNodeObjectCircles(g, counter) {
         g.append("circle")
@@ -20276,4 +20369,4 @@ class Rect extends abstractNode_1.AbstractNode {
 }
 exports.Rect = Rect;
 
-},{"../graph":3,"./abstractNode":12}]},{},[7,3,11,1,2,6,5,4,12,13,16,14,15]);
+},{"../graph":3,"./abstractNode":14}]},{},[8,3,13,1,2,7,6,4,5,9,14,15,18,16,17]);

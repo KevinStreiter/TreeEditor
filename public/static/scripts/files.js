@@ -17,6 +17,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const controller_1 = require("./controller");
+const icon_1 = require("./icon");
 let toDOM = require("./modules/toDOM.js");
 const d3 = __importStar(require("./modules/d3"));
 function getUploadedFile(filename) {
@@ -77,7 +78,7 @@ function uploadFile() {
         .then(response => response.text())
         .then(function (data) {
         updateFileList(data);
-        insertFileIcon(rectInfo);
+        icon_1.insertFileIcon(rectInfo);
         controller_1.saveProject();
     });
 }
@@ -111,43 +112,12 @@ function updateFileList(filename) {
         item.addEventListener('click', executeDeleteFileListListener);
     });
 }
-function insertFileIcon(id) {
-    let container = d3.select("#appendixContainer_" + id);
-    let foreign = container.select(".foreignAppendix");
-    let nodes = d3.select("#nodes");
-    nodes.selectAll("g").each(function () {
-        let element = d3.select(this);
-        if (element.attr("id") == id) {
-            let icon = foreign.select(".appendixFileIcon");
-            icon.node().classList.add("iconShow");
-            icon.node().classList.remove("iconHide");
-        }
-    });
-}
-function removeFileIcon(id) {
-    let container = d3.select("#appendixContainer_" + id);
-    let icon = container.select(".appendixFileIcon");
-    icon.node().classList.add("iconHide");
-    icon.node().classList.remove("iconShow");
-}
-function isFileListEmpty(id) {
-    let empty = true;
-    let list = d3.select("#fileList");
-    list.selectAll("li").each(function () {
-        let li = d3.select(this).attr("id");
-        if (li.split("_", 2)[0] == id) {
-            empty = false;
-            return;
-        }
-    });
-    return empty;
-}
 function executeDeleteFileListListener(event) {
     return __awaiter(this, void 0, void 0, function* () {
         let nodeId = document.getElementById('rectInfo').innerHTML;
         let fileId = controller_1.deleteItemList(event);
-        if (isFileListEmpty(nodeId)) {
-            removeFileIcon(nodeId);
+        if (icon_1.isFileListEmpty(nodeId)) {
+            icon_1.removeFileIcon(nodeId);
         }
         yield controller_1.saveProject();
         deleteFile(fileId);

@@ -8,6 +8,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const controller_1 = require("./controller");
+const icon_1 = require("./icon");
 const d3 = __importStar(require("./modules/d3"));
 let toDOM = require("./modules/toDOM.js");
 function processLinkItem() {
@@ -27,7 +28,7 @@ function updateLinkList(name, url) {
     let linkId = document.getElementById("linkInfo").innerHTML;
     if (linkId == "") {
         insertNewLinkItem(name, url);
-        insertLinkIcon();
+        icon_1.insertLinkIcon();
     }
     else {
         updateLinkItem(name, url, linkId);
@@ -73,8 +74,8 @@ function executeDeleteLinkListListener(event) {
     if (linkId == linkInfo.innerHTML) {
         linkInfo.innerHTML = "";
     }
-    if (isLinkListEmpty(nodeId)) {
-        removeLinkIcon(nodeId);
+    if (icon_1.isLinkListEmpty(nodeId)) {
+        icon_1.removeLinkIcon(nodeId);
     }
     controller_1.saveProject();
 }
@@ -151,35 +152,3 @@ function getProjectLinks(id) {
         .then(data => updateProjectLinks(data));
 }
 exports.getProjectLinks = getProjectLinks;
-function insertLinkIcon() {
-    let id = document.getElementById('rectInfo').innerHTML;
-    let container = d3.select("#appendixContainer_" + id);
-    let foreign = container.select(".foreignAppendix");
-    let nodes = d3.select("#nodes");
-    nodes.selectAll("g").each(function () {
-        let element = d3.select(this);
-        if (element.attr("id") == id) {
-            let icon = foreign.select(".appendixLinkIcon");
-            icon.node().classList.add("iconShow");
-            icon.node().classList.remove("iconHide");
-        }
-    });
-}
-function removeLinkIcon(id) {
-    let container = d3.select("#appendixContainer_" + id);
-    let icon = container.select(".appendixLinkIcon");
-    icon.node().classList.add("iconHide");
-    icon.node().classList.remove("iconShow");
-}
-function isLinkListEmpty(id) {
-    let empty = true;
-    let list = d3.select("#linkList");
-    list.selectAll("li").each(function () {
-        let li = d3.select(this).attr("class");
-        if (li == id) {
-            empty = false;
-            return;
-        }
-    });
-    return empty;
-}

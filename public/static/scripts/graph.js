@@ -239,7 +239,7 @@ function updateRectSize(newXCoordinate, newYCoordinate, counter, parent, current
             .attr("y", +current.attr("y") + 40);
         parent.select("text.descriptionText")
             .attr("x", +current.attr("x"))
-            .attr("y", +current.attr("y") - 2);
+            .attr("y", +current.attr("y") + 9);
         updateUploadIconPosition(parent, current);
     }
 }

@@ -4,6 +4,7 @@ import {uploadFile} from "./files";
 import {transformNodeObject} from "./navbar";
 import {loadProject, preventEnterInput, saveProject} from "./controller";
 import {initializeGraph, updateRectColor, updateRectText} from "./graph";
+import {processContentText} from "./icon";
 import * as d3 from "./modules/d3";
 
 window.onload = async () => {
@@ -29,7 +30,8 @@ function initializePageListeners() {
         updateRectText(this)
     });
     d3.select("#contentText").on("input", function () {
-        updateRectText(this)
+        updateRectText(this);
+        processContentText();
     });
 
     d3.select("#circleSwitch").on("input", function() {

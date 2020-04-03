@@ -1,6 +1,8 @@
 import {deleteItemList, saveProject} from "./controller";
+import {insertFileIcon, isFileListEmpty, removeFileIcon} from "./icon";
 let toDOM = require("./modules/toDOM.js");
 import * as d3 from "./modules/d3";
+
 
 
 function getUploadedFile(filename) {
@@ -99,42 +101,6 @@ function updateFileList(filename) {
     document.querySelectorAll(".deleteFileBtn").forEach(item => {
         item.addEventListener('click', executeDeleteFileListListener);
     });
-}
-
-function insertFileIcon(id) {
-    let container = d3.select("#appendixContainer_"+id);
-    let foreign = container.select(".foreignAppendix");
-    let nodes = d3.select("#nodes");
-
-    nodes.selectAll("g").each(function () {
-        let element = d3.select(this);
-        if (element.attr("id") == id) {
-            let icon = foreign.select(".appendixFileIcon");
-            icon.node().classList.add("iconShow");
-            icon.node().classList.remove("iconHide");
-        }
-    });
-
-}
-
-function removeFileIcon(id) {
-    let container = d3.select("#appendixContainer_"+id);
-    let icon = container.select(".appendixFileIcon");
-    icon.node().classList.add("iconHide");
-    icon.node().classList.remove("iconShow");
-}
-
-function isFileListEmpty(id): boolean {
-    let empty = true;
-    let list = d3.select("#fileList");
-    list.selectAll("li").each(function () {
-        let li = d3.select(this).attr("id");
-        if (li.split("_", 2)[0] == id) {
-            empty = false;
-            return;
-        }
-    });
-    return empty;
 }
 
 async function executeDeleteFileListListener(event) {

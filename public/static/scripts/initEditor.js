@@ -22,6 +22,7 @@ const files_1 = require("./files");
 const navbar_1 = require("./navbar");
 const controller_1 = require("./controller");
 const graph_1 = require("./graph");
+const icon_1 = require("./icon");
 const d3 = __importStar(require("./modules/d3"));
 window.onload = () => __awaiter(void 0, void 0, void 0, function* () {
     graph_1.initializeGraph(getMargin());
@@ -43,6 +44,7 @@ function initializePageListeners() {
     });
     d3.select("#contentText").on("input", function () {
         graph_1.updateRectText(this);
+        icon_1.processContentText();
     });
     d3.select("#circleSwitch").on("input", function () {
         navbar_1.transformNodeObject();

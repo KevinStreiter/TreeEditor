@@ -181,13 +181,16 @@ function updateUploadIcons() {
     let rect = g.select("rect");
     let fileIconClassName = ".appendixFileIcon";
     let linkIconClassName = ".appendixLinkIcon";
+    let linkContentTextClassName = ".appendixContentTextIcon";
     let fileIcon = g.select(fileIconClassName);
     let linkIcon = g.select(linkIconClassName);
+    let contentTextIcon = g.select(linkContentTextClassName);
     g.selectAll(".appendixIcons").remove();
     const rectNode = new ConcreteRectCreator().createNode();
     rectNode.appendNodeIconAppendix(g, g.attr("id"));
     toggleUploadIconDisplay(g, fileIcon, fileIconClassName);
     toggleUploadIconDisplay(g, linkIcon, linkIconClassName);
+    toggleUploadIconDisplay(g, contentTextIcon, linkContentTextClassName);
     updateUploadIconPosition(g, rect);
 }
 
@@ -208,7 +211,7 @@ function insertForeignNodeDescription(foreignNode, foreignRect, element) {
         .then(data => {
             foreignNode.append("text")
                 .attr("x", +foreignRect.attr("x"))
-                .attr("y", +foreignRect.attr("y") - 2)
+                .attr("y", +foreignRect.attr("y") + 9)
                 .attr("font-weight", 9)
                 .attr("class", "descriptionText")
                 .style('font-size', 9)

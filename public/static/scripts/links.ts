@@ -1,4 +1,5 @@
 import {deleteItemList, saveProject} from "./controller";
+import {insertLinkIcon, isLinkListEmpty, removeLinkIcon} from "./icon";
 import * as d3 from "./modules/d3";
 let toDOM = require("./modules/toDOM.js");
 
@@ -152,38 +153,3 @@ export function getProjectLinks(id) {
         .then(data => updateProjectLinks(data));
 }
 
-function insertLinkIcon() {
-    let id = document.getElementById('rectInfo').innerHTML;
-    let container = d3.select("#appendixContainer_"+id);
-    let foreign = container.select(".foreignAppendix");
-    let nodes = d3.select("#nodes");
-
-    nodes.selectAll("g").each(function () {
-        let element = d3.select(this);
-        if (element.attr("id") == id) {
-            let icon = foreign.select(".appendixLinkIcon");
-            icon.node().classList.add("iconShow");
-            icon.node().classList.remove("iconHide");
-        }
-    });
-}
-
-function removeLinkIcon(id) {
-    let container = d3.select("#appendixContainer_"+id);
-    let icon = container.select(".appendixLinkIcon");
-    icon.node().classList.add("iconHide");
-    icon.node().classList.remove("iconShow");
-}
-
-function isLinkListEmpty(id): boolean {
-    let empty = true;
-    let list = d3.select("#linkList");
-    list.selectAll("li").each(function () {
-        let li = d3.select(this).attr("class");
-        if (li == id) {
-            empty = false;
-            return;
-        }
-    });
-    return empty;
-}
