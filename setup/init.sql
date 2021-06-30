@@ -2,7 +2,7 @@ CREATE SCHEMA IF NOT EXISTS treeEditor;
 USE treeEditor;
 
 CREATE USER IF NOT EXISTS gegege
-    IDENTIFIED BY 'MWXw9$Ppmjl51drrm7';
+    IDENTIFIED BY '***';
 
 GRANT ALL
     ON treeEditor.*
